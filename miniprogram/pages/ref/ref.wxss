@@ -305,21 +305,22 @@
   width: 100%;
   border: 2rpx solid #e5e5e5;
   border-radius: 20rpx;
-  padding: 20rpx 24rpx;
-  font-size: 28rpx;
-  background: #fafafa;
+  padding: 26rpx 28rpx;
+  font-size: 30rpx;
+  background: #fff;
   color: #1a1a1a;
   box-sizing: border-box;
 }
 
 .form-textarea {
   width: 100%;
-  min-height: 200rpx;
+  min-height: 260rpx;
   border: 2rpx solid #e5e5e5;
   border-radius: 20rpx;
-  padding: 20rpx 24rpx;
-  font-size: 28rpx;
-  background: #fafafa;
+  padding: 26rpx 28rpx;
+  font-size: 30rpx;
+  line-height: 1.6;
+  background: #fff;
   color: #1a1a1a;
   box-sizing: border-box;
 }
@@ -383,18 +384,29 @@
 .sample-label { color: #9ca3af; }
 .sample-link { color: #3b82f6; font-weight: 500; }
 
-.import-btn { margin-top: 24rpx; }
+.import-actions {
+  display: flex;
+  gap: 18rpx;
+  margin-top: 32rpx;
+}
+
+.import-actions .import-btn {
+  flex: 2;
+  width: auto;
+  margin: 0;
+}
+
+.import-actions .cancel-btn {
+  flex: 1;
+  margin: 0;
+}
 
 .btn-primary.disabled {
   opacity: 0.6;
 }
 
-.cancel-btn {
-  margin-top: 16rpx;
-}
-
 .import-tip {
-  margin-top: 20rpx;
+  margin-top: 28rpx;
   font-size: 22rpx;
   color: #9ca3af;
   text-align: center;

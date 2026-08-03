@@ -167,10 +167,12 @@
           <text class="sample-link" bindtap="fillSample">试试示例：日式厨房收纳</text>
         </view>
 
-        <view class="btn-primary import-btn {{analyzing ? 'disabled' : ''}}" bindtap="aiAnalyze">
-          {{analyzing ? '🤖 AI 分析中…' : 'AI 分析提取'}}
+        <view class="import-actions">
+          <view class="btn-secondary cancel-btn" bindtap="closeImport">取消</view>
+          <view class="btn-primary import-btn {{analyzing ? 'disabled' : ''}}" bindtap="aiAnalyze">
+            {{analyzing ? '🤖 AI 分析中…' : 'AI 分析提取'}}
+          </view>
         </view>
-        <view class="btn-secondary cancel-btn" bindtap="closeImport">取消</view>
         <view class="import-tip">💡 AI 会提炼要点/避坑项，收藏前可先预览结果</view>
       </block>
 
