@@ -3,6 +3,33 @@
 // 空气质量：Open-Meteo Air Quality API（免费、无需 key）
 // 地址：可选配腾讯位置服务 WebService key（config.WEATHER.TENCENT_MAP_KEY）
 const config = require('../config');
+const CITIES = require('../data/cities');
+
+// 球面距离（km）
+function haversine(lat1, lon1, lat2, lon2) {
+  const R = 6371;
+  const toRad = Math.PI / 180;
+  const dLat = (lat2 - lat1) * toRad;
+  const dLon = (lon2 - lon1) * toRad;
+  const a = Math.sin(dLat / 2) * Math.sin(dLat / 2)
+    + Math.cos(lat1 * toRad) * Math.cos(lat2 * toRad) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
+// 就近匹配城市（免 key，全国主要城市）
+function nearestCity(lat, lon) {
+  let best = null;
+  let bestD = Infinity;
+  for (let i = 0; i < CITIES.length; i++) {
+    const d = haversine(lat, lon, CITIES[i].lat, CITIES[i].lon);
+    if (d < bestD) {
+      bestD = d;
+      best = CITIES[i];
+    }
+  }
+  if (!best || bestD > 250) return '';
+  return best.name;
+}
 
 function requestJson(url) {
   return new Promise((resolve, reject) => {
@@ -112,21 +139,21 @@ function fetch(lat, lon) {
   return Promise.all([forecastP, airP]).then(([f, a]) => build(f, a));
 }
 
-// 逆地理编码（需要腾讯位置服务 key；未配置返回空字符串）
+// 逆地理编码：配置腾讯 key 返回街道级地址；否则就近匹配城市名
 function geocode(lat, lon) {
   const key = config.WEATHER && config.WEATHER.TENCENT_MAP_KEY;
-  if (!key) return Promise.resolve('');
+  if (!key) return Promise.resolve(nearestCity(lat, lon));
   const url = 'https://apis.map.qq.com/ws/geocoder/v1/?location=' + lat + ',' + lon + '&key=' + key;
   return requestJson(url)
     .then(d => {
-      if (!d || d.status !== 0 || !d.result) return '';
+      if (!d || d.status !== 0 || !d.result) return nearestCity(lat, lon);
       const comp = d.result.address_component || {};
       const city = comp.city || '';
       const district = comp.district || '';
       const brief = (d.result.address || '').slice(0, 10);
-      return (city + ' · ' + district + ' ' + brief).trim();
+      return (city + ' · ' + district + ' ' + brief).trim() || nearestCity(lat, lon);
     })
-    .catch(() => '');
+    .catch(() => nearestCity(lat, lon));
 }
 
 module.exports = {

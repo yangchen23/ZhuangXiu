@@ -195,12 +195,13 @@ function cycleWeather() {
 // 真实天气缓存（10 分钟内不重复请求）
 function getRealWeather() {
   const w = get(KEYS.realWeather, null);
-  if (w && w.fetchedAt && Date.now() - w.fetchedAt < 10 * 60 * 1000) return w;
+  // v2：内置城市表就近匹配（旧缓存里可能存了「当前定位」，直接作废）
+  if (w && w.v === 2 && w.fetchedAt && Date.now() - w.fetchedAt < 10 * 60 * 1000) return w;
   return null;
 }
 
 function setRealWeather(w) {
-  set(KEYS.realWeather, Object.assign({}, w, { fetchedAt: Date.now() }));
+  set(KEYS.realWeather, Object.assign({}, w, { v: 2, fetchedAt: Date.now() }));
 }
 
 // ===== 拍照留档 =====
