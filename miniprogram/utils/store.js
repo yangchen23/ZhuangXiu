@@ -11,7 +11,8 @@ const KEYS = {
   checks: 'zjx_checks',
   bookmarks: 'zjx_bookmarks',
   weather: 'zjx_weather',
-  photos: 'zjx_photos'
+  photos: 'zjx_photos',
+  realWeather: 'zjx_real_weather'
 };
 
 function get(key, fallback) {
@@ -191,6 +192,17 @@ function cycleWeather() {
   return next;
 }
 
+// 真实天气缓存（10 分钟内不重复请求）
+function getRealWeather() {
+  const w = get(KEYS.realWeather, null);
+  if (w && w.fetchedAt && Date.now() - w.fetchedAt < 10 * 60 * 1000) return w;
+  return null;
+}
+
+function setRealWeather(w) {
+  set(KEYS.realWeather, Object.assign({}, w, { fetchedAt: Date.now() }));
+}
+
 // ===== 拍照留档 =====
 function getPhotos() { return get(KEYS.photos, []); }
 function addPhotos(paths) {
@@ -232,6 +244,8 @@ module.exports = {
   addBookmark,
   getWeatherIndex,
   cycleWeather,
+  getRealWeather,
+  setRealWeather,
   getPhotos,
   addPhotos,
   removePhoto

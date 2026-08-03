@@ -7,7 +7,7 @@
 
   <!-- Hero 天气主题 -->
   <view class="hero {{weather.cls}}">
-    <view class="hg-weather-switch" bindtap="cycleWeather">🌦️ 切换</view>
+    <view class="hg-weather-switch" bindtap="refreshWeather">{{weatherLoading ? '🔄 加载中' : '🔄 刷新'}}</view>
     <view wx:if="{{weather.rain}}" class="rain-drops">
       <view
         wx:for="{{rainDrops}}"
@@ -18,7 +18,7 @@
     </view>
     <text class="hg-emoji">{{weather.emoji}}</text>
     <view class="hg-title">{{weather.title}}</view>
-    <view class="hg-stage">📍 准备期 · 北欧风格</view>
+    <view class="hg-stage">📍 {{weather.label || '当前定位'}} · 北欧风格</view>
     <view class="hg-quote">{{weather.quote}}</view>
   </view>
 
@@ -26,7 +26,7 @@
   <view class="weather-card">
     <text class="wc-icon">{{weather.icon}}</text>
     <view class="wc-text">
-      <view class="wc-temp">{{weather.temp}} <text class="wc-desc">{{weather.desc}}</text></view>
+      <view class="wc-temp">{{weather.temp || '--°C'}} <text class="wc-desc">{{weather.desc}}</text></view>
       <view class="wc-air">{{weather.air}}</view>
     </view>
     <view class="wc-tip">{{weather.tip}}</view>

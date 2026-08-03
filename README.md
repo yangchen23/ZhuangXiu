@@ -149,6 +149,16 @@ D:\Project\ZhuangXiu\
 注意：直连模式需要在微信公众平台把 `api.deepseek.com` 加入 request 合法域名（开发工具已关闭域名校验可直接调试）；
 直连会把密钥打包进小程序，仅限自用调试，正式发布务必改用云函数。
 
+### 真实天气
+
+- 首页天气已接入真实数据：`wx.getLocation` 定位 → Open-Meteo 实时天气 + 空气质量（免费、无需 key）
+- 天气主题（晴/雨/多云）随真实天气自动切换；右上角「🔄 刷新」可手动更新（10 分钟缓存）
+- 定位被拒绝/失败时自动回退到 `config.js` 中 `WEATHER.DEFAULT_LOCATION`（默认深圳）
+- 想要天气卡片显示具体街道地址：到 [腾讯位置服务](https://lbs.qq.com) 注册小程序 key（勾选 WebServiceAPI），
+  填入 `config.js` 的 `WEATHER.TENCENT_MAP_KEY`；不填则显示「当前定位」
+- 生产环境需在公众平台把 `api.open-meteo.com`、`air-quality-api.open-meteo.com` 加入 request 合法域名
+  （如配置了腾讯 key，还需加入 `apis.map.qq.com`）
+
 ### 已知演示占位
 
 - 风格分析/拍照识别仍为占位（待接多模态视觉模型）

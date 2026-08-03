@@ -18,6 +18,14 @@
     "backgroundColor": "#f5f5f5",
     "backgroundTextStyle": "dark"
   },
+  "permission": {
+    "scope.userLocation": {
+      "desc": "用于获取当前位置，查询真实天气"
+    }
+  },
+  "requiredPrivateInfos": [
+    "getLocation"
+  ],
   "tabBar": {
     "custom": true,
     "color": "#999999",

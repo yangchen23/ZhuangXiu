@@ -13,5 +13,19 @@ module.exports = {
     //   module.exports = { DEEPSEEK_API_KEY: 'sk-xxx' }
     // 生产环境建议走云函数（cloudfunctions/aiChat），密钥放在云函数环境变量里。
     API_KEY: ''
+  },
+
+  // 真实天气配置
+  WEATHER: {
+    // 定位失败/拒绝授权时的默认位置（深圳）
+    DEFAULT_LOCATION: {
+      latitude: 22.5415,
+      longitude: 114.0596,
+      label: '深圳（默认定位）'
+    },
+    // 腾讯位置服务 WebService key（可选）：
+    // 到 https://lbs.qq.com 注册小程序 key（勾选 WebServiceAPI），
+    // 填入后天气卡片会显示具体街道地址；留空则显示「当前定位」
+    TENCENT_MAP_KEY: ''
   }
 };
