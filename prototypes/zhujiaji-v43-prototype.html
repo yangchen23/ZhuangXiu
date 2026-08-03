@@ -1,0 +1,950 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>筑家记 V4.3 - 有人情味的版本</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{font-size:16px}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;background:#f0f0f0;display:flex;justify-content:center;align-items:center;min-height:100vh;padding:20px;-webkit-font-smoothing:antialiased}
+.phone-frame{width:390px;height:844px;background:#f5f5f5;border-radius:44px;overflow:hidden;box-shadow:0 25px 80px rgba(0,0,0,0.25),0 0 0 2px #1a1a1a,0 0 0 6px #2d2d2d,0 0 0 8px #1a1a1a;position:relative;display:flex;flex-direction:column}
+.status-bar{height:44px;background:#fff;display:flex;justify-content:space-between;align-items:center;padding:0 28px;font-size:12px;font-weight:600;color:#1a1a1a;flex-shrink:0}
+.nav-bar{height:44px;background:#fff;display:flex;align-items:center;justify-content:center;padding:0 16px;font-size:17px;font-weight:600;color:#1a1a1a;position:relative;flex-shrink:0;border-bottom:0.5px solid #e5e5e5}
+.nav-bar .back-btn{position:absolute;left:12px;width:32px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;border:none;background:none;font-size:20px;color:#f59e0b}
+.nav-bar .action-btn{position:absolute;right:12px;font-size:14px;color:#f59e0b;cursor:pointer;border:none;background:none;font-weight:500;padding:4px 10px}
+.main-content{flex:1;overflow-y:auto;overflow-x:hidden;background:#f5f5f5;-webkit-overflow-scrolling:touch}
+.main-content::-webkit-scrollbar{display:none}
+.page{display:none;min-height:100%;padding-bottom:80px;animation:fadeIn .25s ease}
+.page.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+.tab-bar{height:60px;background:#fff;display:flex;align-items:center;border-top:0.5px solid #e5e5e5;flex-shrink:0;position:relative}
+.tab-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer;padding:4px 0;border:none;background:none;color:#999}
+.tab-item.active{color:#f59e0b}
+.tab-item .tab-icon{font-size:20px;line-height:1}
+.tab-item .tab-label{font-size:10px;line-height:1}
+.fab-btn{position:absolute;left:50%;top:-22px;transform:translateX(-50%);width:44px;height:44px;background:linear-gradient(135deg,#f59e0b,#d97706);border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:28px;cursor:pointer;z-index:50;border:none;box-shadow:0 4px 12px rgba(245,158,11,0.4);transition:transform .2s}
+.fab-btn.open{transform:translateX(-50%) rotate(45deg)}
+.fab-menu{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);display:none;z-index:90}
+.fab-menu.open{display:block}
+.fab-backdrop{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.35);z-index:80;display:none}
+.fab-backdrop.open{display:block}
+.fab-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;width:200px}
+.fab-item{background:#fff;border-radius:16px;padding:16px 10px;cursor:pointer;box-shadow:0 4px 16px rgba(0,0,0,0.12);display:flex;flex-direction:column;align-items:center;gap:6px;border:none;font-size:13px;color:#1a1a1a;font-weight:500}
+.fab-item:active{transform:scale(.95)}
+.fab-item .f-icon{font-size:24px}
+.section-header{display:flex;justify-content:space-between;align-items:center;padding:20px 16px 12px;font-size:15px;font-weight:600;color:#1a1a1a}
+.section-header .more{font-size:13px;color:#999;cursor:pointer;font-weight:400}
+.tag{display:inline-flex;align-items:center;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:500}
+.tag-orange{background:#fef3c7;color:#d97706}
+.tag-green{background:#dcfce7;color:#16a34a}
+.tag-blue{background:#dbeafe;color:#2563eb}
+.tag-red{background:#fee2e2;color:#dc2626}
+.tag-gray{background:#f3f4f6;color:#6b7280}
+.card{background:#fff;border-radius:14px;margin:0 16px 10px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.04)}
+.card-body{padding:14px}
+
+/* ===== HOME V4.3 (有灵魂) ===== */
+.home-meta{padding:12px 16px 8px;background:linear-gradient(135deg,#fef3c7 0%,#fff7ed 100%);font-size:12px;color:#92400e;display:flex;justify-content:space-between;align-items:center}
+.home-meta .hm-left{font-weight:500}
+.home-meta .hm-right{font-size:11px;color:#92400e}
+.home-greeting{padding:20px 16px 16px;background:linear-gradient(135deg,#fef3c7 0%,#fff7ed 100%);text-align:center}
+.home-greeting .hg-emoji{font-size:36px;margin-bottom:6px}
+.home-greeting h2{font-size:20px;font-weight:700;color:#1a1a1a;margin-bottom:4px}
+.home-greeting .hg-stage{font-size:13px;color:#92400e;display:inline-flex;align-items:center;gap:4px;padding:3px 10px;background:rgba(255,255,255,0.7);border-radius:10px}
+.home-greeting .hg-quote{margin-top:12px;padding:10px 16px;background:rgba(255,255,255,0.5);border-radius:12px;font-size:12px;color:#92400e;line-height:1.5;font-style:italic}
+
+/* 天气卡 */
+.weather-card{margin:-6px 16px 12px;padding:12px 14px;background:linear-gradient(135deg,#dbeafe,#bfdbfe);border-radius:14px;display:flex;align-items:center;gap:10px}
+.weather-card .wc-icon{font-size:32px}
+.weather-card .wc-text{flex:1}
+.weather-card .wc-temp{font-size:18px;font-weight:700;color:#1e40af}
+.weather-card .wc-desc{font-size:12px;color:#3b82f6;margin-top:2px}
+.weather-card .wc-tip{font-size:11px;color:#dc2626;background:#fff;padding:4px 8px;border-radius:8px;font-weight:500}
+
+/* 昨日未完成 */
+.pending-card{margin:0 16px 12px;padding:12px 14px;background:#fff;border-radius:14px;border-left:4px solid #ef4444;box-shadow:0 1px 3px rgba(0,0,0,0.04)}
+.pending-card h4{font-size:13px;font-weight:600;color:#dc2626;margin-bottom:6px;display:flex;align-items:center;gap:6px}
+.pending-item{display:flex;justify-content:space-between;align-items:center;padding:4px 0;font-size:12px;color:#4b5563}
+.pending-item .pi-tag{font-size:10px;padding:1px 6px;border-radius:8px;background:#fee2e2;color:#dc2626}
+
+/* 3 stats */
+.dash-stats{display:flex;gap:10px;padding:0 16px;margin-bottom:12px}
+.dash-stat{flex:1;background:#fff;border-radius:14px;padding:12px;text-align:center;box-shadow:0 1px 3px rgba(0,0,0,0.04);cursor:pointer}
+.dash-stat .s-icon{font-size:22px;margin-bottom:2px}
+.dash-stat .s-num{font-size:18px;font-weight:700;color:#1a1a1a}
+.dash-stat .s-label{font-size:11px;color:#9ca3af;margin-top:1px}
+
+/* 开工准备 V4.3 - 智能化 */
+.prep-card{margin:0 16px 12px;padding:14px;background:#fff;border-radius:14px;box-shadow:0 1px 3px rgba(0,0,0,0.04)}
+.prep-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.prep-header h4{font-size:14px;font-weight:600}
+.prep-progress{font-size:12px;color:#f59e0b;font-weight:600}
+.prep-bar-track{height:8px;background:#f3f4f6;border-radius:4px;overflow:hidden;margin-bottom:10px}
+.prep-bar-fill{height:100%;background:linear-gradient(90deg,#f59e0b,#d97706);border-radius:4px;transition:width .5s}
+.prep-items{display:flex;flex-wrap:wrap;gap:6px}
+.prep-tag{padding:5px 10px;border-radius:14px;font-size:12px;cursor:pointer;background:#fff;color:#6b7280;border:1px solid #e5e5e5;transition:all .2s}
+.prep-tag.done{background:#dcfce7;color:#16a34a;border-color:#bbf7d0}
+.prep-tag.done::before{content:'✓ '}
+.prep-tag.next{background:#fef3c7;color:#d97706;border-color:#fde68a;font-weight:600}
+.prep-tag.next::after{content:' →'}
+
+.prep-cta{margin-top:12px;padding:10px 12px;background:linear-gradient(135deg,#fef3c7,#fde68a);border-radius:10px;display:flex;align-items:center;justify-content:space-between}
+.prep-cta-text{font-size:13px;color:#92400e;font-weight:500}
+.prep-cta-btn{padding:6px 14px;background:#f59e0b;color:#fff;border-radius:14px;font-size:12px;font-weight:500;cursor:pointer}
+
+/* 下一阶段预告 */
+.next-stage-card{margin:0 16px 12px;padding:14px;background:linear-gradient(135deg,#dbeafe,#eff6ff);border-radius:14px;border:1px solid #bfdbfe}
+.next-stage-card h4{font-size:13px;font-weight:600;color:#1e40af;margin-bottom:4px}
+.next-stage-card p{font-size:12px;color:#3b82f6;line-height:1.5;margin-bottom:6px}
+.next-stage-card .ns-btn{display:inline-block;padding:5px 12px;background:#3b82f6;color:#fff;border-radius:12px;font-size:12px;font-weight:500;cursor:pointer}
+
+/* 每日贴士 */
+.tip-card{margin:0 16px 12px;padding:12px 14px;background:linear-gradient(135deg,#f3e8ff,#ede9fe);border-radius:14px;border:1px solid #e9d5ff}
+.tip-card h4{font-size:12px;font-weight:600;color:#7c3aed;margin-bottom:4px}
+.tip-card p{font-size:12px;color:#6b21a8;line-height:1.5}
+
+/* ===== DIARY (V4.3) ===== */
+.diary-tab-bar{display:flex;background:#fff;border-bottom:0.5px solid #e5e5e5;position:sticky;top:0;z-index:10}
+.diary-tab{flex:1;text-align:center;padding:11px 0;font-size:13px;color:#999;cursor:pointer;border:none;background:none;border-bottom:2px solid transparent;font-weight:500}
+.diary-tab.active{color:#f59e0b;border-bottom-color:#f59e0b}
+.diary-panel{display:none}
+.diary-panel.active{display:block}
+
+.overview-stats{display:flex;gap:8px;padding:14px 16px}
+.ov-card{flex:1;background:#fff;border-radius:12px;padding:10px;text-align:center;box-shadow:0 1px 3px rgba(0,0,0,0.04)}
+.ov-card .ov-num{font-size:20px;font-weight:700;color:#1a1a1a}
+.ov-card .ov-label{font-size:10px;color:#9ca3af;margin-top:2px}
+.ov-card .ov-num.orange{color:#f59e0b}
+.ov-card .ov-num.green{color:#22c55e}
+.ov-card .ov-num.blue{color:#3b82f6}
+
+.flow-card{background:#fff;margin:0 16px 10px;padding:14px;border-radius:14px;box-shadow:0 1px 3px rgba(0,0,0,0.04)}
+.flow-row{display:flex;align-items:center;gap:0;overflow-x:auto;padding-bottom:4px}
+.flow-row::-webkit-scrollbar{display:none}
+.flow-step{display:flex;flex-direction:column;align-items:center;gap:4px;flex-shrink:0;min-width:48px;cursor:pointer}
+.flow-dot{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;background:#e5e5e5;color:#999}
+.flow-dot.done{background:#22c55e;color:#fff}
+.flow-dot.current{background:#f59e0b;color:#fff;box-shadow:0 0 0 4px rgba(245,158,11,0.2)}
+.flow-line{height:2px;background:#e5e5e5;flex:1;min-width:14px;align-self:center;margin-bottom:14px}
+.flow-line.done{background:#22c55e}
+.flow-label{font-size:9px;color:#9ca3af;text-align:center}
+.flow-label.current{color:#d97706;font-weight:700}
+.flow-label.done{color:#1a1a1a}
+
+.stage-detail{background:linear-gradient(135deg,#fef3c7 0%,#fffbeb 100%);margin:0 16px 10px;padding:14px;border-radius:14px}
+.stage-detail h3{font-size:17px;font-weight:700;color:#1a1a1a}
+.stage-detail .stage-meta{font-size:12px;color:#92400e;margin-top:2px}
+.stage-progress-bar{height:8px;background:rgba(255,255,255,0.6);border-radius:4px;overflow:hidden;margin:8px 0}
+.stage-progress-fill{height:100%;background:linear-gradient(90deg,#f59e0b,#d97706);border-radius:4px}
+
+/* 折叠面板 - 关键 */
+.collapsible{background:#fff;margin:0 16px 10px;border-radius:14px;box-shadow:0 1px 3px rgba(0,0,0,0.04);overflow:hidden}
+.collapsible-header{padding:12px 14px;display:flex;justify-content:space-between;align-items:center;cursor:pointer}
+.collapsible-header h4{font-size:14px;font-weight:600;display:flex;align-items:center;gap:6px}
+.collapsible-header .ch-right{display:flex;align-items:center;gap:6px}
+.collapsible-header .ch-progress{font-size:11px;color:#9ca3af;font-weight:400}
+.collapsible-header .ch-toggle{font-size:12px;color:#9ca3af;transition:transform .2s}
+.collapsible-header .ch-toggle.open{transform:rotate(180deg)}
+.collapsible-body{display:none;padding:0 14px 12px;border-top:0.5px solid #f5f5f5}
+.collapsible-body.open{display:block}
+.collapsible-edit{padding:8px 14px 10px;border-top:0.5px solid #f5f5f5;display:none;background:#fafafa}
+.collapsible-edit.open{display:block}
+.collapsible-edit a{color:#f59e0b;font-size:12px;cursor:pointer;margin-right:14px}
+
+/* Task/Check items */
+.task-item{display:flex;align-items:center;gap:8px;padding:8px 0;font-size:13px;color:#1a1a1a;cursor:pointer;border-bottom:0.5px solid #f5f5f5}
+.task-item:last-child{border-bottom:none}
+.task-check{width:18px;height:18px;border-radius:50%;border:2px solid #d1d5db;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:10px;color:transparent}
+.task-check.done{background:#22c55e;border-color:#22c55e;color:#fff}
+.task-text{flex:1}
+.task-text.done{color:#9ca3af;text-decoration:line-through}
+.task-add{display:flex;align-items:center;gap:6px;padding:8px 0;font-size:12px;color:#9ca3af;cursor:pointer}
+
+.check-item{display:flex;align-items:center;gap:8px;padding:6px 0;font-size:13px;color:#1a1a1a;cursor:pointer}
+.check-mark{flex-shrink:0;font-size:14px}
+.check-text{flex:1}
+
+.budget-card{background:#fff;margin:0 16px 10px;padding:14px;border-radius:14px;box-shadow:0 1px 3px rgba(0,0,0,0.04)}
+.budget-amount{font-size:22px;font-weight:700;color:#1a1a1a}
+.budget-bar-track{height:6px;background:#f3f4f6;border-radius:3px;overflow:hidden;margin:6px 0 4px}
+.budget-bar-fill{height:100%;border-radius:3px}
+.budget-info{display:flex;justify-content:space-between;font-size:11px;color:#9ca3af}
+
+.photo-card{background:#fff;margin:0 16px 10px;padding:14px;border-radius:14px;box-shadow:0 1px 3px rgba(0,0,0,0.04)}
+.photo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:8px}
+.photo-tile{aspect-ratio:1;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px;background:#f5f5f5;cursor:pointer;position:relative}
+.photo-tile .ph-date{position:absolute;bottom:2px;left:2px;font-size:9px;color:#fff;background:rgba(0,0,0,0.4);padding:1px 4px;border-radius:4px}
+.photo-add{background:#fafafa;border:2px dashed #d1d5db;color:#9ca3af}
+
+.warning-card{background:#fff;border:1px solid #fed7aa;margin:0 16px 10px;padding:14px;border-radius:14px}
+.warning-card h4{font-size:13px;font-weight:600;color:#9a3412;margin-bottom:6px}
+.warning-item{display:flex;gap:6px;font-size:12px;color:#7c2d12;line-height:1.6;padding:3px 0}
+
+.worker-card{background:#fff;margin:0 16px 10px;padding:14px;border-radius:14px;box-shadow:0 1px 3px rgba(0,0,0,0.04)}
+.worker-item{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:0.5px solid #f5f5f5}
+.worker-item:last-child{border-bottom:none}
+.worker-avatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#fef3c7,#fde68a);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.worker-info{flex:1}
+.worker-info .wn{font-size:13px;font-weight:600}
+.worker-info .wr{font-size:11px;color:#9ca3af;margin-top:1px}
+.worker-status{padding:3px 8px;border-radius:10px;font-size:11px;font-weight:500}
+.worker-status.on{background:#dcfce7;color:#16a34a}
+.worker-status.off{background:#f3f4f6;color:#6b7280}
+
+/* ===== Plan Calendar (V4.3) ===== */
+.cal-header{padding:14px 16px;display:flex;justify-content:space-between;align-items:center}
+.cal-header h4{font-size:16px;font-weight:600}
+.cal-nav{font-size:14px;color:#9ca3af;cursor:pointer}
+.cal-grid{background:#fff;margin:0 16px 10px;padding:12px;border-radius:14px;box-shadow:0 1px 3px rgba(0,0,0,0.04)}
+.cal-weekdays{display:grid;grid-template-columns:repeat(7,1fr);text-align:center;font-size:11px;color:#9ca3af;margin-bottom:8px}
+.cal-days{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.cal-day{aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:8px;font-size:13px;cursor:pointer;position:relative;gap:2px}
+.cal-day:hover{background:#f5f5f5}
+.cal-day.other-month{color:#ccc}
+.cal-day.today{background:#f59e0b;color:#fff;font-weight:700}
+.cal-day .day-dot{width:5px;height:5px;border-radius:50%;background:#d1d5db;position:absolute;bottom:4px}
+.cal-day.today .day-dot{background:#fff}
+.cal-day .dot-green{background:#22c55e}
+.cal-day .dot-orange{background:#f59e0b}
+
+.cal-legend{padding:10px 16px;display:flex;gap:14px;font-size:11px;color:#6b7280;justify-content:center}
+.cal-legend span{display:flex;align-items:center;gap:4px}
+.cal-legend .dot{width:8px;height:8px;border-radius:50%}
+
+.cal-detail{background:#fff;margin:0 16px 10px;padding:12px 14px;border-radius:14px;box-shadow:0 1px 3px rgba(0,0,0,0.04)}
+.cal-detail h4{font-size:14px;font-weight:600;margin-bottom:8px;color:#f59e0b}
+.cal-event{display:flex;align-items:center;gap:8px;padding:6px 0;font-size:13px;color:#1a1a1a;border-bottom:0.5px solid #f5f5f5}
+.cal-event:last-child{border-bottom:none}
+.cal-event .ce-dot{width:8px;height:8px;border-radius:50%;background:#d1d5db;flex-shrink:0}
+.cal-event .ce-dot.green{background:#22c55e}
+.cal-event .ce-dot.orange{background:#f59e0b}
+.cal-event .ce-text{flex:1}
+.cal-event .ce-time{font-size:11px;color:#9ca3af}
+
+/* ===== Records V4.3 ===== */
+.search-bar{margin:14px 16px;padding:10px 14px;background:#fff;border-radius:14px;display:flex;align-items:center;gap:8px;box-shadow:0 1px 3px rgba(0,0,0,0.04);cursor:pointer}
+.search-bar input{flex:1;border:none;outline:none;font-size:14px;color:#1a1a1a;background:transparent}
+.search-bar input::placeholder{color:#9ca3af}
+.search-bar .ai-tag{font-size:10px;background:linear-gradient(135deg,#3b82f6,#2563eb);color:#fff;padding:2px 6px;border-radius:6px;font-weight:500}
+
+.tag-chips{display:flex;gap:6px;padding:0 16px 12px;overflow-x:auto}
+.tag-chips::-webkit-scrollbar{display:none}
+.tag-chip{padding:4px 12px;border-radius:14px;font-size:12px;cursor:pointer;background:#fff;color:#6b7280;border:1px solid #e5e5e5;white-space:nowrap}
+.tag-chip.active{background:#f59e0b;color:#fff;border-color:#f59e0b}
+
+.record-item{display:flex;gap:10px;padding:12px 14px;background:#fff;border-radius:12px;margin:0 16px 8px;box-shadow:0 1px 2px rgba(0,0,0,0.03);cursor:pointer}
+.record-icon{width:40px;height:40px;border-radius:10px;background:#f5f5f5;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.record-info{flex:1;min-width:0}
+.record-info h5{font-size:13px;font-weight:600}
+.record-info .ri-meta{font-size:11px;color:#9ca3af;margin-top:1px;display:flex;gap:6px;align-items:center}
+.record-info .ri-desc{font-size:12px;color:#4b5563;margin-top:3px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.record-info .ri-tags{display:flex;gap:4px;margin-top:4px;flex-wrap:wrap}
+
+.date-header{padding:14px 16px 6px;font-size:13px;font-weight:600;color:#1a1a1a;display:flex;align-items:center;gap:6px}
+
+/* ===== REFERENCE Tab (合并) ===== */
+.ref-tabs{display:flex;background:#fff;border-bottom:0.5px solid #e5e5e5;position:sticky;top:0;z-index:10}
+.ref-tab{flex:1;text-align:center;padding:12px 0;font-size:14px;color:#999;cursor:pointer;border:none;background:none;border-bottom:2px solid transparent;font-weight:500}
+.ref-tab.active{color:#f59e0b;border-bottom-color:#f59e0b}
+.ref-panel{display:none}
+.ref-panel.active{display:block;padding:0 0 20px}
+.bookmark-entry{display:flex;align-items:center;gap:12px;margin:14px 16px 10px;padding:14px;background:#fff;border-radius:12px;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,0.04)}
+.bookmark-entry .be-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;background:linear-gradient(135deg,#f59e0b,#d97706);color:#fff;flex-shrink:0}
+.style-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:0 16px}
+.style-card{border-radius:12px;overflow:hidden;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,0.04)}
+.style-card .sc-img{height:80px;display:flex;align-items:center;justify-content:center;font-size:32px}
+.style-card .sc-name{text-align:center;font-size:11px;padding:6px 4px;font-weight:500;background:#fff}
+.kg-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:0 16px}
+.kg-item{background:#fff;border-radius:12px;padding:14px 6px;text-align:center;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,0.04)}
+.kg-item .kg-icon{font-size:26px;margin-bottom:4px}
+.kg-item .kg-label{font-size:11px;color:#4b5563;font-weight:500}
+.faq-list{padding:0 16px}
+.faq-item{display:flex;align-items:center;gap:10px;padding:12px 14px;background:#fff;border-radius:10px;margin-bottom:6px;cursor:pointer;font-size:13px;color:#1a1a1a}
+
+/* ===== MINE ===== */
+.menu-group{margin:0 16px 12px}
+.menu-item{display:flex;align-items:center;gap:12px;padding:14px 16px;background:#fff;cursor:pointer;font-size:14px;color:#1a1a1a;border-bottom:0.5px solid #f5f5f5}
+.menu-item:first-child{border-radius:14px 14px 0 0}
+.menu-item:last-child{border-radius:0 0 14px 14px;border-bottom:none}
+.menu-item:only-child{border-radius:14px}
+.menu-item .menu-icon{font-size:20px;width:28px;text-align:center}
+.menu-item .arrow{margin-left:auto;color:#ccc}
+
+.modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.4);z-index:100;display:none;align-items:flex-end;justify-content:center}
+.modal-overlay.active{display:flex}
+.modal-sheet{width:390px;max-height:85vh;background:#fff;border-radius:20px 20px 0 0;overflow-y:auto;padding:20px 16px 30px;animation:slideUp .3s ease}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.modal-handle{width:36px;height:4px;background:#ddd;border-radius:2px;margin:0 auto 16px}
+.btn-primary{width:100%;padding:12px;background:linear-gradient(135deg,#f59e0b,#d97706);color:#fff;border:none;border-radius:12px;font-size:16px;font-weight:600;cursor:pointer}
+.btn-secondary{flex:1;padding:12px;background:#f5f5f5;border:none;border-radius:12px;font-size:15px;color:#6b7280;cursor:pointer}
+.form-group{margin-bottom:14px}
+.form-label{font-size:13px;font-weight:600;color:#4b5563;margin-bottom:6px;display:block}
+.form-textarea,.form-input{width:100%;border:1px solid #e5e5e5;border-radius:10px;padding:10px 12px;font-size:14px;font-family:inherit;background:#fafafa;color:#1a1a1a}
+.form-textarea{min-height:80px;resize:vertical}
+.tag-input-area{display:flex;flex-wrap:wrap;gap:6px;padding:8px;border:1px solid #e5e5e5;border-radius:10px;background:#fafafa;min-height:40px;align-items:center}
+.tag-input-area .existing-tag{padding:3px 8px;background:#fef3c7;color:#d97706;border-radius:8px;font-size:12px;display:flex;align-items:center;gap:4px}
+.tag-input-area input{border:none;outline:none;background:transparent;font-size:13px;flex:1;min-width:80px}
+
+.toast{position:fixed;top:60px;left:50%;transform:translateX(-50%);background:#1a1a1a;color:#fff;padding:10px 24px;border-radius:20px;font-size:14px;z-index:200;opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap}
+.toast.show{opacity:1}
+@media(max-width:430px){.phone-frame{width:100%;height:100vh;border-radius:0;box-shadow:none}.modal-sheet{width:100%}}
+</style>
+</head>
+<body>
+
+<div class="phone-frame">
+<div class="status-bar"><span>9:41</span><span>WiFi ▮▮▮ ▮▮▮</span></div>
+<div class="nav-bar">
+  <button class="back-btn" id="backBtn" style="visibility:hidden" onclick="goBack()">←</button>
+  <span id="navTitle">筑家记</span>
+  <button class="action-btn" id="actionBtn" style="display:none" onclick="showToast('编辑模式')">编辑</button>
+</div>
+<div class="toast" id="toast"></div>
+<div class="main-content">
+
+<!-- ===== HOME V4.3 (有灵魂) ===== -->
+<div class="page active" id="page-home">
+  <div class="home-meta">
+    <span class="hm-left">📅 2026年7月31日 周五 · 准备第7天</span>
+    <span class="hm-right">距开工 31 天</span>
+  </div>
+  <div class="home-greeting">
+    <div class="hg-emoji">☀️</div>
+    <h2>早安，准备中的家</h2>
+    <div class="hg-stage">📍 准备期 · 北欧风格</div>
+    <div class="hg-quote">"每个家都是独一无二的<br>你今天挑选的每一样，都在让家更近一点"</div>
+  </div>
+
+  <!-- 天气卡 -->
+  <div class="weather-card">
+    <div class="wc-icon">🌧️</div>
+    <div class="wc-text">
+      <div class="wc-temp">22-28°C <span style="font-size:12px;color:#3b82f6;font-weight:400">中雨</span></div>
+      <div class="wc-desc">空气质量良 · 湿度 78%</div>
+    </div>
+    <div class="wc-tip">⛈️ 今天别去建材市场</div>
+  </div>
+
+  <!-- 昨日未完成 -->
+  <div class="pending-card">
+    <h4>📌 昨天有 2 件事没做完</h4>
+    <div class="pending-item">
+      <span>· 选购客厅筒灯（拖了 2 天）</span>
+      <span class="pi-tag">建议今天补</span>
+    </div>
+    <div class="pending-item">
+      <span>· 预约木工师傅（已约到明早9点）</span>
+      <span class="pi-tag" style="background:#dcfce7;color:#16a34a">已完成</span>
+    </div>
+  </div>
+
+  <!-- 3 stats -->
+  <div class="dash-stats">
+    <div class="dash-stat" onclick="switchTab('ref')"><div class="s-icon">🎨</div><div class="s-num">北欧</div><div class="s-label">我的风格</div></div>
+    <div class="dash-stat"><div class="s-icon">📚</div><div class="s-num">5</div><div class="s-label">知识库</div></div>
+    <div class="dash-stat"><div class="s-icon">💰</div><div class="s-num">¥0</div><div class="s-label">已花费</div></div>
+  </div>
+
+  <!-- 开工准备 V4.3 (带智能引导) -->
+  <div class="prep-card">
+    <div class="prep-header">
+      <h4>📋 开工准备</h4>
+      <span class="prep-progress">2/5 完成</span>
+    </div>
+    <div class="prep-bar-track"><div class="prep-bar-fill" style="width:40%" id="prepBar"></div></div>
+    <div class="prep-items" id="prepItems">
+      <span class="prep-tag done" onclick="togglePrep(this)">选定风格</span>
+      <span class="prep-tag done" onclick="togglePrep(this)">预算规划</span>
+      <span class="prep-tag next" onclick="togglePrep(this)">找施工方</span>
+      <span class="prep-tag" onclick="togglePrep(this)">签合同</span>
+      <span class="prep-tag" onclick="togglePrep(this)">办手续</span>
+    </div>
+    <div class="prep-cta">
+      <span class="prep-cta-text">🎯 下一步：找施工方</span>
+      <span class="prep-cta-btn" onclick="showToast('打开施工方推荐')">去看看</span>
+    </div>
+  </div>
+
+  <!-- 下一阶段预告 -->
+  <div class="next-stage-card">
+    <h4>➡️ 下一阶段预告：泥瓦</h4>
+    <p>开工后第一件大事：贴瓷砖。需要提前准备：瓷砖选型、瓦工预约、卫生间防水高度确认</p>
+    <span class="ns-btn" onclick="showToast('查看泥瓦阶段攻略')">看攻略</span>
+  </div>
+
+  <!-- 每日贴士 -->
+  <div class="tip-card">
+    <h4>💡 今日贴士</h4>
+    <p>正在下中雨，不建议去建材城。趁雨天在家做点功课：搜"水电改造避坑"，看 2-3 篇就够了</p>
+  </div>
+</div>
+
+<!-- ===== 参考 Tab (合并) ===== -->
+<div class="page" id="page-ref">
+  <div class="ref-tabs">
+    <button class="ref-tab active" onclick="switchRefTab('insp',this)">💡 灵感</button>
+    <button class="ref-tab" onclick="switchRefTab('know',this)">📚 知识</button>
+  </div>
+  <div class="ref-panel active" id="ref-insp">
+    <div class="bookmark-entry" onclick="openImportModal()">
+      <div class="be-icon">📥</div>
+      <div style="flex:1"><strong style="font-size:14px">收藏外部内容</strong><br><span style="font-size:11px;color:#9ca3af">小红书/抖音/公众号 · 复制链接即收藏</span></div>
+      <span style="color:#ccc">›</span>
+    </div>
+    <div class="section-header"><span>✨ 风格图库</span><span class="more">8大风格</span></div>
+    <div class="style-grid">
+      <div class="style-card"><div class="sc-img" style="background:linear-gradient(135deg,#f0f9ff,#e0f2fe)">🪵</div><div class="sc-name">北欧</div></div>
+      <div class="style-card"><div class="sc-img" style="background:linear-gradient(135deg,#fefce8,#fef9c3)">🎋</div><div class="sc-name">日式</div></div>
+      <div class="style-card"><div class="sc-img" style="background:linear-gradient(135deg,#faf5ff,#f3e8ff)">🏺</div><div class="sc-name">侘寂</div></div>
+      <div class="style-card"><div class="sc-img" style="background:linear-gradient(135deg,#f8fafc,#f1f5f9)">⬜</div><div class="sc-name">极简</div></div>
+      <div class="style-card"><div class="sc-img" style="background:linear-gradient(135deg,#fff7ed,#ffedd5)">🏮</div><div class="sc-name">新中式</div></div>
+      <div class="style-card"><div class="sc-img" style="background:linear-gradient(135deg,#fdf2f8,#fce7f3)">✨</div><div class="sc-name">轻奢</div></div>
+      <div class="style-card"><div class="sc-img" style="background:linear-gradient(135deg,#fef2f2,#fee2e2)">🥐</div><div class="sc-name">法式</div></div>
+      <div class="style-card"><div class="sc-img" style="background:linear-gradient(135deg,#f0fdf4,#dcf7d0)">🛋️</div><div class="sc-name">美式</div></div>
+    </div>
+  </div>
+  <div class="ref-panel" id="ref-know">
+    <div class="section-header"><span>📚 知识分类</span></div>
+    <div class="kg-grid">
+      <div class="kg-item"><div class="kg-icon">🧱</div><div class="kg-label">瓷砖</div></div>
+      <div class="kg-item"><div class="kg-icon">🪵</div><div class="kg-label">地板</div></div>
+      <div class="kg-item"><div class="kg-icon">🎨</div><div class="kg-label">涂料</div></div>
+      <div class="kg-item"><div class="kg-icon">🚿</div><div class="kg-label">卫浴</div></div>
+      <div class="kg-item"><div class="kg-icon">💡</div><div class="kg-label">灯具</div></div>
+      <div class="kg-item"><div class="kg-icon">🔌</div><div class="kg-label">开关</div></div>
+      <div class="kg-item"><div class="kg-icon">🪟</div><div class="kg-label">门窗</div></div>
+      <div class="kg-item"><div class="kg-icon">🛁</div><div class="kg-label">家电</div></div>
+    </div>
+    <div class="section-header"><span>🔥 热门问答</span><span class="more">50+</span></div>
+    <div class="faq-list">
+      <div class="faq-item"><span style="color:#f59e0b;font-weight:700;margin-right:8px">Q1</span>装修的正确顺序？<span style="color:#ef4444;font-size:11px;font-weight:600;margin-left:auto">HOT</span></div>
+      <div class="faq-item"><span style="color:#f59e0b;font-weight:700;margin-right:8px">Q2</span>瓷砖选800×800还是750×1500？<span style="color:#ef4444;font-size:11px;font-weight:600;margin-left:auto">HOT</span></div>
+      <div class="faq-item"><span style="color:#f59e0b;font-weight:700;margin-right:8px">Q3</span>卫生间防水要多高？</div>
+      <div class="faq-item"><span style="color:#f59e0b;font-weight:700;margin-right:8px">Q4</span>水管走顶好还是走地？</div>
+      <div class="faq-item"><span style="color:#f59e0b;font-weight:700;margin-right:8px">Q5</span>中央空调什么时候装？</div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== DIARY Tab (V4.3) ===== -->
+<div class="page" id="page-diary">
+  <div class="diary-tab-bar">
+    <button class="diary-tab active" onclick="switchDiaryTab('overview',this)">📊 总览</button>
+    <button class="diary-tab" onclick="switchDiaryTab('plan',this)">📅 计划</button>
+    <button class="diary-tab" onclick="switchDiaryTab('record',this)">📝 记录</button>
+  </div>
+
+  <!-- 总览 V4.3 (折叠式) -->
+  <div class="diary-panel active" id="diary-overview">
+    <div class="overview-stats">
+      <div class="ov-card"><div class="ov-num orange">70%</div><div class="ov-label">整体进度</div></div>
+      <div class="ov-card"><div class="ov-num blue">12</div><div class="ov-label">空间数</div></div>
+      <div class="ov-card"><div class="ov-num green">52</div><div class="ov-label">材料</div></div>
+    </div>
+
+    <div class="flow-card">
+      <div class="flow-row">
+        <div class="flow-step"><div class="flow-dot done">✓</div><div class="flow-label done">拆除</div></div>
+        <div class="flow-line done"></div>
+        <div class="flow-step"><div class="flow-dot done">✓</div><div class="flow-label done">空调</div></div>
+        <div class="flow-line done"></div>
+        <div class="flow-step"><div class="flow-dot done">✓</div><div class="flow-label done">水电</div></div>
+        <div class="flow-line done"></div>
+        <div class="flow-step"><div class="flow-dot current">●</div><div class="flow-label current">泥瓦</div></div>
+        <div class="flow-line"></div>
+        <div class="flow-step"><div class="flow-dot">○</div><div class="flow-label">木工</div></div>
+        <div class="flow-line"></div>
+        <div class="flow-step"><div class="flow-dot">○</div><div class="flow-label">油漆</div></div>
+        <div class="flow-line"></div>
+        <div class="flow-step"><div class="flow-dot">○</div><div class="flow-label">安装</div></div>
+      </div>
+    </div>
+
+    <div class="stage-detail">
+      <h3>🏗️ 泥瓦阶段</h3>
+      <div class="stage-meta">第 38 天 · 预计还需 12 天</div>
+      <div class="stage-progress-bar"><div class="stage-progress-fill" style="width:70%"></div></div>
+      <div style="display:flex;justify-content:space-between;font-size:11px;color:#92400e"><span>已完成 70%</span><span>预计完工 第50天</span></div>
+    </div>
+
+    <!-- 今日任务 - 折叠 -->
+    <div class="collapsible">
+      <div class="collapsible-header" onclick="toggleCollapsible('tasks')">
+        <h4>✅ 今日任务 <span class="ch-progress">(3/8)</span></h4>
+        <div class="ch-right">
+          <span class="ch-edit" onclick="event.stopPropagation();editTasks()" style="color:#f59e0b;font-size:12px;cursor:pointer;padding:0 4px">编辑</span>
+          <span class="ch-toggle open" id="toggle-tasks">▼</span>
+        </div>
+      </div>
+      <div class="collapsible-body open" id="body-tasks">
+        <div class="task-item" onclick="toggleTask(this)"><div class="task-check done">✓</div><span class="task-text done">客厅地砖铺完检查</span></div>
+        <div class="task-item" onclick="toggleTask(this)"><div class="task-check done">✓</div><span class="task-text done">厨房墙砖贴完</span></div>
+        <div class="task-item" onclick="toggleTask(this)"><div class="task-check done">✓</div><span class="task-text done">卫生间闭水试验</span></div>
+        <div class="task-item" onclick="toggleTask(this)"><div class="task-check">○</div><span class="task-text">主卫贴砖（剩3㎡）</span></div>
+        <div class="task-item" onclick="toggleTask(this)"><div class="task-check">○</div><span class="task-text">预约木工师傅（明早9点）</span></div>
+        <div class="task-item" onclick="toggleTask(this)"><div class="task-check">○</div><span class="task-text">选购筒灯8个（客厅）</span></div>
+        <div class="task-item" onclick="toggleTask(this)"><div class="task-check">○</div><span class="task-text">定制柜体预约量尺</span></div>
+        <div class="task-item" onclick="toggleTask(this)"><div class="task-check">○</div><span class="task-text">拍贴砖完成区域照片</span></div>
+        <div class="task-add" onclick="showToast('添加任务')">＋ 添加任务</div>
+      </div>
+    </div>
+
+    <!-- 验收清单 - 折叠 -->
+    <div class="collapsible">
+      <div class="collapsible-header" onclick="toggleCollapsible('checklist')">
+        <h4>🎯 泥瓦验收清单 <span class="ch-progress">(5/12)</span></h4>
+        <div class="ch-right">
+          <span class="ch-toggle" id="toggle-checklist">▼</span>
+        </div>
+      </div>
+      <div class="collapsible-body" id="body-checklist">
+        <div class="check-item" onclick="toggleCheck(this)"><span class="check-mark">✓</span><span class="check-text" style="text-decoration:line-through;color:#9ca3af">表面平整度（2m靠尺≤3mm）</span></div>
+        <div class="check-item" onclick="toggleCheck(this)"><span class="check-mark">✓</span><span class="check-text" style="text-decoration:line-through;color:#9ca3af">阴阳角方正</span></div>
+        <div class="check-item" onclick="toggleCheck(this)"><span class="check-mark">✓</span><span class="check-text" style="text-decoration:line-through;color:#9ca3af">留缝宽度一致（2mm）</span></div>
+        <div class="check-item" onclick="toggleCheck(this)"><span class="check-mark">✓</span><span class="check-text" style="text-decoration:line-through;color:#9ca3af">卫生间坡度</span></div>
+        <div class="check-item" onclick="toggleCheck(this)"><span class="check-mark">✓</span><span class="check-text" style="text-decoration:line-through;color:#9ca3af">闭水试验48h</span></div>
+        <div class="check-item" onclick="toggleCheck(this)"><span class="check-mark">☐</span><span class="check-text">空鼓率检查</span></div>
+        <div class="check-item" onclick="toggleCheck(this)"><span class="check-mark">☐</span><span class="check-text">接缝高低差</span></div>
+        <div class="check-item" onclick="toggleCheck(this)"><span class="check-mark">☐</span><span class="check-text">门口挡水坎</span></div>
+        <div style="padding:6px 0;font-size:12px;color:#f59e0b;cursor:pointer" onclick="showToast('查看全部12项')">查看全部 12 项 ›</div>
+      </div>
+    </div>
+
+    <!-- 阶段预算 -->
+    <div class="budget-card">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+        <h4 style="font-size:14px;font-weight:600">💰 本阶段支出</h4>
+        <span style="font-size:11px;color:#9ca3af">泥瓦</span>
+      </div>
+      <div style="display:flex;align-items:baseline;gap:6px">
+        <span class="budget-amount">¥28,500</span>
+        <span style="font-size:12px;color:#9ca3af">/ 预算 ¥30,000</span>
+      </div>
+      <div class="budget-bar-track"><div class="budget-bar-fill" style="width:95%;background:linear-gradient(90deg,#f59e0b,#d97706)"></div></div>
+      <div class="budget-info"><span>已用 95%</span><span style="color:#dc2626">剩余 ¥1,500</span></div>
+    </div>
+
+    <!-- 现场照片 -->
+    <div class="photo-card">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <h4 style="font-size:14px;font-weight:600">📷 现场照片</h4>
+        <span style="font-size:12px;color:#9ca3af;cursor:pointer">全部 24张 ›</span>
+      </div>
+      <div class="photo-grid">
+        <div class="photo-tile" style="background:linear-gradient(135deg,#fef3c7,#fde68a)">🧱<span class="ph-date">7.30</span></div>
+        <div class="photo-tile" style="background:linear-gradient(135deg,#dbeafe,#bfdbfe)">📐<span class="ph-date">7.29</span></div>
+        <div class="photo-tile" style="background:linear-gradient(135deg,#dcfce7,#bbf7d0)">🏗️<span class="ph-date">7.28</span></div>
+        <div class="photo-tile" style="background:linear-gradient(135deg,#fce7f3,#fbcfe8)">🚿<span class="ph-date">7.27</span></div>
+        <div class="photo-tile" style="background:linear-gradient(135deg,#f3e8ff,#e9d5ff)">🧱<span class="ph-date">7.26</span></div>
+        <div class="photo-tile photo-add">+<span class="ph-date" style="color:#9ca3af">拍照</span></div>
+      </div>
+    </div>
+
+    <!-- 避坑 -->
+    <div class="warning-card">
+      <h4>⚠️ 泥瓦阶段必看避坑</h4>
+      <div class="warning-item">• 美缝建议在贴砖<strong>7天后再做</strong></div>
+      <div class="warning-item">• 卫生间必须<strong>24小时闭水试验</strong>，去楼下看</div>
+      <div class="warning-item">• 地面保护膜<strong>别撕太早</strong></div>
+      <div class="warning-item">• 贴完砖1周内<strong>别踩踏</strong></div>
+    </div>
+
+    <!-- 工人 -->
+    <div class="worker-card">
+      <h4 style="font-size:14px;font-weight:600;margin-bottom:8px">👷 今日工人</h4>
+      <div class="worker-item">
+        <div class="worker-avatar">👨‍🔧</div>
+        <div class="worker-info"><div class="wn">张师傅（瓦工）</div><div class="wr">☎ 138-xxxx-2233 · 8h</div></div>
+        <span class="worker-status on">在场</span>
+      </div>
+      <div class="worker-item">
+        <div class="worker-avatar">🧑‍💼</div>
+        <div class="worker-info"><div class="wn">王工长</div><div class="wr">已离场 · 19:00</div></div>
+        <span class="worker-status off">已离场</span>
+      </div>
+    </div>
+
+    <!-- 下一阶段 -->
+    <div class="next-stage-card">
+      <h4>➡️ 下一阶段：木工</h4>
+      <p>木工进场前需准备：吊顶方案图、定制柜体设计、筒灯开孔位置</p>
+      <span class="ns-btn" onclick="showToast('联系木工')">立即预约木工</span>
+    </div>
+  </div>
+
+  <!-- 计划 - 日历视图 (V4.3) -->
+  <div class="diary-panel" id="diary-plan">
+    <div class="cal-header">
+      <span class="cal-nav">‹ 6月</span>
+      <h4>📅 2026年7月</h4>
+      <span class="cal-nav">8月 ›</span>
+    </div>
+    <div class="cal-grid">
+      <div class="cal-weekdays">
+        <div>日</div><div>一</div><div>二</div><div>三</div><div>四</div><div>五</div><div>六</div>
+      </div>
+      <div class="cal-days">
+        <div class="cal-day other-month"><span>28</span></div>
+        <div class="cal-day other-month"><span>29</span></div>
+        <div class="cal-day other-month"><span>30</span></div>
+        <div class="cal-day"><span>1</span><span class="day-dot dot-green"></span></div>
+        <div class="cal-day"><span>2</span><span class="day-dot dot-green"></span></div>
+        <div class="cal-day"><span>3</span><span class="day-dot dot-green"></span></div>
+        <div class="cal-day"><span>4</span><span class="day-dot dot-green"></span></div>
+        <div class="cal-day"><span>5</span><span class="day-dot dot-green"></span></div>
+        <div class="cal-day"><span>6</span><span class="day-dot dot-green"></span></div>
+        <div class="cal-day"><span>7</span><span class="day-dot dot-green"></span></div>
+        <div class="cal-day"><span>8</span><span class="day-dot dot-green"></span></div>
+        <div class="cal-day"><span>9</span><span class="day-dot dot-green"></span></div>
+        <div class="cal-day"><span>10</span><span class="day-dot dot-green"></span></div>
+        <div class="cal-day"><span>11</span><span class="day-dot dot-green"></span></div>
+        <div class="cal-day"><span>12</span><span class="day-dot dot-green"></span></div>
+        <div class="cal-day"><span>13</span><span class="day-dot dot-green"></span></div>
+        <div class="cal-day"><span>14</span><span class="day-dot dot-green"></span></div>
+        <div class="cal-day"><span>15</span><span class="day-dot dot-green"></span></div>
+        <div class="cal-day"><span>16</span><span class="day-dot dot-green"></span></div>
+        <div class="cal-day"><span>17</span><span class="day-dot dot-green"></span></div>
+        <div class="cal-day"><span>18</span><span class="day-dot dot-green"></span></div>
+        <div class="cal-day"><span>19</span><span class="day-dot dot-green"></span></div>
+        <div class="cal-day"><span>20</span><span class="day-dot dot-green"></span></div>
+        <div class="cal-day"><span>21</span><span class="day-dot dot-green"></span></div>
+        <div class="cal-day"><span>22</span><span class="day-dot dot-green"></span></div>
+        <div class="cal-day"><span>23</span><span class="day-dot dot-green"></span></div>
+        <div class="cal-day"><span>24</span><span class="day-dot dot-green"></span></div>
+        <div class="cal-day"><span>25</span><span class="day-dot dot-green"></span></div>
+        <div class="cal-day"><span>26</span><span class="day-dot dot-green"></span></div>
+        <div class="cal-day"><span>27</span><span class="day-dot dot-green"></span></div>
+        <div class="cal-day"><span>28</span><span class="day-dot dot-green"></span></div>
+        <div class="cal-day"><span>29</span><span class="day-dot dot-green"></span></div>
+        <div class="cal-day"><span>30</span><span class="day-dot dot-green"></span></div>
+        <div class="cal-day today"><span>31</span><span class="day-dot"></span></div>
+        <div class="cal-day other-month"><span>1</span></div>
+        <div class="cal-day other-month"><span>2</span></div>
+        <div class="cal-day other-month"><span>3</span><span class="day-dot dot-orange"></span></div>
+        <div class="cal-day other-month"><span>4</span><span class="day-dot dot-orange"></span></div>
+        <div class="cal-day other-month"><span>5</span><span class="day-dot dot-orange"></span></div>
+        <div class="cal-day other-month"><span>6</span><span class="day-dot dot-orange"></span></div>
+        <div class="cal-day other-month"><span>7</span><span class="day-dot dot-orange"></span></div>
+        <div class="cal-day other-month"><span>8</span><span class="day-dot dot-orange"></span></div>
+      </div>
+    </div>
+    <div class="cal-legend">
+      <span><span class="dot" style="background:#22c55e"></span>已完成</span>
+      <span><span class="dot" style="background:#f59e0b"></span>进行中</span>
+      <span><span class="dot" style="background:#d1d5db"></span>未开始</span>
+    </div>
+    <div class="cal-detail">
+      <h4>📅 7月31日（今天）</h4>
+      <div class="cal-event"><span class="ce-dot orange"></span><span class="ce-text">🟠 泥瓦工继续进行</span><span class="ce-time">第38天</span></div>
+      <div class="cal-event"><span class="ce-dot green"></span><span class="ce-text">客厅地砖铺完第3天</span><span class="ce-time">7.30</span></div>
+      <div class="cal-event"><span class="ce-dot green"></span><span class="ce-text">卫生间闭水试验通过</span><span class="ce-time">7.30</span></div>
+      <div class="cal-event"><span class="ce-dot"></span><span class="ce-text" style="color:#9ca3af">预约木工师傅（明天）</span><span class="ce-time">8.1</span></div>
+    </div>
+  </div>
+
+  <!-- 记录 - 智能搜索 + 标签 (V4.3) -->
+  <div class="diary-panel" id="diary-record">
+    <div class="search-bar">
+      <span style="font-size:16px;color:#9ca3af">🔍</span>
+      <input type="text" placeholder="搜"闭水试验"…" oninput="searchRecords(this.value)">
+      <span class="ai-tag">AI 智能</span>
+    </div>
+    <div class="tag-chips">
+      <span class="tag-chip active" onclick="filterRecordTag('all',this)">全部</span>
+      <span class="tag-chip" onclick="filterRecordTag('客厅',this)">#客厅</span>
+      <span class="tag-chip" onclick="filterRecordTag('水电',this)">#水电</span>
+      <span class="tag-chip" onclick="filterRecordTag('防水',this)">#防水</span>
+      <span class="tag-chip" onclick="filterRecordTag('验收',this)">#验收</span>
+      <span class="tag-chip" onclick="filterRecordTag('开工',this)">#开工</span>
+      <span class="tag-chip" onclick="filterRecordTag('材料',this)">#材料</span>
+    </div>
+    <div style="padding:0 16px;font-size:11px;color:#9ca3af;margin-bottom:8px">本月共 5 条记录 · 按时间倒序</div>
+    <div class="record-item" data-tags="客厅 泥瓦 验收">
+      <div class="record-icon">🧱</div>
+      <div class="record-info">
+        <h5>客厅地砖铺完第3天</h5>
+        <div class="ri-meta"><span>客厅 · 泥瓦 · 张师傅</span><span>7.30</span></div>
+        <div class="ri-desc">800×800浅灰色通体大理石瓷砖，留缝2mm。师傅手艺不错，平整度目测OK。</div>
+        <div class="ri-tags"><span class="tag tag-orange">#客厅</span><span class="tag tag-blue">#泥瓦</span><span class="tag tag-green">#验收</span></div>
+      </div>
+    </div>
+    <div class="record-item" data-tags="卫生间 防水 验收">
+      <div class="record-icon">💧</div>
+      <div class="record-info">
+        <h5>卫生间闭水试验通过</h5>
+        <div class="ri-meta"><span>主卫 · 防水</span><span>7.30</span></div>
+        <div class="ri-desc">蓄水48小时，楼下无渗漏。防水涂料刷到1.8米高，门槛石位置做了挡水坎。</div>
+        <div class="ri-tags"><span class="tag tag-blue">#防水</span><span class="tag tag-green">#验收</span><span class="tag tag-red">#避坑</span></div>
+      </div>
+    </div>
+    <div class="record-item" data-tags="全屋 水电 验收">
+      <div class="record-icon">✅</div>
+      <div class="record-info">
+        <h5>水电验收通过</h5>
+        <div class="ri-meta"><span>全屋 · 水电 · 王工长</span><span>7.28</span></div>
+        <div class="ri-desc">水管打压0.8MPa保持30分钟不掉压，电路通断测试正常。管线已拍照留档。</div>
+        <div class="ri-tags"><span class="tag tag-blue">#水电</span><span class="tag tag-green">#验收</span></div>
+      </div>
+    </div>
+    <div class="record-item" data-tags="厨房 水电 材料">
+      <div class="record-icon">🍳</div>
+      <div class="record-info">
+        <h5>厨房水电走完</h5>
+        <div class="ri-meta"><span>厨房 · 水电</span><span>7.25</span></div>
+        <div class="ri-desc">橱柜下方预留4个插座（洗碗机/净水器/垃圾处理器/备用），冷热水管间距15cm标准。</div>
+        <div class="ri-tags"><span class="tag tag-blue">#水电</span><span class="tag tag-orange">#厨房</span></div>
+      </div>
+    </div>
+    <div class="record-item" data-tags="全屋 开工">
+      <div class="record-icon">🎉</div>
+      <div class="record-info">
+        <h5>开工大吉</h5>
+        <div class="ri-meta"><span>全屋 · 开工</span><span>7.22</span></div>
+        <div class="ri-desc">砸墙完成，垃圾清运完毕。工长带水电师傅现场定位开关插座位置。明天开始开槽布线。</div>
+        <div class="ri-tags"><span class="tag tag-green">#开工</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MINE ===== -->
+<div class="page" id="page-mine">
+  <div style="padding:24px 0;text-align:center">
+    <div style="width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#fef3c7,#fde68a);display:inline-flex;align-items:center;justify-content:center;font-size:24px">🏠</div>
+    <div style="font-size:16px;font-weight:600;margin-top:8px">阳光花园 3-201</div>
+    <div style="font-size:12px;color:#999;margin-top:2px">准备期 · 北欧风格</div>
+  </div>
+  <div class="menu-group">
+    <div class="menu-item"><span class="menu-icon">📚</span>我的知识库<span style="margin-left:auto;font-size:12px;color:#999">5条</span><span class="arrow">›</span></div>
+    <div class="menu-item"><span class="menu-icon">💰</span>预算与流水<span class="arrow">›</span></div>
+    <div class="menu-item"><span class="menu-icon">🏗️</span>空间管理<span class="arrow">›</span></div>
+    <div class="menu-item"><span class="menu-icon">👨‍👩‍👧</span>家庭成员<span style="margin-left:auto;font-size:12px;color:#999">你 · 老婆</span><span class="arrow">›</span></div>
+  </div>
+  <div class="menu-group">
+    <div class="menu-item"><span class="menu-icon">✅</span>验收清单<span class="arrow">›</span></div>
+    <div class="menu-item"><span class="menu-icon">🔌</span>家电选购指南<span class="arrow">›</span></div>
+    <div class="menu-item"><span class="menu-icon">⚙️</span>设置<span class="arrow">›</span></div>
+  </div>
+</div>
+
+</div><!-- /main-content -->
+
+<!-- FAB -->
+<div class="fab-backdrop" id="fabBackdrop" onclick="closeFab()"></div>
+<div class="fab-menu" id="fabMenu">
+  <div class="fab-grid">
+    <button class="fab-item" onclick="openQuickNote();closeFab()"><div class="f-icon">✏️</div>随手记</button>
+    <button class="fab-item" onclick="showToast('拍照留档');closeFab()"><div class="f-icon">📷</div>拍照留档</button>
+    <button class="fab-item" onclick="showToast('AI装修小管家');closeFab()"><div class="f-icon">🤖</div>问AI</button>
+    <button class="fab-item" onclick="openDiaryModal();closeFab()"><div class="f-icon">📝</div>写日记</button>
+  </div>
+</div>
+
+<!-- Tab Bar -->
+<div class="tab-bar">
+  <button class="tab-item active" data-page="home" onclick="switchTab('home')"><span class="tab-icon">🏠</span><span class="tab-label">首页</span></button>
+  <button class="tab-item" data-page="ref" onclick="switchTab('ref')"><span class="tab-icon">📖</span><span class="tab-label">参考</span></button>
+  <button class="fab-btn" id="fabBtn" onclick="toggleFab()">+</button>
+  <button class="tab-item" data-page="diary" onclick="switchTab('diary')"><span class="tab-icon">📓</span><span class="tab-label">日记</span></button>
+  <button class="tab-item" data-page="mine" onclick="switchTab('mine')"><span class="tab-icon">👤</span><span class="tab-label">我的</span></button>
+</div>
+</div>
+
+<!-- 写日记 Modal (带标签输入) -->
+<div class="modal-overlay" id="diaryModal">
+<div class="modal-sheet">
+<div class="modal-handle"></div>
+<div style="font-size:17px;font-weight:600;text-align:center;margin-bottom:16px">📝 写施工日记</div>
+<div class="form-group">
+  <label class="form-label">所属空间</label>
+  <input class="form-input" value="客厅" placeholder="如：客厅/厨房/主卫...">
+</div>
+<div class="form-group">
+  <label class="form-label">今天做了什么</label>
+  <textarea class="form-textarea" placeholder="例：客厅地砖铺完了，800×800浅灰色通体大理石，留缝2mm..."></textarea>
+</div>
+<div class="form-group">
+  <label class="form-label">🏷️ 标签（方便日后搜索）</label>
+  <div class="tag-input-area" id="tagInputArea">
+    <span class="existing-tag">客厅 ×</span>
+    <span class="existing-tag">泥瓦 ×</span>
+    <span class="existing-tag">瓷砖 ×</span>
+    <input type="text" placeholder="输入新标签..." onkeydown="if(event.key==='Enter')addTag(this)">
+  </div>
+  <div style="font-size:11px;color:#9ca3af;margin-top:6px">💡 标签是搜索的关键，例：#水电 #防水 #验收</div>
+</div>
+<div style="display:flex;gap:10px;margin-top:16px">
+  <button class="btn-secondary" onclick="closeDiaryModal()">取消</button>
+  <button class="btn-primary" style="flex:2" onclick="saveDiary()">保存</button>
+</div>
+</div>
+</div>
+
+<!-- 快速记录 Modal -->
+<div class="modal-overlay" id="quickNoteModal">
+<div class="modal-sheet">
+<div class="modal-handle"></div>
+<div style="font-size:17px;font-weight:600;text-align:center;margin-bottom:12px">✏️ 随手记</div>
+<textarea class="form-textarea" placeholder="例：买了瓷砖 800×800 68元/片 × 52片"></textarea>
+<button class="btn-primary" onclick="showToast('AI识别完成！已保存')" style="margin-top:12px">智能识别归类</button>
+<div style="display:flex;gap:10px;margin-top:16px">
+  <button class="btn-secondary" onclick="closeQuickNote()">取消</button>
+  <button class="btn-primary" style="flex:2" onclick="closeQuickNote();showToast('已保存到预算！')">保存到预算</button>
+</div>
+</div>
+</div>
+
+<!-- 收藏 Modal -->
+<div class="modal-overlay" id="importModal">
+<div class="modal-sheet">
+<div class="modal-handle"></div>
+<div style="font-size:17px;font-weight:600;text-align:center;margin-bottom:12px">📥 收藏外部内容</div>
+<div style="display:flex;gap:8px;margin-bottom:14px">
+  <button style="flex:1;padding:10px;background:#dbeafe;color:#1e40af;border:none;border-radius:10px;font-size:13px;font-weight:500;cursor:pointer">🔗 链接</button>
+  <button style="flex:1;padding:10px;background:#fef3c7;color:#92400e;border:none;border-radius:10px;font-size:13px;font-weight:500;cursor:pointer">📸 截图</button>
+  <button style="flex:1;padding:10px;background:#f3f4f6;color:#6b7280;border:none;border-radius:10px;font-size:13px;font-weight:500;cursor:pointer">📋 文本</button>
+</div>
+<input class="form-input" placeholder="https://...">
+<button class="btn-primary" style="margin-top:12px" onclick="showToast('AI分析完成！已保存到知识库')">AI 分析提取</button>
+<div style="display:flex;gap:10px;margin-top:16px">
+  <button class="btn-secondary" onclick="closeImportModal()">关闭</button>
+  <button class="btn-primary" style="flex:2" onclick="closeImportModal()">保存到知识库</button>
+</div>
+</div>
+</div>
+
+<script>
+let currentTab='home', inSubPage=false, fabOpen=false;
+
+function switchTab(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  currentTab=name; inSubPage=false;
+  document.getElementById('backBtn').style.visibility='hidden';
+  document.getElementById('actionBtn').style.display='none';
+  const titles={home:'筑家记',ref:'参考',diary:'装修日记',mine:'我的'};
+  document.getElementById('navTitle').textContent=titles[name]||'筑家记';
+  document.querySelectorAll('.tab-item').forEach(t=>{
+    t.classList.remove('active');
+    if(t.getAttribute('data-page')===name) t.classList.add('active');
+  });
+}
+
+function switchRefTab(name,el) {
+  document.querySelectorAll('.ref-tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.ref-panel').forEach(p=>p.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('ref-'+name).classList.add('active');
+}
+
+function switchDiaryTab(name,el) {
+  document.querySelectorAll('.diary-tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.diary-panel').forEach(p=>p.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('diary-'+name).classList.add('active');
+  if (name === 'record') document.getElementById('actionBtn').style.display='block';
+  else document.getElementById('actionBtn').style.display='none';
+}
+
+// 折叠
+function toggleCollapsible(id) {
+  const body = document.getElementById('body-'+id);
+  const toggle = document.getElementById('toggle-'+id);
+  body.classList.toggle('open');
+  toggle.classList.toggle('open');
+}
+
+function editTasks() { showToast('编辑模式：可拖拽排序/删除/添加'); }
+
+function togglePrep(el) {
+  el.classList.toggle('done');
+  if (el.classList.contains('done')) el.classList.remove('next');
+  updatePrepProgress();
+}
+function updatePrepProgress() {
+  const total = document.querySelectorAll('#prepItems .prep-tag').length;
+  const done = document.querySelectorAll('#prepItems .prep-tag.done').length;
+  document.getElementById('prepBar').style.width = (done/total*100)+'%';
+  document.querySelector('.prep-progress').textContent = done+'/'+total+' 完成';
+}
+
+function toggleTask(el) {
+  const c=el.querySelector('.task-check');
+  const t=el.querySelector('.task-text');
+  if(c.classList.contains('done')){c.classList.remove('done');c.textContent='○';t.classList.remove('done');}
+  else{c.classList.add('done');c.textContent='✓';t.classList.add('done');}
+}
+function toggleCheck(el) {
+  const m=el.querySelector('.check-mark');
+  const t=el.querySelector('.check-text');
+  if(m.textContent==='✓'){m.textContent='☐';t.style.textDecoration='none';t.style.color='#1a1a1a';}
+  else{m.textContent='✓';t.style.textDecoration='line-through';t.style.color='#9ca3af';}
+}
+
+// Records search & filter
+function searchRecords(query) {
+  const q = query.toLowerCase();
+  document.querySelectorAll('#diary-record .record-item').forEach(item => {
+    const text = item.textContent.toLowerCase();
+    item.style.display = text.includes(q) ? '' : 'none';
+  });
+}
+function filterRecordTag(tag, el) {
+  document.querySelectorAll('.tag-chips .tag-chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  document.querySelectorAll('#diary-record .record-item').forEach(item => {
+    if (tag === 'all') { item.style.display = ''; return; }
+    item.style.display = item.getAttribute('data-tags').includes(tag) ? '' : 'none';
+  });
+}
+
+// Tag input
+function addTag(input) {
+  const v = input.value.trim();
+  if (!v) return;
+  const area = document.getElementById('tagInputArea');
+  const tag = document.createElement('span');
+  tag.className = 'existing-tag';
+  tag.textContent = v + ' ×';
+  area.insertBefore(tag, input);
+  input.value = '';
+  showToast('标签已添加');
+}
+
+// FAB
+function toggleFab() {
+  fabOpen=!fabOpen;
+  document.getElementById('fabMenu').classList.toggle('open',fabOpen);
+  document.getElementById('fabBackdrop').classList.toggle('open',fabOpen);
+  document.getElementById('fabBtn').classList.toggle('open',fabOpen);
+}
+function closeFab() { fabOpen=false; document.getElementById('fabMenu').classList.remove('open'); document.getElementById('fabBackdrop').classList.remove('open'); document.getElementById('fabBtn').classList.remove('open'); }
+
+// Modals
+function openDiaryModal() { document.getElementById('diaryModal').classList.add('active'); }
+function closeDiaryModal() { document.getElementById('diaryModal').classList.remove('active'); }
+function saveDiary() { closeDiaryModal(); showToast('日记已保存！带标签方便日后搜索'); }
+function openQuickNote() { document.getElementById('quickNoteModal').classList.add('active'); }
+function closeQuickNote() { document.getElementById('quickNoteModal').classList.remove('active'); }
+function openImportModal() { document.getElementById('importModal').classList.add('active'); }
+function closeImportModal() { document.getElementById('importModal').classList.remove('active'); }
+
+function showToast(msg) {
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),1800);
+}
+
+document.getElementById('diaryModal').addEventListener('click',function(e){if(e.target===this)closeDiaryModal()});
+document.getElementById('quickNoteModal').addEventListener('click',function(e){if(e.target===this)closeQuickNote()});
+document.getElementById('importModal').addEventListener('click',function(e){if(e.target===this)closeImportModal()});
+
+console.log('🏠 筑家记 V4.3 · 有人情味的版本');
+console.log('✨ 首页加灵魂: 日期+天气+问候+昨日未完成+下一阶段预告+贴士');
+console.log('📋 今日任务/验收清单: 可折叠+可编辑');
+console.log('📅 计划: 日历视图');
+console.log('🔍 记录: 智能搜索+标签筛选，写日记带标签');
+</script>
+</body>
+</html>

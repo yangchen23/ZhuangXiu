@@ -1,0 +1,929 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>筑家记 V3 - 知识库优先</title>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 16px; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+  background: #f0f0f0; display: flex; justify-content: center; align-items: center;
+  min-height: 100vh; padding: 20px; -webkit-font-smoothing: antialiased;
+}
+
+.phone-frame {
+  width: 390px; height: 844px; background: #f5f5f5; border-radius: 44px;
+  overflow: hidden; box-shadow: 0 25px 80px rgba(0,0,0,0.25), 0 0 0 2px #1a1a1a, 0 0 0 6px #2d2d2d, 0 0 0 8px #1a1a1a;
+  position: relative; display: flex; flex-direction: column;
+}
+
+.status-bar { height: 44px; background: #fff; display: flex; justify-content: space-between; align-items: center; padding: 0 28px; font-size: 12px; font-weight: 600; color: #1a1a1a; flex-shrink: 0; }
+.nav-bar { height: 44px; background: #fff; display: flex; align-items: center; justify-content: center; padding: 0 16px; font-size: 17px; font-weight: 600; color: #1a1a1a; position: relative; flex-shrink: 0; border-bottom: 0.5px solid #e5e5e5; }
+.nav-bar .back-btn { position: absolute; left: 12px; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; cursor: pointer; border: none; background: none; font-size: 20px; color: #f59e0b; }
+.nav-bar .action-btn { position: absolute; right: 12px; font-size: 14px; color: #f59e0b; cursor: pointer; border: none; background: none; font-weight: 500; }
+
+.main-content { flex: 1; overflow-y: auto; overflow-x: hidden; background: #f5f5f5; -webkit-overflow-scrolling: touch; }
+.main-content::-webkit-scrollbar { display: none; }
+.page { display: none; min-height: 100%; padding-bottom: 20px; animation: fadeIn 0.25s ease; }
+.page.active { display: block; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+
+.tab-bar { height: 60px; background: #fff; display: flex; align-items: center; border-top: 0.5px solid #e5e5e5; flex-shrink: 0; }
+.tab-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; cursor: pointer; padding: 4px 0; border: none; background: none; color: #999; transition: color 0.2s; }
+.tab-item.active { color: #f59e0b; }
+.tab-item .tab-icon { font-size: 20px; line-height: 1; }
+.tab-item .tab-label { font-size: 10px; line-height: 1; }
+.tab-item.add-btn { position: relative; top: -12px; }
+.tab-item.add-btn .tab-icon { width: 44px; height: 44px; background: linear-gradient(135deg, #f59e0b, #d97706); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 28px; box-shadow: 0 4px 12px rgba(245,158,11,0.4); }
+
+.section-header { display: flex; justify-content: space-between; align-items: center; padding: 20px 16px 10px; font-size: 15px; font-weight: 600; color: #1a1a1a; }
+.section-header .more { font-size: 13px; color: #999; cursor: pointer; font-weight: 400; }
+
+.tag { display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 10px; font-size: 11px; font-weight: 500; line-height: 1.6; }
+.tag-info { background: #dbeafe; color: #2563eb; }
+.tag-warning { background: #fee2e2; color: #dc2626; }
+.tag-success { background: #dcfce7; color: #16a34a; }
+.tag-stage { background: #fef3c7; color: #d97706; }
+
+.card { background: #fff; border-radius: 14px; margin: 0 16px 10px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
+
+/* ========== Stage-Aware Banner ========== */
+.stage-banner {
+  margin: 0 16px 14px; padding: 16px; border-radius: 14px;
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  position: relative; overflow: hidden;
+}
+.stage-banner::before { content: '🏗️'; position: absolute; right: -10px; top: -10px; font-size: 80px; opacity: 0.2; }
+.stage-label { font-size: 12px; color: #92400e; font-weight: 500; }
+.stage-title { font-size: 18px; font-weight: 700; color: #1a1a1a; margin-top: 2px; }
+.stage-progress { font-size: 12px; color: #92400e; margin-top: 4px; }
+.stage-tag-row { display: flex; gap: 6px; margin-top: 10px; flex-wrap: wrap; }
+.stage-tag { padding: 4px 10px; border-radius: 12px; font-size: 11px; background: rgba(255,255,255,0.7); color: #92400e; font-weight: 500; cursor: pointer; }
+.stage-tag:active { background: #fff; }
+
+/* ========== Search Bar ========== */
+.search-bar {
+  margin: 0 16px 14px; padding: 10px 14px; background: #fff;
+  border-radius: 14px; display: flex; align-items: center; gap: 8px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04); cursor: pointer;
+}
+.search-bar .icon { color: #9ca3af; font-size: 16px; }
+.search-bar .placeholder { color: #9ca3af; font-size: 14px; }
+.search-bar .voice { margin-left: auto; color: #9ca3af; font-size: 16px; }
+
+/* ========== Knowledge Categories Grid ========== */
+.cat-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; padding: 0 16px; }
+.cat-item { background: #fff; border-radius: 12px; padding: 14px 6px; text-align: center; cursor: pointer; box-shadow: 0 1px 3px rgba(0,0,0,0.04); transition: all 0.2s; }
+.cat-item:active { transform: scale(0.96); background: #fafafa; }
+.cat-item .cat-icon { font-size: 26px; margin-bottom: 4px; }
+.cat-item .cat-label { font-size: 11px; color: #4b5563; font-weight: 500; }
+.cat-item .cat-count { font-size: 10px; color: #9ca3af; margin-top: 1px; }
+
+/* ========== Hot FAQ ========== */
+.faq-list { padding: 0 16px; }
+.faq-item {
+  display: flex; align-items: center; gap: 10px; padding: 12px 14px;
+  background: #fff; border-radius: 10px; margin-bottom: 6px; cursor: pointer;
+  transition: all 0.2s;
+}
+.faq-item:active { background: #fafafa; transform: scale(0.99); }
+.faq-item .q-num { color: #f59e0b; font-weight: 700; font-size: 14px; flex-shrink: 0; min-width: 20px; }
+.faq-item .q-text { font-size: 13px; color: #1a1a1a; flex: 1; line-height: 1.4; }
+.faq-item .q-hot { color: #ef4444; font-size: 11px; font-weight: 600; }
+.faq-item .arrow { color: #ccc; font-size: 14px; }
+
+/* ========== AI Entry (Bottom Secondary) ========== */
+.ai-entry-card {
+  margin: 14px 16px 12px; padding: 16px; border-radius: 14px;
+  background: linear-gradient(135deg, #dbeafe 0%, #eff6ff 100%);
+  display: flex; align-items: center; gap: 12px; cursor: pointer;
+  border: 1px solid #bfdbfe;
+}
+.ai-entry-card .ai-icon { 
+  width: 44px; height: 44px; border-radius: 12px; flex-shrink: 0;
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  display: flex; align-items: center; justify-content: center; font-size: 22px; color: #fff;
+}
+.ai-entry-card .ai-text { flex: 1; }
+.ai-entry-card .ai-text h4 { font-size: 14px; font-weight: 600; color: #1e40af; }
+.ai-entry-card .ai-text p { font-size: 12px; color: #3b82f6; margin-top: 2px; }
+.ai-entry-card .arrow { color: #3b82f6; font-size: 20px; }
+
+/* ========== Photo entry ========== */
+.photo-entry {
+  margin: 0 16px 12px; padding: 12px 14px; background: #fff;
+  border-radius: 12px; display: flex; align-items: center; gap: 10px;
+  cursor: pointer; box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+}
+.photo-entry .p-icon {
+  width: 36px; height: 36px; border-radius: 10px; flex-shrink: 0;
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  display: flex; align-items: center; justify-content: center; font-size: 18px; color: #fff;
+}
+.photo-entry .p-text { flex: 1; font-size: 13px; color: #1a1a1a; }
+.photo-entry .p-text strong { display: block; margin-bottom: 2px; }
+.photo-entry .p-text span { color: #9ca3af; font-size: 11px; }
+
+/* ========== Detail Pages ========== */
+.detail-content { padding: 16px; }
+.detail-content h1 { font-size: 20px; font-weight: 700; color: #1a1a1a; margin-bottom: 4px; }
+.detail-content .meta { font-size: 12px; color: #9ca3af; margin-bottom: 16px; }
+.detail-block { background: #fff; border-radius: 12px; padding: 16px; margin-bottom: 10px; }
+.detail-block h3 { font-size: 14px; font-weight: 600; color: #f59e0b; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; }
+.detail-block p, .detail-block li { font-size: 13px; color: #4b5563; line-height: 1.7; }
+.detail-block ul { padding-left: 20px; }
+.detail-block strong { color: #1a1a1a; }
+
+.pro-con-row { display: flex; gap: 10px; }
+.pro-card { flex: 1; padding: 12px; border-radius: 10px; font-size: 12px; }
+.pro-card.yes { background: #f0fdf4; color: #16a34a; }
+.pro-card.no { background: #fef2f2; color: #dc2626; }
+.pro-card strong { display: block; margin-bottom: 4px; font-size: 13px; }
+
+/* ========== Home (kept) ========== */
+.process-flow { background: #fff; margin: 0 16px 12px; border-radius: 14px; padding: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
+.process-title { font-size: 15px; font-weight: 700; color: #1a1a1a; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+.process-steps { display: flex; align-items: center; overflow-x: auto; padding-bottom: 4px; gap: 0; }
+.process-steps::-webkit-scrollbar { display: none; }
+.process-step { display: flex; flex-direction: column; align-items: center; gap: 6px; flex-shrink: 0; min-width: 50px; position: relative; }
+.process-dot { width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; position: relative; z-index: 1; }
+.process-dot.done { background: #22c55e; color: #fff; }
+.process-dot.current { background: #f59e0b; color: #fff; box-shadow: 0 0 0 5px rgba(245,158,11,0.2); animation: pulse 2s infinite; }
+.process-dot.upcoming { background: #e5e5e5; color: #999; }
+@keyframes pulse { 0%, 100% { box-shadow: 0 0 0 4px rgba(245,158,11,0.2); } 50% { box-shadow: 0 0 0 9px rgba(245,158,11,0.1); } }
+.process-line { height: 2px; background: #22c55e; flex: 1; min-width: 16px; align-self: center; margin-bottom: 18px; }
+.process-line.upcoming { background: #e5e5e5; }
+.process-label { font-size: 10px; color: #1a1a1a; text-align: center; line-height: 1.3; max-width: 50px; }
+.process-label.muted { color: #999; }
+
+.today-alert { margin: 0 16px 12px; padding: 14px; border-radius: 12px; background: linear-gradient(135deg, #fef3c7, #fffbeb); border-left: 4px solid #f59e0b; display: flex; gap: 10px; align-items: flex-start; }
+.today-alert .alert-icon { font-size: 22px; flex-shrink: 0; }
+.today-alert .alert-text { font-size: 13px; color: #92400e; line-height: 1.5; }
+.today-alert .alert-text strong { color: #d97706; }
+
+.todo-list { margin: 0 16px 12px; }
+.todo-item { display: flex; align-items: center; gap: 10px; padding: 12px 14px; background: #fff; border-radius: 12px; margin-bottom: 6px; cursor: pointer; }
+.todo-check { width: 22px; height: 22px; border-radius: 50%; border: 2px solid #d1d5db; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 12px; color: transparent; }
+.todo-check.done { background: #22c55e; border-color: #22c55e; color: #fff; }
+.todo-text { font-size: 14px; color: #1a1a1a; flex: 1; }
+.todo-text.done { color: #9ca3af; text-decoration: line-through; }
+
+/* ========== Spaces (kept) ========== */
+.space-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 0 16px; }
+.space-card { background: #fff; border-radius: 14px; overflow: hidden; cursor: pointer; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
+.space-card-img { height: 90px; display: flex; align-items: center; justify-content: center; font-size: 32px; position: relative; }
+.space-card-img.living { background: linear-gradient(135deg, #fef3c7, #fde68a); }
+.space-card-img.bedroom { background: linear-gradient(135deg, #dbeafe, #bfdbfe); }
+.space-card-img.kitchen { background: linear-gradient(135deg, #fce7f3, #fbcfe8); }
+.space-card-img.bathroom { background: linear-gradient(135deg, #dcfce7, #bbf7d0); }
+.space-card-img.study { background: linear-gradient(135deg, #f3e8ff, #e9d5ff); }
+.space-card-img .status-badge { position: absolute; top: 8px; right: 8px; }
+.space-card-body { padding: 10px 12px; }
+.space-card-body h4 { font-size: 14px; font-weight: 600; color: #1a1a1a; }
+.space-card-body .sub { font-size: 11px; color: #999; margin-top: 2px; }
+
+/* ========== Mine ========== */
+.profile-area { padding: 24px 0; text-align: center; }
+.profile-avatar { width: 60px; height: 60px; border-radius: 50%; background: linear-gradient(135deg, #fef3c7, #fde68a); display: inline-flex; align-items: center; justify-content: center; font-size: 26px; }
+.menu-group { margin: 0 16px 12px; }
+.menu-item { display: flex; align-items: center; gap: 12px; padding: 14px 16px; background: #fff; cursor: pointer; font-size: 14px; color: #1a1a1a; border-bottom: 0.5px solid #f5f5f5; }
+.menu-item:first-child { border-radius: 14px 14px 0 0; }
+.menu-item:last-child { border-radius: 0 0 14px 14px; border-bottom: none; }
+.menu-item:only-child { border-radius: 14px; }
+.menu-item .menu-icon { font-size: 20px; width: 28px; text-align: center; }
+.menu-item .arrow { margin-left: auto; color: #ccc; }
+.menu-item .badge { margin-left: auto; margin-right: 4px; font-size: 11px; background: #fee2e2; color: #dc2626; padding: 2px 8px; border-radius: 10px; }
+
+/* ========== Modals ========== */
+.modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.4); z-index: 100; display: none; align-items: flex-end; justify-content: center; }
+.modal-overlay.active { display: flex; }
+.modal-sheet { width: 390px; max-height: 85vh; background: #fff; border-radius: 20px 20px 0 0; overflow-y: auto; padding: 20px 16px 30px; animation: slideUp 0.3s ease; }
+@keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+.modal-handle { width: 36px; height: 4px; background: #ddd; border-radius: 2px; margin: 0 auto 16px; }
+.btn-primary { width: 100%; padding: 12px; background: linear-gradient(135deg, #f59e0b, #d97706); color: #fff; border: none; border-radius: 12px; font-size: 16px; font-weight: 600; cursor: pointer; }
+.btn-secondary { flex: 1; padding: 12px; background: #f5f5f5; border: none; border-radius: 12px; font-size: 15px; color: #6b7280; cursor: pointer; }
+.form-group { margin-bottom: 14px; }
+.form-label { font-size: 13px; font-weight: 600; color: #4b5563; margin-bottom: 6px; display: block; }
+.form-textarea, .form-select { width: 100%; border: 1px solid #e5e5e5; border-radius: 10px; padding: 10px 12px; font-size: 14px; font-family: inherit; background: #fafafa; color: #1a1a1a; }
+.form-textarea:focus, .form-select:focus { border-color: #f59e0b; outline: none; background: #fff; }
+.form-textarea { min-height: 70px; resize: vertical; }
+.photo-upload { border: 2px dashed #e5e5e5; border-radius: 12px; padding: 20px; text-align: center; color: #999; cursor: pointer; }
+
+.toast { position: fixed; top: 60px; left: 50%; transform: translateX(-50%); background: #1a1a1a; color: #fff; padding: 10px 24px; border-radius: 20px; font-size: 14px; z-index: 200; opacity: 0; transition: opacity 0.3s; pointer-events: none; }
+.toast.show { opacity: 1; }
+
+@media (max-width: 430px) { .phone-frame { width: 100%; height: 100vh; border-radius: 0; box-shadow: none; } .modal-sheet { width: 100%; } }
+</style>
+</head>
+<body>
+
+<div class="phone-frame">
+  <div class="status-bar"><span>9:41</span><span>WiFi ▮▮▮ ▮▮▮</span></div>
+
+  <div class="nav-bar" id="navBar">
+    <button class="back-btn" id="backBtn" style="visibility:hidden;" onclick="goBack()">←</button>
+    <span id="navTitle">筑家记</span>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <div class="main-content" id="mainContent">
+
+    <!-- ===== Page: Home ===== -->
+    <div class="page active" id="page-home">
+      <div class="section-header">
+        <span>装修进度</span>
+        <span style="font-size:13px;color:#f59e0b;font-weight:600;">泥瓦阶段 · 第38天</span>
+      </div>
+      <div class="process-flow">
+        <div class="process-steps">
+          <div class="process-step"><div class="process-dot done">✓</div><span class="process-label">拆除</span></div>
+          <div class="process-line"></div>
+          <div class="process-step"><div class="process-dot done">✓</div><span class="process-label">中央空调</span></div>
+          <div class="process-line"></div>
+          <div class="process-step"><div class="process-dot done">✓</div><span class="process-label">水电</span></div>
+          <div class="process-line"></div>
+          <div class="process-step"><div class="process-dot current">●</div><span class="process-label" style="font-weight:700;color:#d97706;">泥瓦</span></div>
+          <div class="process-line upcoming"></div>
+          <div class="process-step"><div class="process-dot upcoming">○</div><span class="process-label muted">木工</span></div>
+          <div class="process-line upcoming"></div>
+          <div class="process-step"><div class="process-dot upcoming">○</div><span class="process-label muted">油漆</span></div>
+          <div class="process-line upcoming"></div>
+          <div class="process-step"><div class="process-dot upcoming">○</div><span class="process-label muted">安装</span></div>
+        </div>
+      </div>
+
+      <div class="today-alert">
+        <div class="alert-icon">💡</div>
+        <div class="alert-text">
+          <strong>泥瓦快结束了：</strong><br>
+          1. 提前预约木工师傅<br>
+          2. 确认吊顶方案和筒灯开孔<br>
+          3. 定制柜体可以量尺了
+        </div>
+      </div>
+
+      <div class="section-header"><span>今日待办</span><span class="more">编辑</span></div>
+      <div class="todo-list">
+        <div class="todo-item" onclick="toggleTodo(this)"><div class="todo-check done">✓</div><span class="todo-text done">客厅地砖铺完检查</span></div>
+        <div class="todo-item" onclick="toggleTodo(this)"><div class="todo-check">○</div><span class="todo-text">预约木工师傅</span></div>
+        <div class="todo-item" onclick="toggleTodo(this)"><div class="todo-check">○</div><span class="todo-text">选购筒灯</span></div>
+      </div>
+    </div>
+
+    <!-- ===== Page: Knowledge Hub (V3 Core) ===== -->
+    <div class="page" id="page-knowledge">
+      <!-- Stage-Aware Banner -->
+      <div class="stage-banner">
+        <div class="stage-label">📍 当前阶段</div>
+        <div class="stage-title">泥瓦阶段</div>
+        <div class="stage-progress">已施工 38 天 · 还需约 12 天完成</div>
+        <div class="stage-tag-row">
+          <span class="stage-tag" onclick="openDetail('stage-tile')">🧱 瓷砖验收</span>
+          <span class="stage-tag" onclick="openDetail('faq-tiling')">📐 贴砖规范</span>
+          <span class="stage-tag" onclick="openDetail('waterproof')">💧 防水验收</span>
+          <span class="stage-tag" onclick="openDetail('faq-tile')">🎨 美缝选择</span>
+        </div>
+      </div>
+
+      <!-- Search Bar -->
+      <div class="search-bar" onclick="showToast('打开搜索：支持搜材料/品牌/问题')">
+        <span class="icon">🔍</span>
+        <span class="placeholder">搜「瓷砖」「防水」「中央空调」…</span>
+        <span class="voice">🎤</span>
+      </div>
+
+      <!-- Knowledge Categories -->
+      <div class="section-header">
+        <span>📚 知识分类</span>
+        <span class="more">全部 12 类</span>
+      </div>
+      <div class="cat-grid">
+        <div class="cat-item" onclick="openDetail('cat-tile')">
+          <div class="cat-icon">🧱</div>
+          <div class="cat-label">瓷砖</div>
+          <div class="cat-count">12篇</div>
+        </div>
+        <div class="cat-item" onclick="showToast('地板选购指南')">
+          <div class="cat-icon">🪵</div>
+          <div class="cat-label">地板</div>
+          <div class="cat-count">8篇</div>
+        </div>
+        <div class="cat-item">
+          <div class="cat-icon">🎨</div>
+          <div class="cat-label">涂料</div>
+          <div class="cat-count">6篇</div>
+        </div>
+        <div class="cat-item">
+          <div class="cat-icon">🚿</div>
+          <div class="cat-label">卫浴</div>
+          <div class="cat-count">10篇</div>
+        </div>
+        <div class="cat-item">
+          <div class="cat-icon">💡</div>
+          <div class="cat-label">灯具</div>
+          <div class="cat-count">7篇</div>
+        </div>
+        <div class="cat-item">
+          <div class="cat-icon">🔌</div>
+          <div class="cat-label">开关</div>
+          <div class="cat-count">5篇</div>
+        </div>
+        <div class="cat-item">
+          <div class="cat-icon">🪟</div>
+          <div class="cat-label">门窗</div>
+          <div class="cat-count">8篇</div>
+        </div>
+        <div class="cat-item">
+          <div class="cat-icon">🛁</div>
+          <div class="cat-label">家电</div>
+          <div class="cat-count">14篇</div>
+        </div>
+      </div>
+
+      <!-- Hot FAQ -->
+      <div class="section-header">
+        <span>🔥 热门问答</span>
+        <span class="more">查看全部 50+</span>
+      </div>
+      <div class="faq-list">
+        <div class="faq-item" onclick="openDetail('faq-order')">
+          <span class="q-num">Q1</span>
+          <span class="q-text">装修的正确顺序是什么？</span>
+          <span class="q-hot">HOT</span>
+          <span class="arrow">›</span>
+        </div>
+        <div class="faq-item" onclick="openDetail('faq-tile')">
+          <span class="q-num">Q2</span>
+          <span class="q-text">瓷砖选800×800还是750×1500？</span>
+          <span class="q-hot">HOT</span>
+          <span class="arrow">›</span>
+        </div>
+        <div class="faq-item" onclick="openDetail('faq-waterproof')">
+          <span class="q-num">Q3</span>
+          <span class="q-text">卫生间防水要做多高？</span>
+          <span class="arrow">›</span>
+        </div>
+        <div class="faq-item" onclick="openDetail('faq-pipe')">
+          <span class="q-num">Q4</span>
+          <span class="q-text">水管走顶好还是走地好？</span>
+          <span class="arrow">›</span>
+        </div>
+        <div class="faq-item" onclick="openDetail('faq-ac')">
+          <span class="q-num">Q5</span>
+          <span class="q-text">中央空调什么时候装？</span>
+          <span class="arrow">›</span>
+        </div>
+        <div class="faq-item">
+          <span class="q-num">Q6</span>
+          <span class="q-text">半包和全包哪个划算？</span>
+          <span class="arrow">›</span>
+        </div>
+        <div class="faq-item">
+          <span class="q-num">Q7</span>
+          <span class="q-text">先装门还是先铺地板？</span>
+          <span class="arrow">›</span>
+        </div>
+        <div class="faq-item">
+          <span class="q-num">Q8</span>
+          <span class="q-text">乳胶漆怎么选？环保怎么看？</span>
+          <span class="arrow">›</span>
+        </div>
+      </div>
+
+      <!-- AI Entry (Secondary) -->
+      <div class="ai-entry-card" onclick="openAIChat()">
+        <div class="ai-icon">🤖</div>
+        <div class="ai-text">
+          <h4>问AI小管家</h4>
+          <p>上面的没找到？问问AI（会消耗 token）</p>
+        </div>
+        <span class="arrow">›</span>
+      </div>
+
+      <!-- Photo entry -->
+      <div class="photo-entry" onclick="showScanModal()">
+        <div class="p-icon">📷</div>
+        <div class="p-text">
+          <strong>拍张照，AI帮你识材料</strong>
+          <span>瓷砖、涂料、家具、品牌型号都能识别</span>
+        </div>
+        <span class="arrow" style="color:#ccc;">›</span>
+      </div>
+    </div>
+
+    <!-- ===== Page: Detail (knowledge article) ===== -->
+    <div class="page" id="page-detail">
+      <div class="detail-content" id="detailContent">
+        <!-- Dynamic content injected by JS -->
+      </div>
+    </div>
+
+    <!-- ===== Page: AI Chat (Secondary) ===== -->
+    <div class="page" id="page-ai-chat">
+      <div style="padding:14px 16px;background:#fff;border-bottom:0.5px solid #e5e5e5;">
+        <div style="font-size:13px;color:#9ca3af;">🤖 AI 智能问答（消耗 token）</div>
+        <div style="font-size:11px;color:#fca5a5;margin-top:2px;">💡 先查知识库更省 token 哦</div>
+      </div>
+      <div style="padding:14px 16px;" id="aiChatMessages">
+        <div style="display:flex;gap:8px;margin-bottom:14px;">
+          <div style="width:32px;height:32px;border-radius:50%;background:#fef3c7;display:flex;align-items:center;justify-content:center;flex-shrink:0;">🤖</div>
+          <div style="max-width:75%;padding:10px 14px;border-radius:16px;border-top-left-radius:4px;background:#fff;font-size:13px;line-height:1.6;box-shadow:0 1px 2px rgba(0,0,0,0.04);">
+            嗨！我是装修小管家 👋<br>
+            知识库没找到答案的话，可以问我。比如你家户型的具体布局、个性化的预算分析等。
+          </div>
+        </div>
+      </div>
+      <div style="position:sticky;bottom:0;display:flex;align-items:center;gap:8px;padding:10px 16px;background:#fff;border-top:0.5px solid #e5e5e5;">
+        <input id="aiChatInput" placeholder="输入问题…" style="flex:1;border:1px solid #e5e5e5;border-radius:20px;padding:8px 14px;font-size:14px;background:#fafafa;outline:none;" onkeydown="if(event.key==='Enter')sendAIChat()">
+        <button onclick="sendAIChat()" style="width:36px;height:36px;border-radius:50%;border:none;background:#f59e0b;color:#fff;font-size:16px;cursor:pointer;">↑</button>
+      </div>
+    </div>
+
+    <!-- ===== Page: Spaces ===== -->
+    <div class="page" id="page-spaces">
+      <div class="section-header"><span>全部空间</span><span class="more">编辑</span></div>
+      <div class="space-grid">
+        <div class="space-card">
+          <div class="space-card-img living">🛋️<span class="status-badge tag tag-stage">泥瓦中</span></div>
+          <div class="space-card-body"><h4>客厅</h4><div class="sub">地砖铺设 70%</div></div>
+        </div>
+        <div class="space-card">
+          <div class="space-card-img bedroom">🛏️<span class="status-badge tag tag-info">待开工</span></div>
+          <div class="space-card-body"><h4>主卧</h4><div class="sub">水电完成</div></div>
+        </div>
+        <div class="space-card">
+          <div class="space-card-img kitchen">🍳<span class="status-badge tag tag-success">水电完成</span></div>
+          <div class="space-card-body"><h4>厨房</h4><div class="sub">待贴砖</div></div>
+        </div>
+        <div class="space-card">
+          <div class="space-card-img bathroom">🛁<span class="status-badge tag tag-stage">防水中</span></div>
+          <div class="space-card-body"><h4>主卫生间</h4><div class="sub">闭水试验</div></div>
+        </div>
+        <div class="space-card">
+          <div class="space-card-img study">📚<span class="status-badge tag tag-info">待开工</span></div>
+          <div class="space-card-body"><h4>书房</h4><div class="sub">水电完成</div></div>
+        </div>
+        <div class="space-card" style="border:2px dashed #e5e5e5;background:transparent;display:flex;align-items:center;justify-content:center;min-height:140px;cursor:pointer;">
+          <div style="text-align:center;color:#ccc;"><div style="font-size:24px;">+</div><div style="font-size:11px;">添加空间</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== Page: Mine ===== -->
+    <div class="page" id="page-mine">
+      <div class="profile-area">
+        <div class="profile-avatar">🏠</div>
+        <div style="font-size:16px;font-weight:600;margin-top:10px;">阳光花园 3-201</div>
+        <div style="font-size:12px;color:#999;margin-top:2px;">套内90㎡ · 三室两厅</div>
+      </div>
+      <div class="menu-group">
+        <div class="menu-item" onclick="switchTab('knowledge')">
+          <span class="menu-icon">📚</span><span>装修百科</span>
+          <span class="badge">80+ 篇</span><span class="arrow">›</span>
+        </div>
+        <div class="menu-item">
+          <span class="menu-icon">🛁</span><span>家电选购指南</span><span class="arrow">›</span>
+        </div>
+        <div class="menu-item">
+          <span class="menu-icon">💰</span><span>预算管理</span><span class="arrow">›</span>
+        </div>
+        <div class="menu-item">
+          <span class="menu-icon">👨‍👩‍👧</span><span>家庭成员</span>
+          <span style="margin-left:auto;font-size:12px;color:#999;">你 · 老婆</span>
+          <span class="arrow">›</span>
+        </div>
+        <div class="menu-item">
+          <span class="menu-icon">⚙️</span><span>设置</span><span class="arrow">›</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Tab Bar -->
+  <div class="tab-bar">
+    <button class="tab-item active" data-page="home" onclick="switchTab('home')">
+      <span class="tab-icon">🏠</span><span class="tab-label">首页</span>
+    </button>
+    <button class="tab-item" data-page="knowledge" onclick="switchTab('knowledge')">
+      <span class="tab-icon">📚</span><span class="tab-label">知识</span>
+    </button>
+    <button class="tab-item add-btn" onclick="openRecordModal()">
+      <span class="tab-icon">+</span>
+    </button>
+    <button class="tab-item" data-page="spaces" onclick="switchTab('spaces')">
+      <span class="tab-icon">🏗️</span><span class="tab-label">空间</span>
+    </button>
+    <button class="tab-item" data-page="mine" onclick="switchTab('mine')">
+      <span class="tab-icon">👤</span><span class="tab-label">我的</span>
+    </button>
+  </div>
+</div>
+
+<!-- Scan Modal -->
+<div class="modal-overlay" id="scanModal">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div style="font-size:17px;font-weight:600;text-align:center;margin-bottom:16px;">拍照识别材料</div>
+    <div style="height:180px;border-radius:14px;margin-bottom:14px;background:repeating-linear-gradient(45deg,#fafafa,#fafafa 10px,#f5f5f5 10px,#f5f5f5 20px);display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;" onclick="simulateScan()">
+      <div style="font-size:42px;">📸</div>
+      <div style="font-size:13px;color:#9ca3af;margin-top:8px;">点击拍照</div>
+    </div>
+    <div id="scanResult" style="display:none;padding:14px;border-radius:12px;background:#f0fdf4;border:1px solid #bbf7d0;margin-bottom:12px;">
+      <div style="font-size:14px;font-weight:600;color:#16a34a;margin-bottom:8px;">🔍 识别结果</div>
+      <div style="display:flex;justify-content:space-between;padding:4px 0;font-size:13px;"><span>品类</span><span style="font-weight:600;">通体大理石瓷砖</span></div>
+      <div style="display:flex;justify-content:space-between;padding:4px 0;font-size:13px;"><span>规格</span><span style="font-weight:600;">800×800mm</span></div>
+      <div style="display:flex;justify-content:space-between;padding:4px 0;font-size:13px;"><span>估价</span><span style="font-weight:600;">¥55-75/片</span></div>
+      <div style="margin-top:10px;padding:10px;background:#fef3c7;border-radius:8px;font-size:12px;color:#92400e;">💡 选购建议：建议多买5%备用，同批次色号要一致</div>
+    </div>
+    <div style="display:flex;gap:10px;">
+      <button class="btn-secondary" onclick="closeScanModal()">关闭</button>
+      <button class="btn-primary" style="flex:2;" onclick="addToMaterial()">加入材料清单</button>
+    </div>
+  </div>
+</div>
+
+<!-- Record Modal -->
+<div class="modal-overlay" id="recordModal">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div style="font-size:17px;font-weight:600;text-align:center;margin-bottom:16px;">记录施工</div>
+    <div class="form-group">
+      <label class="form-label">所属空间</label>
+      <select class="form-select"><option>客厅</option><option>主卧</option><option>厨房</option><option>主卫生间</option></select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">施工类型</label>
+      <select class="form-select"><option>泥瓦工</option><option>水电改造</option><option>木工</option><option>油漆</option><option>安装</option></select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">记录内容</label>
+      <textarea class="form-textarea" placeholder="描述今天做了什么、用了什么材料…"></textarea>
+    </div>
+    <div class="form-group">
+      <label class="form-label">照片</label>
+      <div class="photo-upload" onclick="showToast('模拟拍照（实际调用 wx.chooseImage）')">
+        <div style="font-size:28px;">📸</div>
+        <div style="font-size:13px;">点击拍照或选择照片</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:16px;">
+      <button class="btn-secondary" onclick="closeRecordModal()">取消</button>
+      <button class="btn-primary" style="flex:2;" onclick="submitRecord()">发布记录</button>
+    </div>
+  </div>
+</div>
+
+<script>
+let currentTab = 'home';
+let pageStack = ['home'];
+
+function switchTab(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  currentTab = name;
+  pageStack = [name];
+  document.getElementById('backBtn').style.visibility = 'hidden';
+  const titles = { home: '筑家记', knowledge: '装修知识', spaces: '空间管理', mine: '我的' };
+  document.getElementById('navTitle').textContent = titles[name] || '筑家记';
+  document.querySelectorAll('.tab-item').forEach(t => {
+    t.classList.remove('active');
+    if (t.getAttribute('data-page') === name) t.classList.add('active');
+  });
+}
+
+function openDetail(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-detail').classList.add('active');
+  document.getElementById('detailContent').innerHTML = getArticle(id);
+  document.getElementById('backBtn').style.visibility = 'visible';
+  document.getElementById('navTitle').textContent = '知识详情';
+}
+
+function goBack() {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + currentTab).classList.add('active');
+  document.getElementById('backBtn').style.visibility = 'hidden';
+  const titles = { home: '筑家记', knowledge: '装修知识', spaces: '空间管理', mine: '我的' };
+  document.getElementById('navTitle').textContent = titles[currentTab] || '筑家记';
+}
+
+const articles = {
+  'cat-tile': `
+    <h1>🧱 瓷砖选购完全指南</h1>
+    <div class="meta">更新于 2026-07-15 · 阅读 12分钟</div>
+
+    <div class="detail-block">
+      <h3>📋 主要分类</h3>
+      <ul>
+        <li><strong>通体大理石</strong>：耐磨耐用，最适合客厅地面（主流选择）</li>
+        <li><strong>釉面砖</strong>：表面光亮，厨房卫生间墙砖常用</li>
+        <li><strong>抛光砖</strong>：便宜耐磨，但防滑性差，不建议卫生间</li>
+        <li><strong>仿古砖</strong>：复古风格，防滑性好，适合卫生间地面</li>
+      </ul>
+    </div>
+
+    <div class="detail-block">
+      <h3>📏 规格选择</h3>
+      <ul>
+        <li><strong>800×800mm</strong>：最主流，性价比高，适合80㎡以下</li>
+        <li><strong>750×1500mm</strong>：大砖上墙显空间大，适合大户型</li>
+        <li><strong>600×1200mm</strong>：适合中小户型，损耗少</li>
+      </ul>
+    </div>
+
+    <div class="detail-block">
+      <h3>💰 参考价位</h3>
+      <ul>
+        <li>经济型：40-60元/片（800×800）</li>
+        <li>中档：60-100元/片（推荐区间）</li>
+        <li>高端：100-200元/片（一线品牌）</li>
+      </ul>
+    </div>
+
+    <div class="detail-block">
+      <h3>✅ 选购技巧</h3>
+      <ul>
+        <li>两块砖面对面贴紧，看缝隙是否均匀</li>
+        <li>背面倒水测试吸水率（≤0.5% 合格）</li>
+        <li>同一批次色号必须一致</li>
+        <li>建议多买 5% 备用（切割损耗）</li>
+      </ul>
+    </div>
+
+    <div class="detail-block">
+      <h3>⚠️ 避坑指南</h3>
+      <div class="pro-con-row">
+        <div class="pro-card yes">
+          <strong>✅ 推荐</strong>
+          广东佛山砖<br>
+          蒙娜丽莎/马可波罗<br>
+          实体店看货再下单
+        </div>
+        <div class="pro-card no">
+          <strong>❌ 避坑</strong>
+          所谓"出口转内销"<br>
+          价格过低的"品牌砖"<br>
+          网红"特价砖"
+        </div>
+      </div>
+    </div>
+  `,
+
+  'faq-order': `
+    <h1>装修的正确顺序是什么？</h1>
+    <div class="meta">装修入门 · 1分钟阅读</div>
+    <div class="detail-block">
+      <h3>📋 标准施工流程</h3>
+      <ul>
+        <li><strong>① 拆除改造</strong>（3-5天）：拆墙、砌墙、垃圾清运</li>
+        <li><strong>② 中央空调/新风</strong>（2-3天）：室内机+铜管（必须在水电前！）</li>
+        <li><strong>③ 水电改造</strong>（7-10天）：开槽、布线、布管、验收打压</li>
+        <li><strong>④ 防水</strong>（3-5天）：涂刷+闭水试验48小时</li>
+        <li><strong>⑤ 泥瓦工</strong>（15-20天）：贴墙地砖、最长工序</li>
+        <li><strong>⑥ 木工</strong>（10-15天）：吊顶、柜体、背景墙</li>
+        <li><strong>⑦ 油漆</strong>（10-15天）：墙面腻子+乳胶漆</li>
+        <li><strong>⑧ 安装</strong>（7-10天）：橱柜、门、开关、灯具、卫浴</li>
+        <li><strong>⑨ 开荒保洁</strong>（1-2天）</li>
+        <li><strong>⑩ 软装进场</strong>：家具、家电、窗帘、绿植</li>
+      </ul>
+    </div>
+    <div class="detail-block">
+      <h3>⏱️ 全程工期</h3>
+      <p>90㎡左右：约 <strong>80-100 天</strong><br>120㎡以上：约 <strong>100-120 天</strong></p>
+    </div>
+  `,
+
+  'faq-tile': `
+    <h1>瓷砖选800×800还是750×1500？</h1>
+    <div class="meta">泥瓦阶段必看 · 2分钟阅读</div>
+    <div class="detail-block">
+      <h3>🏠 800×800（推荐）</h3>
+      <ul>
+        <li>✅ 性价比高，损耗少</li>
+        <li>✅ 适合80㎡以下户型</li>
+        <li>✅ 师傅手艺要求低</li>
+        <li>💰 40-100元/片</li>
+      </ul>
+    </div>
+    <div class="detail-block">
+      <h3>🏠 750×1500</h3>
+      <ul>
+        <li>✅ 大砖上墙显空间大</li>
+        <li>✅ 缝隙少，视觉简洁</li>
+        <li>⚠️ 损耗大，运输贵</li>
+        <li>⚠️ 师傅手艺要求高</li>
+        <li>💰 80-200元/片</li>
+      </ul>
+    </div>
+    <div class="detail-block">
+      <h3>💡 选择建议</h3>
+      <p><strong>小户型（&lt;90㎡）</strong>：直接选 800×800<br>
+      <strong>大户型或大客厅</strong>：可选 750×1500 显大气<br>
+      <strong>厨卫墙砖</strong>：300×600 是最经济的选择</p>
+    </div>
+  `,
+
+  'faq-waterproof': `
+    <h1>卫生间防水做多高？</h1>
+    <div class="meta">防水是装修里最不能省的环节</div>
+    <div class="detail-block">
+      <h3>📏 标准防水高度</h3>
+      <ul>
+        <li><strong>淋浴区墙面</strong>：1.8米以上（建议做满墙到顶）</li>
+        <li><strong>洗手盆区</strong>：1.2米</li>
+        <li><strong>其他干区墙面</strong>：0.3米</li>
+        <li><strong>地面+墙角</strong>：上翻30cm</li>
+      </ul>
+    </div>
+    <div class="detail-block">
+      <h3>🛠️ 关键步骤</h3>
+      <ol>
+        <li>基层清理干净，管根地漏处重点处理</li>
+        <li>涂刷 2-3 遍（横一遍竖一遍）</li>
+        <li><strong>闭水试验 24-48 小时</strong>，去楼下看无渗漏</li>
+        <li>完工后再做一层保护层（防止后续贴砖破坏）</li>
+      </ol>
+    </div>
+    <div class="detail-block">
+      <h3>💰 材料选择</h3>
+      <p>推荐品牌：东方雨虹、德高、汉高百得<br>
+      参考价：¥80-150/桶（5kg装）</p>
+    </div>
+  `,
+
+  'faq-pipe': `
+    <h1>水管走顶还是走地好？</h1>
+    <div class="meta">水电阶段必看</div>
+    <div class="detail-block">
+      <h3>✅ 推荐：厨卫水管走顶，其他走地</h3>
+      <div class="pro-con-row">
+        <div class="pro-card yes">
+          <strong>走顶优点</strong>
+          • 漏水第一时间发现<br>
+          • 维修不用砸地板<br>
+          • 邻里纠纷少
+        </div>
+        <div class="pro-card no">
+          <strong>走顶缺点</strong>
+          • 多费材料30%<br>
+          • 需吊顶遮挡<br>
+          • 水压略降
+        </div>
+      </div>
+    </div>
+    <div class="detail-block">
+      <h3>📋 注意事项</h3>
+      <ul>
+        <li>水管走顶要包保温棉（防冷凝水）</li>
+        <li>电路一律走地（没有漏水风险）</li>
+        <li>强弱电分管分槽，间距≥30cm</li>
+        <li>水压测试 0.8MPa 30分钟不掉压</li>
+      </ul>
+    </div>
+  `,
+
+  'faq-ac': `
+    <h1>中央空调什么时候装？</h1>
+    <div class="meta">关键时间节点</div>
+    <div class="detail-block">
+      <h3>⏰ 正确时机</h3>
+      <p>水电改造完成之后、泥瓦工进场<strong>之前</strong>安装</p>
+      <p>标准顺序：<br>
+      拆除 → 中央空调 → 水电 → 泥瓦</p>
+    </div>
+    <div class="detail-block">
+      <h3>⚠️ 注意事项</h3>
+      <ul>
+        <li>空调内机位置和吊顶方案一起定</li>
+        <li>铜管走向让空调师傅和水电工当面交底</li>
+        <li>外机位提前向物业确认（可能有限制）</li>
+        <li>安装完必须打压测试，48小时不掉压</li>
+        <li>⚠️ 千万别等泥瓦贴了砖再装！</li>
+      </ul>
+    </div>
+  `,
+
+  'stage-tile': `
+    <h1>泥瓦阶段 · 瓷砖验收清单</h1>
+    <div class="meta">本阶段必看 · 5分钟读完</div>
+    <div class="detail-block">
+      <h3>✅ 贴砖完成后验收项</h3>
+      <ul>
+        <li>□ 表面平整度（2m靠尺≤3mm）</li>
+        <li>□ 阴阳角方正（90°误差≤3mm）</li>
+        <li>□ 接缝高低差（≤0.5mm）</li>
+        <li>□ 留缝宽度一致（2mm标准）</li>
+        <li>□ 空鼓率（单片≤10%，总数≤5%）</li>
+        <li>□ 坡度向地漏（泼水测试不积水）</li>
+        <li>□ 卫生间门口有挡水坎</li>
+      </ul>
+    </div>
+    <div class="detail-block">
+      <h3>🎯 美缝选择</h3>
+      <p><strong>美缝剂</strong>：性价比高，颜色丰富<br>
+      <strong>环氧彩砂</strong>：更耐用，卫生间首选<br>
+      <strong>聚脲</strong>：最新材料，最耐用最贵</p>
+    </div>
+  `,
+
+  'waterproof': `
+    <h1>防水验收标准</h1>
+    <div class="detail-block">
+      <h3>🛠️ 闭水试验步骤</h3>
+      <ol>
+        <li>防水层完全干透后进行（一般24-48小时）</li>
+        <li>堵住地漏和管道口</li>
+        <li>蓄水深度 2-3cm</li>
+        <li>静置 48 小时</li>
+        <li>通知楼下邻居一起查看</li>
+        <li>无渗漏才算合格</li>
+      </ol>
+    </div>
+  `,
+
+  'faq-tiling': `
+    <h1>贴砖规范</h1>
+    <div class="detail-block">
+      <h3>📐 工艺要求</h3>
+      <ul>
+        <li>基层要拉毛处理（增加粘合力）</li>
+        <li>大砖要刷背胶（防止空鼓）</li>
+        <li>留缝 2mm（仿古砖 2.5-3mm）</li>
+        <li>墙砖压地砖（避免朝天缝）</li>
+      </ul>
+    </div>
+  `,
+};
+
+function getArticle(id) {
+  return articles[id] || '<div style="text-align:center;padding:60px 20px;color:#ccc;">📄 暂无此文章</div>';
+}
+
+function openAIChat() {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-ai-chat').classList.add('active');
+  document.getElementById('backBtn').style.visibility = 'visible';
+  document.getElementById('navTitle').textContent = 'AI 问答';
+}
+
+function sendAIChat() {
+  const input = document.getElementById('aiChatInput');
+  const msg = input.value.trim();
+  if (!msg) return;
+  const container = document.getElementById('aiChatMessages');
+  container.innerHTML += `<div style="display:flex;gap:8px;margin-bottom:14px;flex-direction:row-reverse;"><div style="width:32px;height:32px;border-radius:50%;background:#dbeafe;display:flex;align-items:center;justify-content:center;flex-shrink:0;">👨</div><div style="max-width:75%;padding:10px 14px;border-radius:16px;border-top-right-radius:4px;background:#fef3c7;font-size:13px;line-height:1.6;">${escapeHtml(msg)}</div></div>`;
+  input.value = '';
+  container.scrollTop = container.scrollHeight;
+  setTimeout(() => {
+    container.innerHTML += `<div style="display:flex;gap:8px;margin-bottom:14px;"><div style="width:32px;height:32px;border-radius:50%;background:#fef3c7;display:flex;align-items:center;justify-content:center;flex-shrink:0;">🤖</div><div style="max-width:75%;padding:10px 14px;border-radius:16px;border-top-left-radius:4px;background:#fff;font-size:13px;line-height:1.6;box-shadow:0 1px 2px rgba(0,0,0,0.04);">${getAIResp(msg)}</div></div>`;
+    container.scrollTop = container.scrollHeight;
+  }, 1200);
+}
+
+function getAIResp(msg) {
+  if (msg.includes('中央空调')) return '<strong>中央空调</strong>要在水电前、泥瓦前装，现在问得早！建议先看知识库里 <strong>「Q5 中央空调什么时候装」</strong>。';
+  if (msg.includes('预算')) return '你家90㎡，目前已用12.85万/总预算20万，处于正常范围。详细分析建议看「预算管理」页。';
+  return '这是一个好问题。先查查知识库吧，覆盖了80%的通用问题。如果有户型特殊性，再问我也行。';
+}
+
+function escapeHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+function toggleTodo(el) {
+  const check = el.querySelector('.todo-check');
+  const text = el.querySelector('.todo-text');
+  if (check.classList.contains('done')) { check.classList.remove('done'); check.textContent = '○'; text.classList.remove('done'); }
+  else { check.classList.add('done'); check.textContent = '✓'; text.classList.add('done'); }
+}
+
+function showScanModal() { document.getElementById('scanModal').classList.add('active'); document.getElementById('scanResult').style.display = 'none'; }
+function closeScanModal() { document.getElementById('scanModal').classList.remove('active'); }
+function simulateScan() { setTimeout(() => { document.getElementById('scanResult').style.display = 'block'; }, 300); }
+function addToMaterial() { closeScanModal(); showToast('已加入客厅材料清单'); }
+
+function openRecordModal() { document.getElementById('recordModal').classList.add('active'); }
+function closeRecordModal() { document.getElementById('recordModal').classList.remove('active'); }
+function submitRecord() { closeRecordModal(); showToast('施工记录已保存！'); }
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2000);
+}
+
+document.getElementById('scanModal').addEventListener('click', function(e) { if(e.target === this) closeScanModal(); });
+document.getElementById('recordModal').addEventListener('click', function(e) { if(e.target === this) closeRecordModal(); });
+
+console.log('🏠 筑家记 V3 · 知识库优先版');
+console.log('📚 知识Tab — 阶段推荐 + 分类浏览 + 常见问题');
+console.log('🤖 AI聊天降级为备用入口（标注会消耗token）');
+</script>
+</body>
+</html>

@@ -1,0 +1,1126 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>筑家记 V2 - 装修智能管家</title>
+<style>
+/* ========== Reset ========== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 16px; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+  background: #f0f0f0; display: flex; justify-content: center; align-items: center;
+  min-height: 100vh; padding: 20px; -webkit-font-smoothing: antialiased;
+}
+
+.phone-frame {
+  width: 390px; height: 844px; background: #f5f5f5; border-radius: 44px;
+  overflow: hidden; box-shadow: 0 25px 80px rgba(0,0,0,0.25), 0 0 0 2px #1a1a1a, 0 0 0 6px #2d2d2d, 0 0 0 8px #1a1a1a;
+  position: relative; display: flex; flex-direction: column;
+}
+
+.status-bar {
+  height: 44px; background: #fff; display: flex; justify-content: space-between;
+  align-items: center; padding: 0 28px; font-size: 12px; font-weight: 600;
+  color: #1a1a1a; flex-shrink: 0;
+}
+
+.nav-bar {
+  height: 44px; background: #fff; display: flex; align-items: center; justify-content: center;
+  padding: 0 16px; font-size: 17px; font-weight: 600; color: #1a1a1a;
+  position: relative; flex-shrink: 0; border-bottom: 0.5px solid #e5e5e5;
+}
+.nav-bar .back-btn {
+  position: absolute; left: 12px; width: 32px; height: 32px;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; border: none; background: none; font-size: 20px;
+  color: #f59e0b; border-radius: 50%; transition: background 0.2s;
+}
+.nav-bar .back-btn:active { background: #f5f5f5; }
+.nav-bar .action-btn {
+  position: absolute; right: 12px; font-size: 14px; color: #f59e0b;
+  cursor: pointer; border: none; background: none; font-weight: 500;
+  padding: 6px 10px; border-radius: 6px;
+}
+
+.main-content {
+  flex: 1; overflow-y: auto; overflow-x: hidden; background: #f5f5f5;
+  -webkit-overflow-scrolling: touch; position: relative;
+}
+.main-content::-webkit-scrollbar { display: none; }
+
+.page { display: none; min-height: 100%; padding-bottom: 20px; animation: fadeIn 0.25s ease; }
+.page.active { display: block; }
+
+@keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+
+/* ========== Tab Bar ========== */
+.tab-bar {
+  height: 60px; background: #fff; display: flex; align-items: center;
+  border-top: 0.5px solid #e5e5e5; flex-shrink: 0;
+}
+.tab-item {
+  flex: 1; display: flex; flex-direction: column; align-items: center;
+  justify-content: center; gap: 2px; cursor: pointer; padding: 4px 0;
+  border: none; background: none; color: #999; transition: color 0.2s;
+}
+.tab-item.active { color: #f59e0b; }
+.tab-item .tab-icon { font-size: 20px; line-height: 1; }
+.tab-item .tab-label { font-size: 10px; line-height: 1; }
+.tab-item.add-btn { position: relative; top: -12px; }
+.tab-item.add-btn .tab-icon {
+  width: 44px; height: 44px; background: linear-gradient(135deg, #f59e0b, #d97706);
+  border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  color: #fff; font-size: 28px; box-shadow: 0 4px 12px rgba(245,158,11,0.4);
+}
+
+/* ========== Tags & Shared ========== */
+.tag {
+  display: inline-flex; align-items: center; padding: 2px 8px;
+  border-radius: 10px; font-size: 11px; font-weight: 500; line-height: 1.6;
+}
+.tag-ongoing { background: #fef3c7; color: #d97706; }
+.tag-done { background: #dcfce7; color: #16a34a; }
+.tag-pending { background: #f3f4f6; color: #9ca3af; }
+.tag-warning { background: #fee2e2; color: #dc2626; }
+.tag-info { background: #dbeafe; color: #2563eb; }
+
+.card {
+  background: #fff; border-radius: 14px; margin: 0 16px 10px;
+  overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+}
+.card-body { padding: 14px; }
+
+.section-header {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 20px 16px 10px; font-size: 15px; font-weight: 600; color: #1a1a1a;
+}
+.section-header .more { font-size: 13px; color: #999; cursor: pointer; font-weight: 400; }
+
+/* ========== Page: Home V2 ========== */
+.process-flow {
+  background: #fff; margin: 0 16px 12px; border-radius: 14px;
+  padding: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+}
+.process-title {
+  font-size: 15px; font-weight: 700; color: #1a1a1a; margin-bottom: 14px;
+  display: flex; align-items: center; gap: 8px;
+}
+.process-steps { display: flex; align-items: center; overflow-x: auto; padding-bottom: 4px; gap: 0; }
+.process-steps::-webkit-scrollbar { display: none; }
+.process-step {
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  flex-shrink: 0; min-width: 56px; position: relative;
+}
+.process-dot {
+  width: 28px; height: 28px; border-radius: 50%; display: flex;
+  align-items: center; justify-content: center; font-size: 14px;
+  position: relative; z-index: 1;
+}
+.process-dot.done { background: #22c55e; color: #fff; }
+.process-dot.current { 
+  background: #f59e0b; color: #fff;
+  box-shadow: 0 0 0 6px rgba(245,158,11,0.2);
+  animation: pulse 2s infinite;
+}
+.process-dot.upcoming { background: #e5e5e5; color: #999; }
+@keyframes pulse {
+  0%, 100% { box-shadow: 0 0 0 4px rgba(245,158,11,0.2); }
+  50% { box-shadow: 0 0 0 10px rgba(245,158,11,0.1); }
+}
+.process-line {
+  height: 2px; background: #22c55e; flex: 1; min-width: 20px;
+  align-self: center; margin-bottom: 20px;
+}
+.process-line.upcoming { background: #e5e5e5; }
+.process-label {
+  font-size: 10px; color: #1a1a1a; text-align: center; line-height: 1.3;
+  max-width: 56px; word-break: keep-all;
+}
+.process-label.muted { color: #999; }
+
+.today-alert {
+  margin: 0 16px 12px; padding: 14px; border-radius: 12px;
+  background: linear-gradient(135deg, #fef3c7, #fffbeb);
+  border-left: 4px solid #f59e0b; display: flex; gap: 10px; align-items: flex-start;
+}
+.today-alert .alert-icon { font-size: 24px; flex-shrink: 0; }
+.today-alert .alert-text { font-size: 13px; color: #92400e; line-height: 1.5; }
+.today-alert .alert-text strong { color: #d97706; }
+
+.todo-list { margin: 0 16px 12px; }
+.todo-item {
+  display: flex; align-items: center; gap: 10px; padding: 12px 14px;
+  background: #fff; border-radius: 12px; margin-bottom: 6px;
+  cursor: pointer; transition: all 0.2s;
+}
+.todo-item:active { background: #fafafa; }
+.todo-check {
+  width: 22px; height: 22px; border-radius: 50%; border: 2px solid #d1d5db;
+  flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+  transition: all 0.2s; font-size: 12px; color: transparent;
+}
+.todo-check.done { background: #22c55e; border-color: #22c55e; color: #fff; }
+.todo-text { font-size: 14px; color: #1a1a1a; flex: 1; }
+.todo-text.done { color: #9ca3af; text-decoration: line-through; }
+
+.knowledge-card {
+  margin: 0 16px 12px; padding: 14px; border-radius: 12px;
+  background: linear-gradient(135deg, #dbeafe, #eff6ff);
+  border: 1px solid #bfdbfe; cursor: pointer;
+}
+.knowledge-card h4 { font-size: 14px; color: #1e40af; margin-bottom: 4px; }
+.knowledge-card p { font-size: 12px; color: #3b82f6; }
+
+/* ========== Page: AI Advisor V2 ========== */
+.ai-quick-actions {
+  display: flex; gap: 10px; padding: 14px 16px; overflow-x: auto;
+}
+.ai-quick-actions::-webkit-scrollbar { display: none; }
+.ai-quick-card {
+  flex-shrink: 0; width: 100px; padding: 16px 12px; border-radius: 14px;
+  background: #fff; text-align: center; cursor: pointer; box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  transition: all 0.2s;
+}
+.ai-quick-card:active { transform: scale(0.96); background: #fafafa; }
+.ai-quick-card .q-icon { font-size: 28px; margin-bottom: 8px; }
+.ai-quick-card .q-label { font-size: 12px; color: #4b5563; font-weight: 500; }
+
+/* Chat Area */
+.chat-container { padding: 0 16px 12px; }
+.chat-date-divider {
+  text-align: center; font-size: 11px; color: #9ca3af;
+  padding: 10px 0; margin-bottom: 6px;
+}
+.chat-msg { display: flex; gap: 8px; margin-bottom: 14px; }
+.chat-msg.user { flex-direction: row-reverse; }
+.chat-avatar {
+  width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center; font-size: 16px;
+}
+.chat-avatar.ai { background: #fef3c7; }
+.chat-avatar.user { background: #dbeafe; }
+.chat-bubble {
+  max-width: 75%; padding: 10px 14px; border-radius: 16px;
+  font-size: 13px; line-height: 1.6; color: #1a1a1a;
+}
+.chat-bubble.ai {
+  background: #fff; border-top-left-radius: 4px;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+}
+.chat-bubble.user {
+  background: #fef3c7; border-top-right-radius: 4px;
+}
+.chat-bubble .suggestion-chips {
+  display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px;
+}
+.suggestion-chip {
+  padding: 6px 12px; border-radius: 16px; font-size: 12px;
+  background: #f5f5f5; color: #4b5563; cursor: pointer;
+  border: 0.5px solid #e5e5e5; transition: all 0.2s;
+}
+.suggestion-chip:active { background: #fef3c7; border-color: #f59e0b; }
+
+/* AI quick questions */
+.ai-common-questions { padding: 4px 16px 12px; }
+.ai-common-questions .label {
+  font-size: 12px; color: #9ca3af; margin-bottom: 8px;
+}
+
+/* Chat input */
+.chat-input-bar {
+  display: flex; align-items: center; gap: 8px; padding: 10px 16px;
+  background: #fff; border-top: 0.5px solid #e5e5e5;
+  position: sticky; bottom: 0;
+}
+.chat-input {
+  flex: 1; border: 1px solid #e5e5e5; border-radius: 20px;
+  padding: 8px 14px; font-size: 14px; background: #fafafa;
+  font-family: inherit; color: #1a1a1a; outline: none;
+}
+.chat-input:focus { border-color: #f59e0b; background: #fff; }
+.chat-input::placeholder { color: #ccc; }
+.chat-btn {
+  width: 36px; height: 36px; border-radius: 50%; border: none;
+  background: #f5f5f5; font-size: 18px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.2s; flex-shrink: 0;
+}
+.chat-btn.send { background: #f59e0b; color: #fff; font-size: 16px; }
+.chat-btn:active { transform: scale(0.92); }
+
+/* Typing indicator */
+.typing-dots { display: flex; gap: 4px; padding: 4px 0; }
+.typing-dots span {
+  width: 6px; height: 6px; border-radius: 50%; background: #d1d5db;
+  animation: typingBounce 1.4s infinite;
+}
+.typing-dots span:nth-child(2) { animation-delay: 0.2s; }
+.typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes typingBounce {
+  0%, 60%, 100% { transform: translateY(0); }
+  30% { transform: translateY(-6px); }
+}
+
+/* ========== Modal: Photo Scan ========== */
+.modal-overlay {
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.4); z-index: 100; display: none;
+  align-items: flex-end; justify-content: center;
+}
+.modal-overlay.active { display: flex; }
+.modal-sheet {
+  width: 390px; max-height: 85vh; background: #fff;
+  border-radius: 20px 20px 0 0; overflow-y: auto;
+  padding: 20px 16px 30px; animation: slideUp 0.3s ease;
+}
+@keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+.modal-handle { width: 36px; height: 4px; background: #ddd; border-radius: 2px; margin: 0 auto 16px; }
+
+/* Photo scan modal */
+.scan-preview {
+  height: 200px; border-radius: 14px; margin-bottom: 16px;
+  background: repeating-linear-gradient(45deg, #fafafa, #fafafa 10px, #f5f5f5 10px, #f5f5f5 20px);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  cursor: pointer; position: relative;
+}
+.scan-preview .scan-icon { font-size: 48px; margin-bottom: 8px; }
+.scan-preview .scan-hint { font-size: 13px; color: #9ca3af; }
+
+.scan-result {
+  padding: 14px; border-radius: 12px; background: #f0fdf4;
+  border: 1px solid #bbf7d0; margin-bottom: 12px; display: none;
+}
+.scan-result.show { display: block; }
+.scan-result .result-title {
+  font-size: 14px; font-weight: 600; color: #16a34a; margin-bottom: 8px;
+}
+.scan-result .result-row {
+  display: flex; justify-content: space-between; padding: 4px 0;
+  font-size: 13px; color: #4b5563;
+}
+.scan-result .result-row .val { font-weight: 600; color: #1a1a1a; }
+
+.btn-primary {
+  width: 100%; padding: 12px; background: linear-gradient(135deg, #f59e0b, #d97706);
+  color: #fff; border: none; border-radius: 12px; font-size: 16px;
+  font-weight: 600; cursor: pointer; transition: opacity 0.2s, transform 0.1s;
+}
+.btn-primary:active { opacity: 0.85; transform: scale(0.98); }
+.btn-secondary {
+  flex: 1; padding: 12px; background: #f5f5f5; border: none;
+  border-radius: 12px; font-size: 15px; color: #6b7280; cursor: pointer;
+}
+
+/* ========== Page: Spaces (compact from V1) ========== */
+.space-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 0 16px;
+}
+.space-card {
+  background: #fff; border-radius: 14px; overflow: hidden; cursor: pointer;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04); transition: transform 0.15s;
+}
+.space-card:active { transform: scale(0.97); }
+.space-card-img {
+  height: 90px; display: flex; align-items: center; justify-content: center;
+  font-size: 32px; position: relative;
+}
+.space-card-img.living { background: linear-gradient(135deg, #fef3c7, #fde68a); }
+.space-card-img.bedroom { background: linear-gradient(135deg, #dbeafe, #bfdbfe); }
+.space-card-img.kitchen { background: linear-gradient(135deg, #fce7f3, #fbcfe8); }
+.space-card-img.bathroom { background: linear-gradient(135deg, #dcfce7, #bbf7d0); }
+.space-card-img.study { background: linear-gradient(135deg, #f3e8ff, #e9d5ff); }
+.space-card-img.balcony { background: linear-gradient(135deg, #e0f2fe, #bae6fd); }
+.space-card-img .status-badge { position: absolute; top: 8px; right: 8px; }
+.space-card-body { padding: 10px 12px; }
+.space-card-body h4 { font-size: 14px; font-weight: 600; color: #1a1a1a; }
+.space-card-body .sub { font-size: 11px; color: #999; margin-top: 2px; }
+
+/* ========== Page: Mine V2 ========== */
+.menu-group { margin: 0 16px 12px; }
+.menu-item {
+  display: flex; align-items: center; gap: 12px; padding: 14px 16px;
+  background: #fff; cursor: pointer; font-size: 14px; color: #1a1a1a;
+  border-bottom: 0.5px solid #f5f5f5;
+}
+.menu-item:first-child { border-radius: 14px 14px 0 0; }
+.menu-item:last-child { border-radius: 0 0 14px 14px; border-bottom: none; }
+.menu-item:only-child { border-radius: 14px; }
+.menu-item .menu-icon { font-size: 20px; width: 28px; text-align: center; }
+.menu-item .arrow { margin-left: auto; color: #ccc; }
+.menu-item .badge { 
+  margin-left: auto; margin-right: 4px; font-size: 11px;
+  background: #fee2e2; color: #dc2626; padding: 2px 8px; border-radius: 10px;
+}
+
+/* ========== Record Modal ========== */
+.form-group { margin-bottom: 14px; }
+.form-label { font-size: 13px; font-weight: 600; color: #4b5563; margin-bottom: 6px; display: block; }
+.form-input, .form-textarea, .form-select {
+  width: 100%; border: 1px solid #e5e5e5; border-radius: 10px;
+  padding: 10px 12px; font-size: 14px; font-family: inherit;
+  background: #fafafa; color: #1a1a1a; transition: border 0.2s;
+}
+.form-input:focus, .form-textarea:focus, .form-select:focus {
+  border-color: #f59e0b; outline: none; background: #fff;
+}
+.form-textarea { min-height: 70px; resize: vertical; }
+.form-select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%23999' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 36px; }
+
+.photo-upload {
+  border: 2px dashed #e5e5e5; border-radius: 12px; padding: 20px;
+  text-align: center; color: #999; cursor: pointer;
+}
+.photo-upload:active { border-color: #f59e0b; }
+
+/* Toast */
+.toast {
+  position: fixed; top: 60px; left: 50%; transform: translateX(-50%);
+  background: #1a1a1a; color: #fff; padding: 10px 24px; border-radius: 20px;
+  font-size: 14px; z-index: 200; opacity: 0; transition: opacity 0.3s;
+  pointer-events: none;
+}
+.toast.show { opacity: 1; }
+
+/* Encyclopedia page */
+.encyclopedia-page { display: none; min-height: 100%; }
+.encyclopedia-page.active { display: block; }
+
+.encyclo-category {
+  margin: 0 16px 10px; padding: 14px; background: #fff;
+  border-radius: 14px; cursor: pointer; box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+}
+.encyclo-category h4 { font-size: 15px; font-weight: 600; color: #1a1a1a; }
+.encyclo-category .items { 
+  display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px;
+}
+.encyclo-tag {
+  padding: 4px 12px; border-radius: 14px; font-size: 12px;
+  background: #fef3c7; color: #92400e; cursor: pointer;
+}
+
+.encyclo-detail { display: none; }
+.encyclo-detail.show { display: block; }
+.encyclo-detail-card {
+  margin: 0 16px 12px; padding: 16px; background: #fff;
+  border-radius: 14px; box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+}
+.encyclo-detail-card h3 { font-size: 16px; margin-bottom: 8px; }
+.encyclo-procon {
+  display: flex; gap: 10px; margin-top: 10px;
+}
+.encyclo-pro, .encyclo-con {
+  flex: 1; padding: 10px; border-radius: 10px; font-size: 12px;
+}
+.encyclo-pro { background: #f0fdf4; color: #16a34a; }
+.encyclo-con { background: #fef2f2; color: #dc2626; }
+
+@media (max-width: 430px) {
+  .phone-frame { width: 100%; height: 100vh; border-radius: 0; box-shadow: none; }
+  .modal-sheet { width: 100%; }
+}
+</style>
+</head>
+<body>
+
+<div class="phone-frame">
+  <div class="status-bar">
+    <span>9:41</span>
+    <span>WiFi ▮▮▮ ▮▮▮</span>
+  </div>
+
+  <div class="nav-bar" id="navBar">
+    <button class="back-btn" id="backBtn" style="visibility:hidden;" onclick="goBack()">←</button>
+    <span id="navTitle">筑家记</span>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <div class="main-content" id="mainContent">
+
+    <!-- ===== Page: Home V2 ===== -->
+    <div class="page active" id="page-home">
+      <!-- Process Engine -->
+      <div class="section-header">
+        <span>装修进度</span>
+        <span style="font-size:13px;color:#f59e0b;font-weight:600;">泥瓦阶段 · 第38天</span>
+      </div>
+      <div class="process-flow">
+        <div class="process-steps">
+          <div class="process-step">
+            <div class="process-dot done">✓</div>
+            <span class="process-label">拆除改造</span>
+          </div>
+          <div class="process-line"></div>
+          <div class="process-step">
+            <div class="process-dot done">✓</div>
+            <span class="process-label">中央空调</span>
+          </div>
+          <div class="process-line"></div>
+          <div class="process-step">
+            <div class="process-dot done">✓</div>
+            <span class="process-label">水电改造</span>
+          </div>
+          <div class="process-line"></div>
+          <div class="process-step">
+            <div class="process-dot current">●</div>
+            <span class="process-label" style="font-weight:700;color:#d97706;">泥瓦工</span>
+          </div>
+          <div class="process-line upcoming"></div>
+          <div class="process-step">
+            <div class="process-dot upcoming">○</div>
+            <span class="process-label muted">木工</span>
+          </div>
+          <div class="process-line upcoming"></div>
+          <div class="process-step">
+            <div class="process-dot upcoming">○</div>
+            <span class="process-label muted">油漆</span>
+          </div>
+          <div class="process-line upcoming"></div>
+          <div class="process-step">
+            <div class="process-dot upcoming">○</div>
+            <span class="process-label muted">安装</span>
+          </div>
+          <div class="process-line upcoming"></div>
+          <div class="process-step">
+            <div class="process-dot upcoming">○</div>
+            <span class="process-label muted">软装</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Proactive Alert -->
+      <div class="today-alert">
+        <div class="alert-icon">💡</div>
+        <div class="alert-text">
+          <strong>泥瓦快结束了，别忘了：</strong><br>
+          1. 提前预约木工师傅（好的师傅要排队）<br>
+          2. 确认吊顶方案和筒灯开孔位置<br>
+          3. 定制柜体可以开始量尺了
+        </div>
+      </div>
+
+      <!-- To-do Checklist -->
+      <div class="section-header">
+        <span>今日待办</span>
+        <span class="more">编辑</span>
+      </div>
+      <div class="todo-list">
+        <div class="todo-item" onclick="toggleTodo(this)">
+          <div class="todo-check done">✓</div>
+          <span class="todo-text done">客厅地砖铺完，检查平整度</span>
+        </div>
+        <div class="todo-item" onclick="toggleTodo(this)">
+          <div class="todo-check">○</div>
+          <span class="todo-text">预约木工师傅确认吊顶方案</span>
+        </div>
+        <div class="todo-item" onclick="toggleTodo(this)">
+          <div class="todo-check">○</div>
+          <span class="todo-text">选购筒灯（客厅8个，4000K中性光）</span>
+        </div>
+      </div>
+
+      <!-- Budget Mini -->
+      <div class="card">
+        <div class="card-body" style="display:flex;justify-content:space-between;align-items:center;">
+          <div>
+            <div style="font-size:12px;color:#999;">预算使用</div>
+            <div style="font-size:18px;font-weight:700;">¥128,500 <span style="font-size:13px;color:#999;font-weight:400;">/ ¥200,000</span></div>
+          </div>
+          <div style="width:60px;height:24px;background:#f3f4f6;border-radius:12px;overflow:hidden;">
+            <div style="width:64%;height:100%;background:linear-gradient(90deg,#f59e0b,#d97706);border-radius:12px;"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Knowledge Push -->
+      <div class="knowledge-card" onclick="showToast('打开知识速递')">
+        <h4>📖 泥瓦阶段必看</h4>
+        <p>瓷砖留缝2mm还是2.5mm？美缝剂和环氧彩砂怎么选？</p>
+      </div>
+    </div>
+
+    <!-- ===== Page: AI Advisor ===== -->
+    <div class="page" id="page-ai">
+      <div class="ai-quick-actions">
+        <div class="ai-quick-card" onclick="showScanModal()">
+          <div class="q-icon">📷</div>
+          <div class="q-label">拍照识别</div>
+        </div>
+        <div class="ai-quick-card" onclick="startAIChat('帮我分析一下我家的户型图，套内90平三室两厅')">
+          <div class="q-icon">📐</div>
+          <div class="q-label">户型分析</div>
+        </div>
+        <div class="ai-quick-card" onclick="openEncyclopedia()">
+          <div class="q-icon">📚</div>
+          <div class="q-label">装修百科</div>
+        </div>
+        <div class="ai-quick-card" onclick="startAIChat('我在建材市场，这个瓷砖老板说是通体大理石，帮我看看值不值68一块')">
+          <div class="q-icon">🔍</div>
+          <div class="q-label">材料鉴别</div>
+        </div>
+      </div>
+
+      <div class="chat-container" id="chatMessages">
+        <!-- AI welcome -->
+        <div class="chat-msg">
+          <div class="chat-avatar ai">🤖</div>
+          <div class="chat-bubble ai">
+            嗨！我是你的装修小管家 🏠<br>
+            有什么装修问题随时问我——不管是不懂工序、不会选材料、还是看不懂施工工艺，我都能帮你！
+            <div class="suggestion-chips">
+              <span class="suggestion-chip" onclick="startAIChat('瓷砖怎么选？通体和釉面有什么区别？')">瓷砖怎么选？</span>
+              <span class="suggestion-chip" onclick="startAIChat('水电走顶还是走地好？')">水电走顶还是走地？</span>
+              <span class="suggestion-chip" onclick="startAIChat('先装门还是先铺地板？')">门和地板谁先装？</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Example Q&A -->
+        <div class="chat-msg user">
+          <div class="chat-avatar user">👨</div>
+          <div class="chat-bubble user">中央空调是不是必须在水电之前装？我家水电已经快做完了，还来得及吗？</div>
+        </div>
+        <div class="chat-msg">
+          <div class="chat-avatar ai">🤖</div>
+          <div class="chat-bubble ai">
+            <strong>来得及，但需要马上协调！</strong><br><br>
+            中央空调正确的顺序是<strong>水电做完、泥瓦之前</strong>安装室内机和铜管。<br><br>
+            你现在水电快做完，正好卡在时间窗口上。注意几点：<br>
+            • 空调内机位置必须提前确定（别和吊顶、筒灯冲突）<br>
+            • 铜管走向和排水坡度要让空调师傅和水电工<strong>当面交底</strong><br>
+            • 外机位提前确认（物业可能有限制）<br>
+            • 安装完后<strong>必须打压测试</strong>，48小时不掉压才算合格<br><br>
+            ⚠️ 千万别等泥瓦进场贴了砖再装空调，那可就真来不及了！
+          </div>
+        </div>
+      </div>
+
+      <!-- AI quick questions -->
+      <div class="ai-common-questions" style="margin-top:8px;">
+        <div class="label">你可能还想问：</div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px;">
+          <span class="suggestion-chip" onclick="startAIChat('卫生间防水要做多高？')">卫生间防水高度</span>
+          <span class="suggestion-chip" onclick="startAIChat('800×800和750×1500瓷砖怎么选？')">瓷砖规格怎么选</span>
+          <span class="suggestion-chip" onclick="startAIChat('半包和全包哪个划算？')">半包vs全包</span>
+          <span class="suggestion-chip" onclick="startAIChat('洗碗机需要预留哪些？')">洗碗机预留条件</span>
+        </div>
+      </div>
+
+      <!-- Chat input (sticky) -->
+      <div class="chat-input-bar">
+        <button class="chat-btn" onclick="showScanModal()">📷</button>
+        <input class="chat-input" id="chatInput" placeholder="输入你的装修问题…" onkeydown="if(event.key==='Enter')sendChat()">
+        <button class="chat-btn send" onclick="sendChat()">↑</button>
+      </div>
+    </div>
+
+    <!-- ===== Page: Spaces ===== -->
+    <div class="page" id="page-spaces">
+      <div class="section-header"><span>全部空间</span><span class="more">编辑</span></div>
+      <div class="space-grid">
+        <div class="space-card" onclick="openSpaceDetail()">
+          <div class="space-card-img living">
+            🛋️
+            <span class="status-badge tag tag-ongoing">泥瓦中</span>
+          </div>
+          <div class="space-card-body"><h4>客厅</h4><div class="sub">地砖铺设 70%</div></div>
+        </div>
+        <div class="space-card" onclick="openSpaceDetail()">
+          <div class="space-card-img bedroom">
+            🛏️
+            <span class="status-badge tag tag-pending">待开工</span>
+          </div>
+          <div class="space-card-body"><h4>主卧</h4><div class="sub">水电完成</div></div>
+        </div>
+        <div class="space-card" onclick="openSpaceDetail()">
+          <div class="space-card-img kitchen">
+            🍳
+            <span class="status-badge tag tag-done">水电完成</span>
+          </div>
+          <div class="space-card-body"><h4>厨房</h4><div class="sub">待贴砖</div></div>
+        </div>
+        <div class="space-card" onclick="openSpaceDetail()">
+          <div class="space-card-img bathroom">
+            🛁
+            <span class="status-badge tag tag-ongoing">防水中</span>
+          </div>
+          <div class="space-card-body"><h4>主卫生间</h4><div class="sub">闭水试验</div></div>
+        </div>
+        <div class="space-card" onclick="openSpaceDetail()">
+          <div class="space-card-img study">
+            📚
+            <span class="status-badge tag tag-pending">待开工</span>
+          </div>
+          <div class="space-card-body"><h4>书房</h4><div class="sub">水电完成</div></div>
+        </div>
+        <div class="space-card" style="border:2px dashed #e5e5e5; background:transparent; display:flex; align-items:center; justify-content:center; min-height:140px; cursor:pointer;">
+          <div style="text-align:center;color:#ccc;"><div style="font-size:24px;">+</div><div style="font-size:11px;">添加空间</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== Page: Mine ===== -->
+    <div class="page" id="page-mine">
+      <div style="padding:24px 0;text-align:center;">
+        <div style="width:60px;height:60px;border-radius:50%;background:linear-gradient(135deg,#fef3c7,#fde68a);display:inline-flex;align-items:center;justify-content:center;font-size:26px;">🏠</div>
+        <div style="font-size:16px;font-weight:600;margin-top:10px;">阳光花园 3-201</div>
+        <div style="font-size:12px;color:#999;margin-top:2px;">套内90㎡ · 三室两厅 · 预计工期90天</div>
+      </div>
+
+      <div class="menu-group">
+        <div class="menu-item" onclick="openEncyclopedia()">
+          <span class="menu-icon">📚</span><span>装修百科</span>
+          <span class="badge">热门</span><span class="arrow">›</span>
+        </div>
+        <div class="menu-item">
+          <span class="menu-icon">🔌</span><span>家电选购指南</span><span class="arrow">›</span>
+        </div>
+        <div class="menu-item">
+          <span class="menu-icon">💰</span><span>预算管理</span><span class="arrow">›</span>
+        </div>
+      </div>
+
+      <div class="menu-group">
+        <div class="menu-item">
+          <span class="menu-icon">👨‍👩‍👧</span><span>家庭成员</span>
+          <span style="margin-left:auto;font-size:12px;color:#999;">你 · 老婆</span>
+          <span class="arrow">›</span>
+        </div>
+        <div class="menu-item">
+          <span class="menu-icon">✅</span><span>验收清单</span><span class="arrow">›</span>
+        </div>
+        <div class="menu-item">
+          <span class="menu-icon">📤</span><span>导出水电走线报告</span><span class="arrow">›</span>
+        </div>
+      </div>
+
+      <div class="menu-group">
+        <div class="menu-item" onclick="showToast('关于筑家记 v2.0')">
+          <span class="menu-icon">ℹ️</span><span>关于筑家记</span><span class="arrow">›</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== Encyclopedia Page (push) ===== -->
+    <div class="encyclopedia-page" id="page-encyclo">
+      <div id="encycloList">
+        <div class="section-header"><span>装修百科</span></div>
+        <div class="encyclo-category" onclick="showEncycloDetail('tile')">
+          <h4>🧱 瓷砖选购</h4>
+          <div class="items">
+            <span class="encyclo-tag">通体大理石</span>
+            <span class="encyclo-tag">釉面砖</span>
+            <span class="encyclo-tag">抛光砖</span>
+            <span class="encyclo-tag">仿古砖</span>
+          </div>
+        </div>
+        <div class="encyclo-category">
+          <h4>🪵 地板选购</h4>
+          <div class="items">
+            <span class="encyclo-tag">实木地板</span>
+            <span class="encyclo-tag">多层实木</span>
+            <span class="encyclo-tag">强化地板</span>
+            <span class="encyclo-tag">SPC石塑</span>
+          </div>
+        </div>
+        <div class="encyclo-category">
+          <h4>🎨 墙面涂料</h4>
+          <div class="items">
+            <span class="encyclo-tag">乳胶漆</span>
+            <span class="encyclo-tag">艺术漆</span>
+            <span class="encyclo-tag">硅藻泥</span>
+            <span class="encyclo-tag">墙布</span>
+          </div>
+        </div>
+        <div class="encyclo-category">
+          <h4>🚿 卫浴洁具</h4>
+          <div class="items">
+            <span class="encyclo-tag">马桶</span>
+            <span class="encyclo-tag">花洒</span>
+            <span class="encyclo-tag">浴室柜</span>
+            <span class="encyclo-tag">淋浴房</span>
+          </div>
+        </div>
+        <div class="encyclo-category">
+          <h4>🔌 开关插座</h4>
+          <div class="items">
+            <span class="encyclo-tag">公牛</span>
+            <span class="encyclo-tag">施耐德</span>
+            <span class="encyclo-tag">西门子</span>
+            <span class="encyclo-tag">罗格朗</span>
+          </div>
+        </div>
+        <div class="encyclo-category">
+          <h4>💡 灯具选购</h4>
+          <div class="items">
+            <span class="encyclo-tag">筒灯/射灯</span>
+            <span class="encyclo-tag">吸顶灯</span>
+            <span class="encyclo-tag">线性灯</span>
+            <span class="encyclo-tag">磁吸轨道</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tile Detail -->
+      <div class="encyclo-detail" id="encyclo-tile">
+        <div class="encyclo-detail-card">
+          <h3>🧱 通体大理石瓷砖</h3>
+          <p style="font-size:13px;color:#6b7280;line-height:1.6;">
+            通体大理石瓷砖是从里到外材质统一的瓷砖，表面纹理仿天然大理石，耐磨性和防滑性好，是现在家装的主流选择。
+          </p>
+          <div style="margin-top:12px;font-size:13px;color:#4b5563;">
+            <div style="font-weight:600;margin-bottom:4px;">📏 常见规格</div>
+            <div>800×800mm（最主流，性价比高）</div>
+            <div>750×1500mm（大砖上墙，显空间大）</div>
+            <div>600×1200mm（适合中小户型）</div>
+          </div>
+          <div style="margin-top:12px;font-size:13px;color:#4b5563;">
+            <div style="font-weight:600;margin-bottom:4px;">💰 参考价位</div>
+            <div>经济型：40-60元/片（800×800）</div>
+            <div>中档：60-100元/片</div>
+            <div>高端：100-200元/片</div>
+          </div>
+          <div class="encyclo-procon" style="margin-top:12px;">
+            <div class="encyclo-pro">
+              <strong>✅ 优点</strong><br>
+              耐磨耐用<br>防滑性好<br>纹理自然<br>价格适中
+            </div>
+            <div class="encyclo-con">
+              <strong>⚠️ 注意</strong><br>
+              铺贴需留缝2mm<br>后期需美缝<br>深色显脏<br>要买足批次
+            </div>
+          </div>
+          <div style="margin-top:14px;padding:12px;background:#fef3c7;border-radius:10px;font-size:13px;color:#92400e;">
+            <strong>💡 选购技巧：</strong>选瓷砖时让店家拿两块砖面对面贴紧，看缝隙是否均匀；背面倒水测试吸水率；同一批次色号必须一致。
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tab Bar -->
+  <div class="tab-bar" id="tabBar">
+    <button class="tab-item active" data-page="home" onclick="switchTab('home')">
+      <span class="tab-icon">🏠</span><span class="tab-label">首页</span>
+    </button>
+    <button class="tab-item" data-page="ai" onclick="switchTab('ai')">
+      <span class="tab-icon">🤖</span><span class="tab-label">AI顾问</span>
+    </button>
+    <button class="tab-item add-btn" onclick="openRecordModal()">
+      <span class="tab-icon">+</span><span class="tab-label"></span>
+    </button>
+    <button class="tab-item" data-page="spaces" onclick="switchTab('spaces')">
+      <span class="tab-icon">🏗️</span><span class="tab-label">空间</span>
+    </button>
+    <button class="tab-item" data-page="mine" onclick="switchTab('mine')">
+      <span class="tab-icon">👤</span><span class="tab-label">我的</span>
+    </button>
+  </div>
+</div>
+
+<!-- ===== Scan Modal ===== -->
+<div class="modal-overlay" id="scanModal">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div style="font-size:17px;font-weight:600;text-align:center;margin-bottom:16px;">拍照识别材料</div>
+
+    <div class="scan-preview" id="scanPreview" onclick="simulateScan()">
+      <div class="scan-icon">📸</div>
+      <div class="scan-hint">点击拍照或选择照片</div>
+    </div>
+
+    <div class="scan-result" id="scanResult">
+      <div class="result-title">🔍 识别结果</div>
+      <div class="result-row"><span>品类</span><span class="val">通体大理石瓷砖</span></div>
+      <div class="result-row"><span>规格</span><span class="val">800×800mm</span></div>
+      <div class="result-row"><span>表面</span><span class="val">柔光面 · 浅灰色</span></div>
+      <div class="result-row"><span>估价</span><span class="val">¥55-75/片</span></div>
+      <div style="margin-top:12px;padding:10px;background:#fef3c7;border-radius:8px;font-size:12px;color:#92400e;">
+        <strong>📝 选购建议：</strong>这个价位属于中档通体大理石，适合客餐厅地面。建议购买时多买5%备用（切割损耗），同一批次色号要一致。
+      </div>
+      <div style="display:flex;gap:6px;margin-top:10px;">
+        <span class="suggestion-chip" onclick="startAIChat('通体大理石和釉面砖选哪个好？我家有小孩')">有小孩选哪种？</span>
+        <span class="suggestion-chip" onclick="startAIChat('800×800瓷砖工费多少钱一平？')">铺贴工费多少？</span>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:10px;margin-top:12px;">
+      <button class="btn-secondary" onclick="closeScanModal()">关闭</button>
+      <button class="btn-primary" style="flex:2;" onclick="addToMaterialList()">加入材料清单</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== Record Modal ===== -->
+<div class="modal-overlay" id="recordModal">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div style="font-size:17px;font-weight:600;text-align:center;margin-bottom:16px;">记录施工</div>
+
+    <div class="form-group">
+      <label class="form-label">所属空间</label>
+      <select class="form-select"><option>客厅</option><option>主卧</option><option>厨房</option><option>主卫生间</option><option>次卧</option><option>书房</option><option>阳台</option></select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">施工类型</label>
+      <select class="form-select"><option>泥瓦工</option><option>水电改造</option><option>木工</option><option>油漆</option><option>安装</option><option>防水</option><option>拆除改造</option><option>验收</option></select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">记录内容</label>
+      <textarea class="form-textarea" placeholder="描述今天做了什么、用了什么材料…"></textarea>
+    </div>
+    <div class="form-group">
+      <label class="form-label">照片（施工细节/管线位置）</label>
+      <div class="photo-upload" onclick="showToast('模拟拍照（实际调用 wx.chooseImage）')">
+        <div style="font-size:28px;">📸</div>
+        <div style="font-size:13px;">点击拍照或选择照片</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:16px;">
+      <button class="btn-secondary" onclick="closeRecordModal()">取消</button>
+      <button class="btn-primary" style="flex:2;" onclick="submitRecord()">发布记录</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ========== Navigation ==========
+let currentPage = 'home';
+let pageHistory = ['home'];
+let isEncyclo = false;
+
+function switchTab(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  currentPage = name;
+  pageHistory = [name];
+  currentPage = name;
+  isEncyclo = false;
+
+  // Hide encyclopedia when switching tabs
+  document.getElementById('page-encyclo').classList.remove('active');
+
+  // Update tab bar
+  document.querySelectorAll('.tab-item').forEach(t => {
+    t.classList.remove('active');
+    if (t.getAttribute('data-page') === name) t.classList.add('active');
+  });
+
+  // Update nav bar
+  const backBtn = document.getElementById('backBtn');
+  const navTitle = document.getElementById('navTitle');
+  backBtn.style.visibility = 'hidden';
+  switch(name) {
+    case 'home': navTitle.textContent = '筑家记'; break;
+    case 'ai': navTitle.textContent = 'AI装修顾问'; break;
+    case 'spaces': navTitle.textContent = '空间管理'; break;
+    case 'mine': navTitle.textContent = '我的'; break;
+  }
+}
+
+function goBack() {
+  if (isEncyclo) {
+    closeEncyclopedia();
+    return;
+  }
+  if (pageHistory.length > 1) {
+    pageHistory.pop();
+    switchTab(pageHistory[pageHistory.length - 1]);
+  }
+}
+
+// ========== AI Chat ==========
+function sendChat() {
+  const input = document.getElementById('chatInput');
+  const msg = input.value.trim();
+  if (!msg) return;
+
+  // Add user msg
+  const container = document.getElementById('chatMessages');
+  container.innerHTML += `
+    <div class="chat-msg user">
+      <div class="chat-avatar user">👨</div>
+      <div class="chat-bubble user">${escapeHtml(msg)}</div>
+    </div>
+  `;
+  input.value = '';
+  container.scrollTop = container.scrollHeight;
+
+  // Simulate typing
+  setTimeout(() => {
+    container.innerHTML += `
+      <div class="chat-msg">
+        <div class="chat-avatar ai">🤖</div>
+        <div class="chat-bubble ai"><div class="typing-dots"><span></span><span></span><span></span></div></div>
+      </div>
+    `;
+    container.scrollTop = container.scrollHeight;
+  }, 300);
+
+  // Simulate AI response
+  setTimeout(() => {
+    // Remove typing
+    const typing = container.querySelector('.typing-dots');
+    if (typing) typing.closest('.chat-bubble').innerHTML = getAIResponse(msg);
+
+    // Add follow-up chips
+    const lastBubble = container.querySelector('.chat-msg:last-child .chat-bubble.ai');
+    if (lastBubble && !lastBubble.querySelector('.suggestion-chips')) {
+      lastBubble.innerHTML += `
+        <div class="suggestion-chips">
+          <span class="suggestion-chip" onclick="startAIChat('还有哪些材料可以拍照识别？')">还能拍什么？</span>
+          <span class="suggestion-chip" onclick="openEncyclopedia()">查看装修百科</span>
+        </div>
+      `;
+    }
+    container.scrollTop = container.scrollHeight;
+  }, 1500);
+}
+
+function startAIChat(msg) {
+  switchTab('ai');
+  document.getElementById('chatInput').value = msg;
+  sendChat();
+}
+
+function getAIResponse(msg) {
+  const q = msg.toLowerCase();
+  if (q.includes('瓷砖') || q.includes('通体') || q.includes('釉面')) {
+    return '<strong>瓷砖选购核心3点：</strong><br><br>1. <strong>看场景</strong>：客餐厅地面选通体大理石（耐磨），厨房墙面选釉面砖（好擦），卫生间地面选防滑仿古砖<br><br>2. <strong>看规格</strong>：80㎡以下选800×800，大户型选750×1500显大气<br><br>3. <strong>看预算</strong>：800×800价位40-200元/片，中档60-80元就够用了<br><br>⚠️ 避坑：别被"广东砖""佛山砖"忽悠，关键看吸水率（≤0.5%）和平整度';
+  }
+  if (q.includes('水电') || q.includes('走顶') || q.includes('走地')) {
+    return '<strong>水电走顶 vs 走地，结论先行：</strong><br><br>🏠 <strong>厨卫水管建议走顶</strong>（漏水容易发现，维修不砸地板）<br>🏠 <strong>其他区域走地</strong>（成本低，施工简单）<br><br>• 走顶优点：漏水第一时间发现、维修方便<br>• 走顶缺点：多费材料30%、要吊顶遮挡、水压略降<br>• 走地优点：省材料、施工快、不占层高<br>• 走地缺点：漏水要砸地板才找得到<br><br>💡 <strong>折中方案</strong>：卫生间和厨房水管走顶，其他走地。电路一律走地（没有漏水风险）';
+  }
+  if (q.includes('门') || q.includes('地板') || q.includes('先装')) {
+    return '<strong>标准顺序：先装地板，后装门！</strong><br><br>原因：<br>• 地板先铺，门套可以直接压在地板上，无缝美观<br>• 门后装可以精确控制门下缝隙（离地5-8mm）<br>• 如果先装门再铺地板，门下缝隙很难控制<br><br>⚠️ 注意：地板铺完后要做好保护，防止装门时工具砸花地板';
+  }
+  if (q.includes('中央空调') || q.includes('水电')) {
+    return '<strong>中央空调安装时机：水电做完后、泥瓦进场前</strong><br><br>正确顺序：<br>拆除改造 → 水电改造 → <strong>中央空调安装</strong> → 泥瓦工<br><br>你现在水电快做完，刚好是装空调的最佳窗口！<br><br>⚠️ 注意事项：<br>• 空调内机位置要和吊顶方案一起定<br>• 铜管走向让空调师傅和水电工当面交底<br>• 外机位提前向物业确认<br>• 安装完必须打压测试，48小时不掉压';
+  }
+  if (q.includes('防水')) {
+    return '<strong>卫生间防水标准高度：</strong><br><br>• 淋浴区：<strong>1.8米以上</strong>（有的做到顶）<br>• 洗手盆区：<strong>1.2米</strong><br>• 其他墙面：<strong>0.3米</strong><br>• 地面+墙角：<strong>上翻0.3米</strong><br><br>关键步骤：<br>1. 基层清理干净，管根、地漏处重点处理<br>2. 涂刷2-3遍（横一遍竖一遍）<br>3. <strong>闭水试验24-48小时</strong>，一定要去楼下看！<br><br>⚠️ 防水是装修里<strong>最不能省</strong>的环节，一旦漏水赔楼下装修费至少上万';
+  }
+  return '这是个好问题！作为装修新手，建议你先了解基本的装修流程：<br><br><strong>拆除→中央空调→水电→防水→泥瓦→木工→油漆→安装→软装</strong><br><br>你现在处于哪个阶段？我可以针对性地给你建议 😊';
+}
+
+function escapeHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+// ========== To-do ==========
+function toggleTodo(el) {
+  const check = el.querySelector('.todo-check');
+  const text = el.querySelector('.todo-text');
+  if (check.classList.contains('done')) {
+    check.classList.remove('done');
+    check.textContent = '○';
+    text.classList.remove('done');
+  } else {
+    check.classList.add('done');
+    check.textContent = '✓';
+    text.classList.add('done');
+  }
+}
+
+// ========== Scan Modal ==========
+function showScanModal() {
+  document.getElementById('scanModal').classList.add('active');
+  document.getElementById('scanResult').classList.remove('show');
+  document.getElementById('scanPreview').style.display = 'flex';
+}
+
+function closeScanModal() {
+  document.getElementById('scanModal').classList.remove('active');
+}
+
+function simulateScan() {
+  document.getElementById('scanPreview').style.display = 'none';
+  setTimeout(() => {
+    document.getElementById('scanResult').classList.add('show');
+  }, 400);
+}
+
+function addToMaterialList() {
+  closeScanModal();
+  showToast('已加入客厅材料清单');
+}
+
+// ========== Record Modal ==========
+function openRecordModal() {
+  document.getElementById('recordModal').classList.add('active');
+}
+
+function closeRecordModal() {
+  document.getElementById('recordModal').classList.remove('active');
+}
+
+function submitRecord() {
+  closeRecordModal();
+  showToast('施工记录已保存！');
+}
+
+// ========== Encyclopedia ==========
+function openEncyclopedia() {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  const page = document.getElementById('page-encyclo');
+  page.classList.add('active');
+  isEncyclo = true;
+
+  document.getElementById('backBtn').style.visibility = 'visible';
+  document.getElementById('navTitle').textContent = '装修百科';
+
+  // Reset detail view
+  document.querySelectorAll('.encyclo-detail').forEach(d => d.classList.remove('show'));
+  document.getElementById('encycloList').style.display = 'block';
+
+  // Deactivate all tabs
+  document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
+}
+
+function showEncycloDetail(type) {
+  document.getElementById('encycloList').style.display = 'none';
+  document.querySelectorAll('.encyclo-detail').forEach(d => d.classList.remove('show'));
+  document.getElementById('encyclo-' + type).classList.add('show');
+}
+
+function closeEncyclopedia() {
+  document.getElementById('page-encyclo').classList.remove('active');
+  document.getElementById('page-' + currentPage).classList.add('active');
+  isEncyclo = false;
+  document.getElementById('backBtn').style.visibility = 'hidden';
+  document.getElementById('navTitle').textContent = currentPage === 'home' ? '筑家记' :
+    currentPage === 'ai' ? 'AI装修顾问' : currentPage === 'spaces' ? '空间管理' : '我的';
+  document.querySelectorAll('.tab-item').forEach(t => {
+    t.classList.remove('active');
+    if (t.getAttribute('data-page') === currentPage) t.classList.add('active');
+  });
+}
+
+// ========== Space Detail ==========
+function openSpaceDetail() {
+  showToast('打开空间详情（含水电管线、日记、材料）');
+}
+
+// ========== Toast ==========
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2000);
+}
+
+// ========== Modal backdrop ==========
+document.getElementById('scanModal').addEventListener('click', function(e) { if(e.target === this) closeScanModal(); });
+document.getElementById('recordModal').addEventListener('click', function(e) { if(e.target === this) closeRecordModal(); });
+
+console.log('🏠 筑家记 V2 · 装修智能管家原型已就绪');
+console.log('🤖 底部「AI顾问」Tab — 对话问答 + 拍照识别 + 百科');
+console.log('🏠 首页 — 装修流程引擎 + 主动引导 + 今日待办');
+console.log('📚 「我的」→ 装修百科 — 瓷砖选购等知识卡片');
+</script>
+</body>
+</html>

@@ -1,0 +1,1469 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>筑家记 - 装修记录小程序原型</title>
+<style>
+/* ========== Reset & Base ========== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: 16px; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+  background: #f0f0f0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  padding: 20px;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ========== Phone Frame ========== */
+.phone-frame {
+  width: 390px;
+  height: 844px;
+  background: #f5f5f5;
+  border-radius: 44px;
+  overflow: hidden;
+  box-shadow: 0 25px 80px rgba(0,0,0,0.25), 0 0 0 2px #1a1a1a, 0 0 0 6px #2d2d2d, 0 0 0 8px #1a1a1a;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ========== Status Bar ========== */
+.status-bar {
+  height: 44px;
+  background: #fff;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 28px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #1a1a1a;
+  flex-shrink: 0;
+}
+.status-bar .time { font-size: 14px; }
+.status-icons { display: flex; gap: 5px; align-items: center; }
+
+/* ========== Nav Bar ========== */
+.nav-bar {
+  height: 44px;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 16px;
+  font-size: 17px;
+  font-weight: 600;
+  color: #1a1a1a;
+  position: relative;
+  flex-shrink: 0;
+  border-bottom: 0.5px solid #e5e5e5;
+}
+.nav-bar .back-btn {
+  position: absolute;
+  left: 12px;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border: none;
+  background: none;
+  font-size: 20px;
+  color: #f59e0b;
+  border-radius: 50%;
+  transition: background 0.2s;
+}
+.nav-bar .back-btn:active { background: #f5f5f5; }
+.nav-bar .action-btn {
+  position: absolute;
+  right: 12px;
+  font-size: 14px;
+  color: #f59e0b;
+  cursor: pointer;
+  border: none;
+  background: none;
+  font-weight: 500;
+  padding: 6px 10px;
+  border-radius: 6px;
+  transition: background 0.2s;
+}
+.nav-bar .action-btn:active { background: #f5f5f5; }
+.nav-bar.hidden { display: none; }
+
+/* ========== Main Content ========== */
+.main-content {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  background: #f5f5f5;
+  -webkit-overflow-scrolling: touch;
+  position: relative;
+}
+.main-content::-webkit-scrollbar { display: none; }
+
+.page {
+  display: none;
+  min-height: 100%;
+  padding-bottom: 20px;
+  animation: fadeIn 0.25s ease;
+}
+.page.active { display: block; }
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ========== Tab Bar ========== */
+.tab-bar {
+  height: 60px;
+  background: #fff;
+  display: flex;
+  align-items: center;
+  border-top: 0.5px solid #e5e5e5;
+  flex-shrink: 0;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+.tab-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  cursor: pointer;
+  padding: 4px 0;
+  border: none;
+  background: none;
+  color: #999;
+  transition: color 0.2s;
+  position: relative;
+}
+.tab-item.active { color: #f59e0b; }
+.tab-item .tab-icon { font-size: 22px; line-height: 1; }
+.tab-item .tab-label { font-size: 10px; line-height: 1; }
+.tab-item.add-btn {
+  position: relative;
+  top: -12px;
+}
+.tab-item.add-btn .tab-icon {
+  width: 44px;
+  height: 44px;
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 28px;
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.4);
+}
+
+/* ========== Shared Components ========== */
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px 16px 10px;
+  font-size: 15px;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+.section-header .more {
+  font-size: 13px;
+  color: #999;
+  cursor: pointer;
+  font-weight: 400;
+}
+
+.card {
+  background: #fff;
+  border-radius: 14px;
+  margin: 0 16px 10px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+}
+.card-body { padding: 14px; }
+
+.tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1.6;
+}
+.tag-ongoing { background: #fef3c7; color: #d97706; }
+.tag-done { background: #dcfce7; color: #16a34a; }
+.tag-pending { background: #f3f4f6; color: #9ca3af; }
+.tag-warning { background: #fee2e2; color: #dc2626; }
+
+.pipeline-color-dot {
+  width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;
+}
+.pipeline-red { background: #ef4444; }
+.pipeline-blue { background: #3b82f6; }
+.pipeline-green { background: #22c55e; }
+.pipeline-orange { background: #f97316; }
+.pipeline-gray { background: #6b7280; }
+.pipeline-yellow { background: #eab308; }
+
+/* ========== Page: Home ========== */
+.home-hero {
+  background: linear-gradient(135deg, #fef3c7 0%, #fff7ed 50%, #fef9c3 100%);
+  padding: 24px 20px;
+  position: relative;
+  overflow: hidden;
+}
+.home-hero::after {
+  content: '';
+  position: absolute;
+  right: -20px;
+  top: -20px;
+  width: 120px;
+  height: 120px;
+  background: radial-gradient(circle, rgba(245,158,11,0.12) 0%, transparent 70%);
+  border-radius: 50%;
+}
+.home-hero h2 {
+  font-size: 20px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin-bottom: 4px;
+  position: relative;
+  z-index: 1;
+}
+.home-hero .subtitle {
+  font-size: 13px;
+  color: #92400e;
+  position: relative;
+  z-index: 1;
+}
+
+.progress-ring-container {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 16px;
+  position: relative;
+  z-index: 1;
+}
+.progress-ring {
+  width: 70px;
+  height: 70px;
+  flex-shrink: 0;
+}
+.progress-ring svg { transform: rotate(-90deg); }
+.progress-stats { display: flex; flex-direction: column; gap: 2px; }
+.progress-stats .pct { font-size: 22px; font-weight: 700; color: #f59e0b; }
+.progress-stats .sub { font-size: 12px; color: #78716c; }
+
+.stats-row {
+  display: flex;
+  gap: 10px;
+  padding: 0 16px;
+  margin-top: -8px;
+  position: relative;
+  z-index: 2;
+}
+.stat-card {
+  flex: 1;
+  background: #fff;
+  border-radius: 12px;
+  padding: 12px;
+  text-align: center;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+.stat-card .num { font-size: 22px; font-weight: 700; color: #1a1a1a; }
+.stat-card .label { font-size: 11px; color: #999; margin-top: 2px; }
+
+.budget-bar-container {
+  padding: 4px 0;
+}
+.budget-bar-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: #78716c;
+  margin-bottom: 4px;
+}
+.budget-bar-track {
+  height: 6px;
+  background: #f3f4f6;
+  border-radius: 3px;
+  overflow: hidden;
+}
+.budget-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #f59e0b, #d97706);
+  border-radius: 3px;
+  transition: width 0.6s ease;
+}
+.budget-bar-fill.over { background: linear-gradient(90deg, #ef4444, #dc2626); }
+
+.activity-item {
+  display: flex;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 0.5px solid #f5f5f5;
+}
+.activity-item:last-child { border-bottom: none; }
+.activity-avatar {
+  width: 36px; height: 36px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; flex-shrink: 0;
+}
+.activity-avatar.wife { background: #fce7f3; }
+.activity-avatar.self { background: #dbeafe; }
+.activity-text { flex: 1; font-size: 13px; color: #4b5563; line-height: 1.5; }
+.activity-text .bold { font-weight: 600; color: #1a1a1a; }
+.activity-time { font-size: 11px; color: #9ca3af; margin-top: 2px; }
+
+/* ========== Page: Spaces ========== */
+.space-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  padding: 0 16px;
+}
+.space-card {
+  background: #fff;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  cursor: pointer;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.space-card:active { transform: scale(0.97); }
+.space-card-img {
+  height: 100px;
+  background: linear-gradient(135deg, #fef3c7, #fde68a);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 36px;
+  position: relative;
+}
+.space-card-img.bedroom { background: linear-gradient(135deg, #dbeafe, #bfdbfe); }
+.space-card-img.kitchen { background: linear-gradient(135deg, #fce7f3, #fbcfe8); }
+.space-card-img.bathroom { background: linear-gradient(135deg, #dcfce7, #bbf7d0); }
+.space-card-img.study { background: linear-gradient(135deg, #f3e8ff, #e9d5ff); }
+.space-card-img.balcony { background: linear-gradient(135deg, #e0f2fe, #bae6fd); }
+.space-card-img .status-badge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+}
+.space-card-body { padding: 10px 12px 12px; }
+.space-card-body h4 { font-size: 14px; font-weight: 600; color: #1a1a1a; }
+.space-card-body .progress-mini {
+  margin-top: 6px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.progress-mini-bar {
+  flex: 1;
+  height: 4px;
+  background: #f3f4f6;
+  border-radius: 2px;
+  overflow: hidden;
+}
+.progress-mini-fill {
+  height: 100%;
+  background: #f59e0b;
+  border-radius: 2px;
+  transition: width 0.5s ease;
+}
+.progress-mini .pct-text {
+  font-size: 11px;
+  color: #999;
+  flex-shrink: 0;
+}
+
+/* ========== Page: Space Detail ========== */
+.detail-hero {
+  height: 200px;
+  background: linear-gradient(135deg, #fef3c7, #fde68a);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 64px;
+  position: relative;
+}
+.detail-hero .room-label {
+  position: absolute;
+  bottom: 16px;
+  left: 16px;
+  color: #92400e;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.detail-tabs {
+  display: flex;
+  background: #fff;
+  border-bottom: 0.5px solid #e5e5e5;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+.detail-tab {
+  flex: 1;
+  text-align: center;
+  padding: 12px 0;
+  font-size: 14px;
+  color: #999;
+  cursor: pointer;
+  border: none;
+  background: none;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s;
+  font-weight: 500;
+}
+.detail-tab.active {
+  color: #f59e0b;
+  border-bottom-color: #f59e0b;
+}
+.detail-tab-panel { display: none; padding: 12px 16px; }
+.detail-tab-panel.active { display: block; }
+
+/* Pipeline card */
+.pipeline-wall-card {
+  background: #fff;
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 10px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+}
+.pipeline-wall-header {
+  padding: 12px 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 14px;
+  font-weight: 600;
+}
+.pipeline-photo {
+  height: 160px;
+  background: repeating-linear-gradient(
+    45deg,
+    #fafafa,
+    #fafafa 10px,
+    #f5f5f5 10px,
+    #f5f5f5 20px
+  );
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+.pipeline-photo .placeholder-text {
+  color: #ccc;
+  font-size: 14px;
+  font-weight: 500;
+}
+.pipeline-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 10px 14px;
+  font-size: 11px;
+  color: #6b7280;
+}
+.pipeline-legend span {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.pipeline-measurements {
+  padding: 10px 14px;
+  background: #fafafa;
+  font-size: 11px;
+  color: #6b7280;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.pipeline-measurements .measure-item {
+  background: #fff;
+  padding: 3px 8px;
+  border-radius: 6px;
+  border: 0.5px solid #e5e5e5;
+}
+
+/* Diary Timeline */
+.timeline { position: relative; padding-left: 24px; }
+.timeline::before {
+  content: '';
+  position: absolute;
+  left: 8px;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: #e5e5e5;
+}
+.timeline-item { position: relative; margin-bottom: 20px; }
+.timeline-dot {
+  position: absolute;
+  left: -20px;
+  top: 4px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: #f59e0b;
+  border: 2px solid #fff;
+  box-shadow: 0 0 0 2px #f59e0b;
+  z-index: 1;
+}
+.timeline-dot.done { background: #22c55e; box-shadow: 0 0 0 2px #22c55e; }
+.timeline-date {
+  font-size: 12px;
+  color: #9ca3af;
+  margin-bottom: 6px;
+}
+.timeline-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 14px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+}
+.timeline-card h4 { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+.timeline-card p { font-size: 13px; color: #6b7280; line-height: 1.5; }
+.timeline-photos {
+  display: flex;
+  gap: 6px;
+  margin-top: 10px;
+  overflow-x: auto;
+}
+.timeline-photo {
+  width: 80px;
+  height: 80px;
+  border-radius: 8px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  background: #f5f5f5;
+}
+
+/* Materials */
+.material-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 0.5px solid #f5f5f5;
+}
+.material-item:last-child { border-bottom: none; }
+.material-icon {
+  width: 42px; height: 42px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  background: #fef3c7;
+  flex-shrink: 0;
+}
+.material-info { flex: 1; }
+.material-info h5 { font-size: 14px; font-weight: 600; }
+.material-info .spec { font-size: 11px; color: #999; margin-top: 2px; }
+.material-price { font-size: 14px; font-weight: 600; color: #1a1a1a; text-align: right; }
+.material-price .qty { font-size: 11px; color: #999; font-weight: 400; }
+
+/* ========== Modal: Record ========== */
+.modal-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.4);
+  z-index: 100;
+  display: none;
+  align-items: flex-end;
+  justify-content: center;
+}
+.modal-overlay.active { display: flex; }
+.modal-sheet {
+  width: 390px;
+  max-height: 85vh;
+  background: #fff;
+  border-radius: 20px 20px 0 0;
+  overflow-y: auto;
+  padding: 20px 16px 30px;
+  animation: slideUp 0.3s ease;
+}
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+.modal-handle {
+  width: 36px;
+  height: 4px;
+  background: #ddd;
+  border-radius: 2px;
+  margin: 0 auto 16px;
+}
+.modal-title {
+  font-size: 17px;
+  font-weight: 600;
+  text-align: center;
+  margin-bottom: 20px;
+}
+.form-group { margin-bottom: 16px; }
+.form-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #4b5563;
+  margin-bottom: 6px;
+  display: block;
+}
+.form-input, .form-textarea, .form-select {
+  width: 100%;
+  border: 1px solid #e5e5e5;
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 14px;
+  font-family: inherit;
+  background: #fafafa;
+  transition: border 0.2s;
+  color: #1a1a1a;
+}
+.form-input:focus, .form-textarea:focus, .form-select:focus {
+  border-color: #f59e0b;
+  outline: none;
+  background: #fff;
+}
+.form-textarea { min-height: 80px; resize: vertical; }
+.form-select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%23999' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 36px; }
+.photo-upload-area {
+  border: 2px dashed #e5e5e5;
+  border-radius: 12px;
+  padding: 24px;
+  text-align: center;
+  color: #999;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+.photo-upload-area:active { border-color: #f59e0b; }
+.photo-upload-area .icon { font-size: 32px; margin-bottom: 6px; }
+.btn-primary {
+  width: 100%;
+  padding: 12px;
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s, transform 0.1s;
+}
+.btn-primary:active { opacity: 0.85; transform: scale(0.98); }
+
+/* ========== Page: Diary List ========== */
+.filter-chips {
+  display: flex;
+  gap: 8px;
+  padding: 14px 16px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.filter-chips::-webkit-scrollbar { display: none; }
+.filter-chip {
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 13px;
+  white-space: nowrap;
+  cursor: pointer;
+  border: 1px solid #e5e5e5;
+  background: #fff;
+  color: #6b7280;
+  transition: all 0.2s;
+  font-weight: 500;
+}
+.filter-chip.active {
+  background: #f59e0b;
+  color: #fff;
+  border-color: #f59e0b;
+}
+
+/* ========== Page: Mine ========== */
+.profile-card {
+  background: #fff;
+  border-radius: 14px;
+  margin: 16px;
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+}
+.profile-avatar {
+  width: 52px; height: 52px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #fef3c7, #fde68a);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26px;
+}
+.menu-list { margin: 0 16px; }
+.menu-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 0;
+  cursor: pointer;
+  border-bottom: 0.5px solid #f5f5f5;
+  font-size: 14px;
+  color: #1a1a1a;
+}
+.menu-item:last-child { border-bottom: none; }
+.menu-item .menu-icon { font-size: 20px; width: 28px; text-align: center; }
+.menu-item .arrow { margin-left: auto; color: #ccc; }
+
+.empty-state {
+  text-align: center;
+  padding: 40px 20px;
+  color: #ccc;
+  font-size: 13px;
+}
+.empty-state .icon { font-size: 48px; margin-bottom: 10px; }
+
+/* Toast */
+.toast {
+  position: fixed;
+  top: 60px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #1a1a1a;
+  color: #fff;
+  padding: 10px 24px;
+  border-radius: 20px;
+  font-size: 14px;
+  z-index: 200;
+  opacity: 0;
+  transition: opacity 0.3s;
+  pointer-events: none;
+}
+.toast.show { opacity: 1; }
+
+/* Responsive */
+@media (max-width: 430px) {
+  .phone-frame { width: 100%; height: 100vh; border-radius: 0; box-shadow: none; }
+  .modal-sheet { width: 100%; }
+}
+</style>
+</head>
+<body>
+
+<div class="phone-frame">
+  <!-- Status Bar -->
+  <div class="status-bar">
+    <span class="time">9:41</span>
+    <span class="status-icons">WiFi ▮▮▮ ▮▮▮</span>
+  </div>
+
+  <!-- Nav Bar -->
+  <div class="nav-bar" id="navBar">
+    <button class="back-btn hidden" id="backBtn" onclick="goBack()">←</button>
+    <span id="navTitle">筑家记</span>
+    <button class="action-btn hidden" id="actionBtn">筛选</button>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+  <!-- Main Content -->
+  <div class="main-content" id="mainContent">
+
+    <!-- Page: Home -->
+    <div class="page active" id="page-home">
+      <div class="home-hero">
+        <h2>阳光花园 3-201</h2>
+        <div class="subtitle">开工第 38 天 · 水电已完成，泥瓦进行中</div>
+        <div class="progress-ring-container">
+          <div class="progress-ring">
+            <svg width="70" height="70" viewBox="0 0 70 70">
+              <circle cx="35" cy="35" r="30" fill="none" stroke="#f3f4f6" stroke-width="6"/>
+              <circle cx="35" cy="35" r="30" fill="none" stroke="#f59e0b" stroke-width="6"
+                stroke-dasharray="188.5" stroke-dashoffset="75.4" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <div class="progress-stats">
+            <span class="pct">60%</span>
+            <span class="sub">整体进度</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="stats-row">
+        <div class="stat-card">
+          <div class="num">7</div>
+          <div class="label">管理空间</div>
+        </div>
+        <div class="stat-card">
+          <div class="num">38</div>
+          <div class="label">施工日记</div>
+        </div>
+        <div class="stat-card">
+          <div class="num">52</div>
+          <div class="label">材料记录</div>
+        </div>
+      </div>
+
+      <div class="section-header">
+        <span>预算使用</span>
+        <span style="font-size:13px;color:#999;">¥128,500 / ¥200,000</span>
+      </div>
+      <div class="budget-bar-container" style="margin:0 16px 16px;">
+        <div class="budget-bar-track">
+          <div class="budget-bar-fill" style="width:64%"></div>
+        </div>
+      </div>
+
+      <div class="section-header">
+        <span>最近动态</span>
+      </div>
+      <div class="card">
+        <div class="card-body">
+          <div class="activity-item">
+            <div class="activity-avatar self">👨</div>
+            <div>
+              <div class="activity-text">在 <span class="bold">客厅</span> 记录了泥瓦施工进度，瓷砖已铺完80%</div>
+              <div class="activity-time">今天 14:32</div>
+            </div>
+          </div>
+          <div class="activity-item">
+            <div class="activity-avatar wife">👩</div>
+            <div>
+              <div class="activity-text">确认了 <span class="bold">主卧</span> 的木地板选样，型号：大自然 K-8732</div>
+              <div class="activity-time">今天 10:15</div>
+            </div>
+          </div>
+          <div class="activity-item">
+            <div class="activity-avatar self">👨</div>
+            <div>
+              <div class="activity-text">上传了 <span class="bold">厨房</span> 水电走线照片，已完成封槽前留档</div>
+              <div class="activity-time">昨天 16:48</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Page: Spaces -->
+    <div class="page" id="page-spaces">
+      <div class="section-header">
+        <span>全部空间</span>
+        <span class="more">编辑</span>
+      </div>
+      <div class="space-grid">
+        <div class="space-card" onclick="openSpace('living')">
+          <div class="space-card-img">
+            🛋️
+            <span class="status-badge tag tag-ongoing">施工中</span>
+          </div>
+          <div class="space-card-body">
+            <h4>客厅</h4>
+            <div class="progress-mini">
+              <div class="progress-mini-bar"><div class="progress-mini-fill" style="width:70%"></div></div>
+              <span class="pct-text">70%</span>
+            </div>
+          </div>
+        </div>
+        <div class="space-card" onclick="openSpace('master-bedroom')">
+          <div class="space-card-img bedroom">
+            🛏️
+            <span class="status-badge tag tag-pending">待开工</span>
+          </div>
+          <div class="space-card-body">
+            <h4>主卧</h4>
+            <div class="progress-mini">
+              <div class="progress-mini-bar"><div class="progress-mini-fill" style="width:20%"></div></div>
+              <span class="pct-text">20%</span>
+            </div>
+          </div>
+        </div>
+        <div class="space-card" onclick="openSpace('kitchen')">
+          <div class="space-card-img kitchen">
+            🍳
+            <span class="status-badge tag tag-done">水电完成</span>
+          </div>
+          <div class="space-card-body">
+            <h4>厨房</h4>
+            <div class="progress-mini">
+              <div class="progress-mini-bar"><div class="progress-mini-fill" style="width:55%"></div></div>
+              <span class="pct-text">55%</span>
+            </div>
+          </div>
+        </div>
+        <div class="space-card" onclick="openSpace('bathroom')">
+          <div class="space-card-img bathroom">
+            🛁
+            <span class="status-badge tag tag-ongoing">施工中</span>
+          </div>
+          <div class="space-card-body">
+            <h4>主卫生间</h4>
+            <div class="progress-mini">
+              <div class="progress-mini-bar"><div class="progress-mini-fill" style="width:65%"></div></div>
+              <span class="pct-text">65%</span>
+            </div>
+          </div>
+        </div>
+        <div class="space-card" onclick="openSpace('study')">
+          <div class="space-card-img study">
+            📚
+            <span class="status-badge tag tag-pending">待开工</span>
+          </div>
+          <div class="space-card-body">
+            <h4>书房</h4>
+            <div class="progress-mini">
+              <div class="progress-mini-bar"><div class="progress-mini-fill" style="width:10%"></div></div>
+              <span class="pct-text">10%</span>
+            </div>
+          </div>
+        </div>
+        <div class="space-card" style="border: 2px dashed #e5e5e5; background: transparent; display: flex; align-items: center; justify-content: center; cursor: pointer; min-height: 164px;">
+          <div style="text-align:center; color:#ccc;">
+            <div style="font-size:28px;">+</div>
+            <div style="font-size:12px;">添加空间</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Page: Space Detail -->
+    <div class="page" id="page-space-detail">
+      <div class="detail-hero" style="background: linear-gradient(135deg, #fef3c7, #fde68a);">
+        🛋️
+        <div class="room-label">客厅</div>
+      </div>
+      <div class="detail-tabs">
+        <button class="detail-tab active" onclick="switchDetailTab('progress')">进度</button>
+        <button class="detail-tab" onclick="switchDetailTab('pipeline')">水电管线</button>
+        <button class="detail-tab" onclick="switchDetailTab('diary')">日记</button>
+        <button class="detail-tab" onclick="switchDetailTab('materials')">材料</button>
+      </div>
+
+      <!-- Progress Tab -->
+      <div class="detail-tab-panel active" id="dt-progress">
+        <div class="card" style="margin:0;">
+          <div class="card-body">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+              <span style="font-size:14px;font-weight:600;">施工进度</span>
+              <span class="tag tag-ongoing">泥瓦阶段</span>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:8px;">
+              <div style="display:flex;align-items:center;gap:8px;font-size:13px;">
+                <span style="color:#22c55e;">✓</span> <span style="color:#1a1a1a;">水电改造</span><span style="color:#999;margin-left:auto;">已完成</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:8px;font-size:13px;">
+                <span style="color:#f59e0b;">●</span> <span style="color:#1a1a1a;font-weight:600;">泥瓦工（地砖+墙砖）</span><span style="color:#f59e0b;margin-left:auto;">进行中 70%</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:8px;font-size:13px;">
+                <span style="color:#e5e5e5;">○</span> <span style="color:#999;">木工吊顶</span><span style="color:#999;margin-left:auto;">待施工</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:8px;font-size:13px;">
+                <span style="color:#e5e5e5;">○</span> <span style="color:#999;">油漆墙面</span><span style="color:#999;margin-left:auto;">待施工</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:8px;font-size:13px;">
+                <span style="color:#e5e5e5;">○</span> <span style="color:#999;">安装灯具/开关</span><span style="color:#999;margin-left:auto;">待施工</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pipeline Tab -->
+      <div class="detail-tab-panel" id="dt-pipeline">
+        <div style="font-size:13px;color:#6b7280;margin-bottom:12px;">点击墙面查看管线走线图</div>
+        <div class="pipeline-wall-card">
+          <div class="pipeline-wall-header">
+            <span>电视背景墙</span>
+            <span class="tag tag-done">已留档</span>
+          </div>
+          <div class="pipeline-photo" onclick="showToast('点击查看大图 · 含管线标注')">
+            <span class="placeholder-text">📷 墙面照片 · 点击查看</span>
+          </div>
+          <div class="pipeline-legend">
+            <span><span class="pipeline-color-dot pipeline-red"></span>强电</span>
+            <span><span class="pipeline-color-dot pipeline-blue"></span>弱电/网线</span>
+            <span><span class="pipeline-color-dot pipeline-green"></span>冷水</span>
+          </div>
+          <div class="pipeline-measurements">
+            <span class="measure-item">插座距地 30cm</span>
+            <span class="measure-item">开关距地 130cm</span>
+            <span class="measure-item">电视穿线管 50管</span>
+          </div>
+        </div>
+        <div class="pipeline-wall-card">
+          <div class="pipeline-wall-header">
+            <span>沙发背景墙</span>
+            <span class="tag tag-done">已留档</span>
+          </div>
+          <div class="pipeline-photo" onclick="showToast('点击查看大图 · 含管线标注')">
+            <span class="placeholder-text">📷 墙面照片 · 点击查看</span>
+          </div>
+          <div class="pipeline-legend">
+            <span><span class="pipeline-color-dot pipeline-red"></span>强电</span>
+            <span><span class="pipeline-color-dot pipeline-blue"></span>弱电/网线</span>
+          </div>
+          <div class="pipeline-measurements">
+            <span class="measure-item">插座距地 30cm ×4</span>
+            <span class="measure-item">网口距地 30cm</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Diary Tab -->
+      <div class="detail-tab-panel" id="dt-diary">
+        <div class="timeline">
+          <div class="timeline-item">
+            <div class="timeline-dot"></div>
+            <div class="timeline-date">7月30日</div>
+            <div class="timeline-card">
+              <h4>地砖铺设第3天</h4>
+              <p>800×800浅灰色通体大理石瓷砖，留缝2mm。师傅手艺不错，平整度目测OK。预计明天能铺完客厅区域。</p>
+              <div class="timeline-photos">
+                <div class="timeline-photo" style="background:#e5e5e5;">📷</div>
+                <div class="timeline-photo" style="background:#e5e5e5;">📷</div>
+                <div class="timeline-photo" style="background:#fef3c7;font-size:11px;color:#999;">+3</div>
+              </div>
+            </div>
+          </div>
+          <div class="timeline-item">
+            <div class="timeline-dot done"></div>
+            <div class="timeline-date">7月28日</div>
+            <div class="timeline-card">
+              <h4>水电验收通过</h4>
+              <p>水管打压0.8MPa保持30分钟不掉压，电路通断测试正常。弱电箱到电视墙已穿好50管备用。</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Materials Tab -->
+      <div class="detail-tab-panel" id="dt-materials">
+        <div class="card" style="margin:0;">
+          <div class="card-body" style="padding:0 14px;">
+            <div class="material-item">
+              <div class="material-icon">🧱</div>
+              <div class="material-info">
+                <h5>通体大理石瓷砖</h5>
+                <div class="spec">马可波罗 · 浅灰 · 800×800mm</div>
+              </div>
+              <div class="material-price">¥68<span class="qty"> ×52片</span></div>
+            </div>
+            <div class="material-item">
+              <div class="material-icon">💡</div>
+              <div class="material-info">
+                <h5>筒灯</h5>
+                <div class="spec">欧普照明 · 7W · 4000K 中性光</div>
+              </div>
+              <div class="material-price">¥42<span class="qty"> ×8个</span></div>
+            </div>
+            <div class="material-item">
+              <div class="material-icon">🔌</div>
+              <div class="material-info">
+                <h5>五孔插座</h5>
+                <div class="spec">公牛 G12 · 哑光白</div>
+              </div>
+              <div class="material-price">¥18<span class="qty"> ×12个</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Page: Diary List -->
+    <div class="page" id="page-diary">
+      <div class="filter-chips">
+        <span class="filter-chip active">全部</span>
+        <span class="filter-chip">客厅</span>
+        <span class="filter-chip">主卧</span>
+        <span class="filter-chip">厨房</span>
+        <span class="filter-chip">卫生间</span>
+        <span class="filter-chip">书房</span>
+      </div>
+      <div class="timeline" style="padding-right:16px;">
+        <div class="timeline-item">
+          <div class="timeline-dot"></div>
+          <div class="timeline-date">今天 · 7月31日</div>
+          <div class="timeline-card">
+            <div style="display:flex;gap:6px;margin-bottom:6px;">
+              <span class="tag tag-ongoing">客厅</span>
+              <span class="tag tag-ongoing" style="background:#dbeafe;color:#2563eb;">泥瓦</span>
+            </div>
+            <h4>地砖铺设第3天</h4>
+            <p>800×800浅灰色通体大理石瓷砖，留缝2mm。师傅手艺不错，平整度目测OK。预计明天能铺完客厅区域。</p>
+            <div class="timeline-photos">
+              <div class="timeline-photo" style="background:#e5e5e5;">📷</div>
+              <div class="timeline-photo" style="background:#e5e5e5;">📷</div>
+              <div class="timeline-photo" style="background:#fef3c7;font-size:11px;color:#999;">+3</div>
+            </div>
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot done"></div>
+          <div class="timeline-date">昨天 · 7月30日</div>
+          <div class="timeline-card">
+            <div style="display:flex;gap:6px;margin-bottom:6px;">
+              <span class="tag tag-ongoing">卫生间</span>
+              <span class="tag tag-ongoing" style="background:#dbeafe;color:#2563eb;">防水</span>
+            </div>
+            <h4>卫生间闭水试验</h4>
+            <p>蓄水24小时，楼下无渗漏。防水涂料刷到1.8米高，门槛石位置做了挡水坎。明天可以开始贴墙砖。</p>
+            <div class="timeline-photos">
+              <div class="timeline-photo" style="background:#e5e5e5;">📷</div>
+            </div>
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot done"></div>
+          <div class="timeline-date">7月28日</div>
+          <div class="timeline-card">
+            <div style="display:flex;gap:6px;margin-bottom:6px;">
+              <span class="tag tag-done">全屋</span>
+              <span class="tag tag-done" style="background:#dcfce7;color:#16a34a;">水电验收</span>
+            </div>
+            <h4>水电验收通过</h4>
+            <p>水管打压0.8MPa保持30分钟不掉压，电路通断测试正常。弱电箱到各房间网线通断OK。所有管线已拍照留档。</p>
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot done"></div>
+          <div class="timeline-date">7月25日</div>
+          <div class="timeline-card">
+            <div style="display:flex;gap:6px;margin-bottom:6px;">
+              <span class="tag tag-done">厨房</span>
+              <span class="tag tag-done" style="background:#dcfce7;color:#16a34a;">水电</span>
+            </div>
+            <h4>厨房水电走完</h4>
+            <p>橱柜下方预留4个插座（洗碗机、净水器、垃圾处理器、备用），烟机插座位置确认。冷热水管间距15cm标准。</p>
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot done"></div>
+          <div class="timeline-date">7月22日</div>
+          <div class="timeline-card">
+            <div style="display:flex;gap:6px;margin-bottom:6px;">
+              <span class="tag tag-done">全屋</span>
+              <span class="tag tag-done">开工</span>
+            </div>
+            <h4>开工大吉</h4>
+            <p>砸墙完成，垃圾清运完毕。工长带水电师傅现场定位开关插座位置。明天开始开槽布线。</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Page: Mine -->
+    <div class="page" id="page-mine">
+      <div style="padding:30px 0;text-align:center;">
+        <div style="width:64px;height:64px;border-radius:50%;background:linear-gradient(135deg,#fef3c7,#fde68a);display:inline-flex;align-items:center;justify-content:center;font-size:28px;">🏠</div>
+        <div style="font-size:18px;font-weight:600;margin-top:12px;">阳光花园 3-201</div>
+        <div style="font-size:13px;color:#999;margin-top:4px;">开工 2026年7月22日 · 预计工期 90天</div>
+      </div>
+      <div class="card" style="margin:0 16px;">
+        <div class="card-body" style="padding:0 14px;">
+          <div class="menu-item">
+            <span class="menu-icon">👨‍👩‍👧</span>
+            <span>家庭成员</span>
+            <span style="margin-left:auto;font-size:12px;color:#999;">你 · 老婆 · 共2人</span>
+            <span class="arrow">›</span>
+          </div>
+          <div class="menu-item">
+            <span class="menu-icon">📊</span>
+            <span>预算管理</span>
+            <span class="arrow">›</span>
+          </div>
+          <div class="menu-item">
+            <span class="menu-icon">✅</span>
+            <span>验收清单</span>
+            <span class="arrow">›</span>
+          </div>
+        </div>
+      </div>
+      <div class="card" style="margin:16px;">
+        <div class="card-body" style="padding:0 14px;">
+          <div class="menu-item">
+            <span class="menu-icon">📋</span>
+            <span>导出水电走线报告</span>
+            <span class="arrow">›</span>
+          </div>
+          <div class="menu-item">
+            <span class="menu-icon">📤</span>
+            <span>导出材料清单</span>
+            <span class="arrow">›</span>
+          </div>
+          <div class="menu-item">
+            <span class="menu-icon">⚙️</span>
+            <span>设置</span>
+            <span class="arrow">›</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Tab Bar -->
+  <div class="tab-bar" id="tabBar">
+    <button class="tab-item active" data-page="home" onclick="switchTab('home')">
+      <span class="tab-icon">🏠</span>
+      <span class="tab-label">首页</span>
+    </button>
+    <button class="tab-item" data-page="spaces" onclick="switchTab('spaces')">
+      <span class="tab-icon">🏗️</span>
+      <span class="tab-label">空间</span>
+    </button>
+    <button class="tab-item add-btn" data-page="record" onclick="openRecordModal()">
+      <span class="tab-icon">+</span>
+      <span class="tab-label"></span>
+    </button>
+    <button class="tab-item" data-page="diary" onclick="switchTab('diary')">
+      <span class="tab-icon">📝</span>
+      <span class="tab-label">日记</span>
+    </button>
+    <button class="tab-item" data-page="mine" onclick="switchTab('mine')">
+      <span class="tab-icon">👤</span>
+      <span class="tab-label">我的</span>
+    </button>
+  </div>
+</div>
+
+<!-- Record Modal -->
+<div class="modal-overlay" id="recordModal">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title">记录施工</div>
+
+    <div class="form-group">
+      <label class="form-label">所属空间</label>
+      <select class="form-select" id="recordSpace">
+        <option>客厅</option>
+        <option>主卧</option>
+        <option>厨房</option>
+        <option>主卫生间</option>
+        <option>次卧室</option>
+        <option>书房</option>
+        <option>阳台</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">施工类型</label>
+      <select class="form-select" id="recordType">
+        <option>泥瓦工</option>
+        <option>水电改造</option>
+        <option>木工</option>
+        <option>油漆</option>
+        <option>安装</option>
+        <option>防水</option>
+        <option>拆除/改造</option>
+        <option>验收</option>
+      </select>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">记录内容</label>
+      <textarea class="form-textarea" id="recordContent" placeholder="描述今天做了什么、用了什么材料、有什么需要注意的..."></textarea>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">照片</label>
+      <div class="photo-upload-area" onclick="showToast('模拟选择照片（实际小程序调用 wx.chooseImage）')">
+        <div class="icon">📸</div>
+        <div>点击拍照或选择照片</div>
+        <div style="font-size:11px;margin-top:4px;">建议拍摄施工细节、管线位置</div>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:10px;margin-top:20px;">
+      <button style="flex:1;padding:12px;background:#f5f5f5;border:none;border-radius:12px;font-size:15px;color:#6b7280;cursor:pointer;" onclick="closeRecordModal()">取消</button>
+      <button class="btn-primary" style="flex:2;" onclick="submitRecord()">发布记录</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ========== State ==========
+let currentPage = 'home';
+let pageHistory = []; // for back navigation
+
+// ========== Navigation ==========
+const pages = ['home', 'spaces', 'space-detail', 'diary', 'mine'];
+const tabPages = ['home', 'spaces', null, 'diary', 'mine']; // null = record button
+
+function switchTab(pageName) {
+  if (pageName === 'record') return; // handled by modal
+  hideAllPages();
+  showPage(pageName);
+  currentPage = pageName;
+  pageHistory = [pageName];
+  updateTabBar(pageName);
+  updateNavBar(pageName);
+}
+
+function hideAllPages() {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  // Also hide space detail sub-pages
+  document.querySelectorAll('.detail-tab-panel').forEach(p => p.classList.remove('active'));
+}
+
+function showPage(name) {
+  const page = document.getElementById('page-' + name);
+  if (page) page.classList.add('active');
+}
+
+function updateTabBar(pageName) {
+  document.querySelectorAll('.tab-item').forEach(item => {
+    const dp = item.getAttribute('data-page');
+    item.classList.remove('active');
+    if (dp === pageName) item.classList.add('active');
+  });
+}
+
+function updateNavBar(pageName) {
+  const backBtn = document.getElementById('backBtn');
+  const navTitle = document.getElementById('navTitle');
+  const actionBtn = document.getElementById('actionBtn');
+
+  backBtn.classList.add('hidden');
+  actionBtn.classList.add('hidden');
+
+  switch(pageName) {
+    case 'home':
+      navTitle.textContent = '筑家记';
+      break;
+    case 'spaces':
+      navTitle.textContent = '空间管理';
+      break;
+    case 'diary':
+      navTitle.textContent = '施工日记';
+      actionBtn.classList.remove('hidden');
+      actionBtn.textContent = '筛选';
+      break;
+    case 'mine':
+      navTitle.textContent = '我���';
+      break;
+  }
+}
+
+function openSpace(spaceId) {
+  hideAllPages();
+  showPage('space-detail');
+  currentPage = 'space-detail';
+  pageHistory.push('space-detail');
+
+  // Reset detail tabs
+  document.querySelectorAll('.detail-tab').forEach((t, i) => {
+    t.classList.toggle('active', i === 0);
+  });
+  document.querySelectorAll('.detail-tab-panel').forEach((p, i) => {
+    p.classList.toggle('active', i === 0);
+  });
+
+  // Update nav
+  document.getElementById('navTitle').textContent = spaceId === 'living' ? '客厅' :
+    spaceId === 'master-bedroom' ? '主卧' : spaceId === 'kitchen' ? '厨房' :
+    spaceId === 'bathroom' ? '主卫生间' : spaceId === 'study' ? '书房' : '空间详情';
+  document.getElementById('backBtn').classList.remove('hidden');
+
+  // Clear tab bar active
+  document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
+}
+
+function goBack() {
+  if (pageHistory.length > 1) {
+    pageHistory.pop();
+    const prev = pageHistory[pageHistory.length - 1];
+    hideAllPages();
+    showPage(prev);
+    currentPage = prev;
+
+    if (prev === 'space-detail') {
+      document.getElementById('backBtn').classList.remove('hidden');
+    } else {
+      document.getElementById('backBtn').classList.add('hidden');
+      updateTabBar(prev);
+      updateNavBar(prev);
+    }
+  }
+}
+
+function switchDetailTab(tabName) {
+  document.querySelectorAll('.detail-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.detail-tab-panel').forEach(p => p.classList.remove('active'));
+
+  const tabIndex = ['progress', 'pipeline', 'diary', 'materials'].indexOf(tabName);
+  document.querySelectorAll('.detail-tab')[tabIndex].classList.add('active');
+  document.getElementById('dt-' + tabName).classList.add('active');
+}
+
+// ========== Modal ==========
+function openRecordModal() {
+  document.getElementById('recordModal').classList.add('active');
+}
+
+function closeRecordModal() {
+  document.getElementById('recordModal').classList.remove('active');
+}
+
+function submitRecord() {
+  const space = document.getElementById('recordSpace').value;
+  const type = document.getElementById('recordType').value;
+  const content = document.getElementById('recordContent').value;
+
+  if (!content.trim()) {
+    showToast('请填写记录内容');
+    return;
+  }
+
+  closeRecordModal();
+  showToast('记录已保存！' + space + ' · ' + type);
+
+  // Reset form
+  document.getElementById('recordContent').value = '';
+}
+
+// ========== Toast ==========
+function showToast(msg) {
+  const toast = document.getElementById('toast');
+  toast.textContent = msg;
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 2000);
+}
+
+// ========== Filter Chips ==========
+document.addEventListener('click', function(e) {
+  if (e.target.classList.contains('filter-chip')) {
+    document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+    e.target.classList.add('active');
+  }
+});
+
+// ========== Modal backdrop click ==========
+document.getElementById('recordModal').addEventListener('click', function(e) {
+  if (e.target === this) closeRecordModal();
+});
+
+// Initial state
+console.log('🏠 筑家记 · 装修记录小程序原型已就绪');
+console.log('📱 点击底部导航切换页面');
+console.log('🏗️ 点击空���卡片查看详情');
+console.log('➕ 点击中间+按钮记录施工');
+console.log('🔌 空间详情 → 水电管线 → 查看管线标注');
+</script>
+</body>
+</html>

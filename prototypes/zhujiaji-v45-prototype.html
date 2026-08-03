@@ -1,0 +1,1516 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>筑家记 V4.4 - 主题互动版</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{font-size:16px}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;background:#f0f0f0;display:flex;justify-content:center;align-items:center;min-height:100vh;padding:20px;-webkit-font-smoothing:antialiased}
+.phone-frame{width:390px;height:844px;background:#f5f5f5;border-radius:44px;overflow:hidden;box-shadow:0 25px 80px rgba(0,0,0,0.25),0 0 0 2px #1a1a1a,0 0 0 6px #2d2d2d,0 0 0 8px #1a1a1a;position:relative;display:flex;flex-direction:column}
+.status-bar{height:44px;background:#fff;display:flex;justify-content:space-between;align-items:center;padding:0 28px;font-size:12px;font-weight:600;color:#1a1a1a;flex-shrink:0}
+.nav-bar{height:44px;background:#fff;display:flex;align-items:center;justify-content:center;padding:0 16px;font-size:17px;font-weight:600;color:#1a1a1a;position:relative;flex-shrink:0;border-bottom:0.5px solid #e5e5e5}
+.nav-bar .back-btn{position:absolute;left:12px;width:32px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;border:none;background:none;font-size:20px;color:#f59e0b}
+.nav-bar .action-btn{position:absolute;right:12px;font-size:14px;color:#f59e0b;cursor:pointer;border:none;background:none;font-weight:500;padding:4px 10px}
+.main-content{flex:1;overflow-y:auto;overflow-x:hidden;background:#f5f5f5;-webkit-overflow-scrolling:touch}
+.main-content::-webkit-scrollbar{display:none}
+.page{display:none;min-height:100%;padding-bottom:80px;animation:fadeIn .25s ease}
+.page.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+.tab-bar{height:60px;background:#fff;display:flex;align-items:center;border-top:0.5px solid #e5e5e5;flex-shrink:0;position:relative}
+.tab-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer;padding:4px 0;border:none;background:none;color:#999}
+.tab-item.active{color:#f59e0b}
+.tab-item .tab-icon{font-size:20px;line-height:1}
+.tab-item .tab-label{font-size:10px;line-height:1}
+.fab-btn{position:absolute;left:50%;top:-22px;transform:translateX(-50%);width:44px;height:44px;background:linear-gradient(135deg,#f59e0b,#d97706);border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:28px;cursor:pointer;z-index:50;border:none;box-shadow:0 4px 12px rgba(245,158,11,0.4);transition:transform .2s}
+.fab-btn.open{transform:translateX(-50%) rotate(45deg)}
+.fab-menu{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);display:none;z-index:90}
+.fab-menu.open{display:block}
+.fab-backdrop{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.35);z-index:80;display:none}
+.fab-backdrop.open{display:block}
+.fab-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;width:200px}
+.fab-item{background:#fff;border-radius:16px;padding:16px 10px;cursor:pointer;box-shadow:0 4px 16px rgba(0,0,0,0.12);display:flex;flex-direction:column;align-items:center;gap:6px;border:none;font-size:13px;color:#1a1a1a;font-weight:500}
+.fab-item:active{transform:scale(.95)}
+.fab-item .f-icon{font-size:24px}
+.section-header{display:flex;justify-content:space-between;align-items:center;padding:20px 16px 12px;font-size:15px;font-weight:600;color:#1a1a1a}
+.section-header .more{font-size:13px;color:#999;cursor:pointer;font-weight:400}
+.tag{display:inline-flex;align-items:center;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:500}
+.tag-orange{background:#fef3c7;color:#d97706}
+.tag-green{background:#dcfce7;color:#16a34a}
+.tag-blue{background:#dbeafe;color:#2563eb}
+.tag-red{background:#fee2e2;color:#dc2626}
+.tag-gray{background:#f3f4f6;color:#6b7280}
+.card{background:#fff;border-radius:14px;margin:0 16px 10px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.04)}
+.card-body{padding:14px}
+
+/* ===== HOME V4.4 - 主题互动 ===== */
+.hero{padding:20px 16px 24px;text-align:center;position:relative;overflow:hidden;transition:background .5s}
+
+/* 晴天主题 */
+.hero.sunny{background:linear-gradient(135deg,#fef3c7 0%,#fff7ed 60%,#fef9c3 100%)}
+.hero.sunny .hg-emoji{animation:rotate-sun 8s linear infinite}
+
+/* 下雨天主题 */
+.hero.rainy{background:linear-gradient(180deg,#475569 0%,#64748b 40%,#94a3b8 100%);color:#fff}
+.hero.rainy .hg-emoji{animation:rain-bounce 2s ease-in-out infinite}
+.hero.rainy h2{color:#fff}
+.hero.rainy .hg-stage{background:rgba(255,255,255,0.2);color:#e0e7ff}
+.hero.rainy .hg-quote{background:rgba(255,255,255,0.15);color:#f1f5f9}
+.hero.rainy .home-meta{background:linear-gradient(135deg,#475569,#64748b);color:#e0e7ff}
+
+/* 多云主题 */
+.hero.cloudy{background:linear-gradient(180deg,#e0e7ff 0%,#c7d2fe 50%,#f1f5f9 100%)}
+
+@keyframes rotate-sun{0%{transform:rotate(0)}100%{transform:rotate(360deg)}}
+@keyframes rain-bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+
+/* 雨滴效果 */
+.rain-drops{position:absolute;top:0;left:0;right:0;bottom:0;pointer-events:none;opacity:.4}
+.rain-drop{position:absolute;width:1px;height:14px;background:linear-gradient(180deg,transparent,#fff);animation:rain-fall 1s linear infinite}
+@keyframes rain-fall{0%{transform:translateY(-20px);opacity:0}50%{opacity:1}100%{transform:translateY(200px);opacity:0}}
+
+.home-meta{padding:12px 16px 6px;font-size:12px;display:flex;justify-content:space-between;align-items:center;background:linear-gradient(135deg,#fef3c7 0%,#fff7ed 100%);color:#92400e;position:relative;z-index:2}
+.hero .hg-emoji{font-size:42px;margin-bottom:4px;display:inline-block;position:relative;z-index:2}
+.hero h2{font-size:20px;font-weight:700;color:#1a1a1a;position:relative;z-index:2}
+.hero .hg-stage{font-size:13px;display:inline-flex;align-items:center;gap:4px;padding:4px 10px;background:rgba(255,255,255,0.7);border-radius:10px;margin-top:8px;position:relative;z-index:2}
+.hero .hg-quote{margin-top:12px;padding:10px 16px;background:rgba(255,255,255,0.5);border-radius:12px;font-size:12px;line-height:1.5;font-style:italic;position:relative;z-index:2}
+.hero .hg-weather-switch{position:absolute;top:8px;right:8px;font-size:10px;background:rgba(255,255,255,0.7);color:#1a1a1a;padding:3px 8px;border-radius:10px;cursor:pointer;z-index:3;font-weight:500}
+
+/* 天气卡 */
+.weather-card{margin:-6px 16px 12px;padding:12px 14px;background:linear-gradient(135deg,#dbeafe,#bfdbfe);border-radius:14px;display:flex;align-items:center;gap:10px}
+.weather-card .wc-icon{font-size:32px}
+.weather-card .wc-text{flex:1}
+.weather-card .wc-temp{font-size:18px;font-weight:700;color:#1e40af}
+.weather-card .wc-desc{font-size:12px;color:#3b82f6;margin-top:2px}
+.weather-card .wc-tip{font-size:11px;color:#dc2626;background:#fff;padding:4px 8px;border-radius:8px;font-weight:500}
+
+/* 昨日未完成 */
+.pending-card{margin:0 16px 12px;padding:12px 14px;background:#fff;border-radius:14px;border-left:4px solid #ef4444;box-shadow:0 1px 3px rgba(0,0,0,0.04)}
+.pending-card h4{font-size:13px;font-weight:600;color:#dc2626;margin-bottom:6px}
+.pending-item{display:flex;justify-content:space-between;align-items:center;padding:4px 0;font-size:12px;color:#4b5563}
+.pending-item .pi-tag{font-size:10px;padding:1px 6px;border-radius:8px;background:#fee2e2;color:#dc2626}
+
+.dash-stats{display:flex;gap:10px;padding:0 16px;margin-bottom:12px}
+.dash-stat{flex:1;background:#fff;border-radius:14px;padding:12px;text-align:center;box-shadow:0 1px 3px rgba(0,0,0,0.04);cursor:pointer}
+.dash-stat .s-icon{font-size:22px;margin-bottom:2px}
+.dash-stat .s-num{font-size:18px;font-weight:700;color:#1a1a1a}
+.dash-stat .s-label{font-size:11px;color:#9ca3af;margin-top:1px}
+
+.prep-card{margin:0 16px 12px;padding:14px;background:#fff;border-radius:14px;box-shadow:0 1px 3px rgba(0,0,0,0.04)}
+.prep-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.prep-header h4{font-size:14px;font-weight:600}
+.prep-progress{font-size:12px;color:#f59e0b;font-weight:600}
+.prep-bar-track{height:8px;background:#f3f4f6;border-radius:4px;overflow:hidden;margin-bottom:10px}
+.prep-bar-fill{height:100%;background:linear-gradient(90deg,#f59e0b,#d97706);border-radius:4px;transition:width .5s}
+.prep-items{display:flex;flex-wrap:wrap;gap:6px}
+.prep-tag{padding:5px 10px;border-radius:14px;font-size:12px;cursor:pointer;background:#fff;color:#6b7280;border:1px solid #e5e5e5;transition:all .2s}
+.prep-tag.done{background:#dcfce7;color:#16a34a;border-color:#bbf7d0}
+.prep-tag.done::before{content:'✓ '}
+.prep-tag.next{background:#fef3c7;color:#d97706;border-color:#fde68a;font-weight:600}
+.prep-tag.next::after{content:' →'}
+.prep-cta{margin-top:12px;padding:10px 12px;background:linear-gradient(135deg,#fef3c7,#fde68a);border-radius:10px;display:flex;align-items:center;justify-content:space-between}
+.prep-cta-text{font-size:13px;color:#92400e;font-weight:500}
+.prep-cta-btn{padding:6px 14px;background:#f59e0b;color:#fff;border-radius:14px;font-size:12px;font-weight:500;cursor:pointer}
+
+.next-stage-card{margin:0 16px 12px;padding:14px;background:linear-gradient(135deg,#dbeafe,#eff6ff);border-radius:14px;border:1px solid #bfdbfe}
+.next-stage-card h4{font-size:13px;font-weight:600;color:#1e40af;margin-bottom:4px}
+.next-stage-card p{font-size:12px;color:#3b82f6;line-height:1.5;margin-bottom:6px}
+.next-stage-card .ns-btn{display:inline-block;padding:5px 12px;background:#3b82f6;color:#fff;border-radius:12px;font-size:12px;font-weight:500;cursor:pointer}
+
+.tip-card{margin:0 16px 12px;padding:12px 14px;background:linear-gradient(135deg,#f3e8ff,#ede9fe);border-radius:14px;border:1px solid #e9d5ff}
+.tip-card h4{font-size:12px;font-weight:600;color:#7c3aed;margin-bottom:4px}
+.tip-card p{font-size:12px;color:#6b21a8;line-height:1.5}
+
+/* ===== 参考 Tab V4.4 (完整恢复) ===== */
+.ref-tabs{display:flex;background:#fff;border-bottom:0.5px solid #e5e5e5;position:sticky;top:0;z-index:10}
+.ref-tab{flex:1;text-align:center;padding:12px 0;font-size:14px;color:#999;cursor:pointer;border:none;background:none;border-bottom:2px solid transparent;font-weight:500}
+.ref-tab.active{color:#f59e0b;border-bottom-color:#f59e0b}
+.ref-panel{display:none}
+.ref-panel.active{display:block;padding:0 0 20px}
+
+.bookmark-entry{display:flex;align-items:center;gap:12px;margin:14px 16px 10px;padding:14px;background:#fff;border-radius:12px;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,0.04)}
+.bookmark-entry .be-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;background:linear-gradient(135deg,#f59e0b,#d97706);color:#fff;flex-shrink:0}
+
+.style-banner{background:linear-gradient(135deg,#f0f9ff,#e0f2fe);margin:0 16px 14px;padding:14px;border-radius:14px;display:flex;align-items:center;gap:10px;cursor:pointer}
+.style-banner .sb-icon{font-size:24px}
+.style-banner h4{font-size:14px;font-weight:600;color:#1a1a1a}
+.style-banner p{font-size:12px;color:#6b7280;margin-top:1px}
+
+.saved-bookmarks{background:#fff;margin:0 16px 14px;padding:12px 14px;border-radius:14px;box-shadow:0 1px 3px rgba(0,0,0,0.04)}
+.saved-bookmarks h4{font-size:13px;font-weight:600;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center}
+.saved-bookmarks .sb-count{font-size:11px;color:#f59e0b;font-weight:500}
+.sb-item{display:flex;gap:10px;padding:8px 0;border-bottom:0.5px solid #f5f5f5;cursor:pointer}
+.sb-item:last-child{border-bottom:none}
+.sb-item .sb-thumb{width:48px;height:48px;border-radius:8px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:20px;background:#f5f5f5}
+.sb-item .sb-info{flex:1;min-width:0}
+.sb-item .sb-info h5{font-size:13px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sb-item .sb-info p{font-size:11px;color:#6b7280;margin-top:1px;display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;overflow:hidden}
+
+.style-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:0 16px}
+.style-card{border-radius:12px;overflow:hidden;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,0.04)}
+.style-card .sc-img{height:80px;display:flex;align-items:center;justify-content:center;font-size:32px}
+.style-card .sc-name{text-align:center;font-size:11px;padding:6px 4px;font-weight:500;background:#fff}
+
+.tools-row{display:flex;gap:10px;padding:16px}
+.tools-row .tool{flex:1;background:#fff;border-radius:14px;padding:14px;text-align:center;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,0.04)}
+.tools-row .tool .t-icon{font-size:24px}
+.tools-row .tool .t-label{font-size:12px;font-weight:500;margin-top:4px}
+
+.kg-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:0 16px}
+.kg-item{background:#fff;border-radius:12px;padding:14px 6px;text-align:center;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,0.04)}
+.kg-item .kg-icon{font-size:26px;margin-bottom:4px}
+.kg-item .kg-label{font-size:11px;color:#4b5563;font-weight:500}
+.faq-list{padding:0 16px}
+.faq-item{display:flex;align-items:center;gap:10px;padding:12px 14px;background:#fff;border-radius:10px;margin-bottom:6px;cursor:pointer;font-size:13px;color:#1a1a1a}
+
+/* ===== DIARY V4.4 (重组) ===== */
+.diary-tab-bar{display:flex;background:#fff;border-bottom:0.5px solid #e5e5e5;position:sticky;top:0;z-index:10}
+.diary-tab{flex:1;text-align:center;padding:11px 0;font-size:13px;color:#999;cursor:pointer;border:none;background:none;border-bottom:2px solid transparent;font-weight:500}
+.diary-tab.active{color:#f59e0b;border-bottom-color:#f59e0b}
+.diary-panel{display:none}
+.diary-panel.active{display:block}
+
+/* 重组：核心三件事 + 资源区 */
+.diary-focus{background:linear-gradient(135deg,#fef3c7 0%,#fffbeb 100%);margin:0 16px 10px;padding:14px;border-radius:14px;position:relative}
+.diary-focus h3{font-size:17px;font-weight:700;color:#1a1a1a;display:flex;align-items:center;gap:6px}
+.diary-focus .df-meta{font-size:12px;color:#92400e;margin-top:2px}
+.df-flow{overflow-x:auto;margin:8px 0 4px}
+.df-flow::-webkit-scrollbar{display:none}
+.df-flow-row{display:flex;align-items:center;gap:0}
+.df-step{display:flex;flex-direction:column;align-items:center;gap:3px;flex-shrink:0;min-width:46px}
+.df-step .dot{width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;background:#e5e5e5;color:#999}
+.df-step .dot.done{background:#22c55e;color:#fff}
+.df-step .dot.current{background:#f59e0b;color:#fff;box-shadow:0 0 0 3px rgba(245,158,11,0.2)}
+.df-step .lbl{font-size:9px;color:#9ca3af}
+.df-step .lbl.current{color:#d97706;font-weight:700}
+.df-step .lbl.done{color:#1a1a1a}
+.df-line{height:2px;background:#e5e5e5;flex:1;min-width:12px;align-self:center;margin-bottom:12px}
+.df-line.done{background:#22c55e}
+
+/* 关键三件事 */
+.diary-key-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin:0 16px 10px}
+.key-card{background:#fff;border-radius:12px;padding:12px;text-align:center;box-shadow:0 1px 3px rgba(0,0,0,0.04);cursor:pointer;position:relative}
+.key-card .kc-num{font-size:18px;font-weight:700;color:#f59e0b}
+.key-card .kc-lbl{font-size:11px;color:#9ca3af;margin-top:2px}
+.key-card .kc-arr{position:absolute;top:6px;right:6px;color:#9ca3af;font-size:10px}
+
+/* 资源网格 - 2x2 */
+.diary-resources{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:0 16px 10px}
+.res-card{background:#fff;border-radius:12px;padding:12px;box-shadow:0 1px 3px rgba(0,0,0,0.04);cursor:pointer}
+.res-card .rc-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.res-card .rc-title{font-size:12px;font-weight:600;color:#4b5563}
+.res-card .rc-arr{font-size:10px;color:#9ca3af}
+.res-card .rc-content{font-size:13px;color:#1a1a1a}
+.res-card .rc-mini{font-size:11px;color:#6b7280;margin-top:3px}
+
+/* 详细模块（折叠） */
+.diary-detail{background:#fff;margin:0 16px 10px;border-radius:14px;box-shadow:0 1px 3px rgba(0,0,0,0.04);overflow:hidden}
+.dd-header{padding:12px 14px;display:flex;justify-content:space-between;align-items:center;cursor:pointer}
+.dd-header h4{font-size:14px;font-weight:600;display:flex;align-items:center;gap:6px}
+.dd-header .dd-progress{font-size:11px;color:#9ca3af}
+.dd-header .dd-toggle{font-size:12px;color:#9ca3af;transition:transform .2s}
+.dd-header .dd-toggle.open{transform:rotate(180deg)}
+.dd-body{display:none;padding:0 14px 12px;border-top:0.5px solid #f5f5f5}
+.dd-body.open{display:block}
+
+.task-item{display:flex;align-items:center;gap:8px;padding:8px 0;font-size:13px;color:#1a1a1a;cursor:pointer;border-bottom:0.5px solid #f5f5f5}
+.task-item:last-child{border-bottom:none}
+.task-check{width:18px;height:18px;border-radius:50%;border:2px solid #d1d5db;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:10px;color:transparent}
+.task-check.done{background:#22c55e;border-color:#22c55e;color:#fff}
+.task-text{flex:1}
+.task-text.done{color:#9ca3af;text-decoration:line-through}
+.task-add{display:flex;align-items:center;gap:6px;padding:8px 0;font-size:12px;color:#9ca3af;cursor:pointer}
+
+.check-item{display:flex;align-items:center;gap:8px;padding:6px 0;font-size:13px;color:#1a1a1a;cursor:pointer}
+.check-mark{flex-shrink:0;font-size:14px}
+.check-text{flex:1}
+
+.budget-card{background:#fff;margin:0 16px 10px;padding:14px;border-radius:14px;box-shadow:0 1px 3px rgba(0,0,0,0.04)}
+.budget-amount{font-size:22px;font-weight:700;color:#1a1a1a}
+.budget-bar-track{height:6px;background:#f3f4f6;border-radius:3px;overflow:hidden;margin:6px 0 4px}
+.budget-bar-fill{height:100%;border-radius:3px}
+.budget-info{display:flex;justify-content:space-between;font-size:11px;color:#9ca3af}
+
+.photo-card{background:#fff;margin:0 16px 10px;padding:14px;border-radius:14px;box-shadow:0 1px 3px rgba(0,0,0,0.04)}
+.photo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:8px}
+.photo-tile{aspect-ratio:1;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:18px;background:#f5f5f5;cursor:pointer;position:relative}
+.photo-tile .ph-date{position:absolute;bottom:2px;left:2px;font-size:9px;color:#fff;background:rgba(0,0,0,0.4);padding:1px 4px;border-radius:4px}
+.photo-add{background:#fafafa;border:2px dashed #d1d5db;color:#9ca3af}
+
+.warning-card{background:#fff;border:1px solid #fed7aa;margin:0 16px 10px;padding:14px;border-radius:14px}
+.warning-card h4{font-size:13px;font-weight:600;color:#9a3412;margin-bottom:6px}
+.warning-item{display:flex;gap:6px;font-size:12px;color:#7c2d12;line-height:1.6;padding:3px 0}
+
+.worker-compact{background:#fff;margin:0 16px 10px;padding:12px 14px;border-radius:12px;box-shadow:0 1px 3px rgba(0,0,0,0.04)}
+.worker-compact .wc-title{font-size:12px;font-weight:600;color:#4b5563;margin-bottom:8px}
+.worker-compact .wc-row{display:flex;align-items:center;gap:8px;font-size:12px;padding:4px 0}
+.worker-compact .wc-av{width:24px;height:24px;border-radius:50%;background:#fef3c7;display:flex;align-items:center;justify-content:center;font-size:12px}
+.worker-compact .wc-name{flex:1;color:#1a1a1a}
+.worker-compact .wc-status{padding:1px 6px;border-radius:8px;font-size:10px;background:#dcfce7;color:#16a34a}
+.worker-compact .wc-status.off{background:#f3f4f6;color:#6b7280}
+
+/* ===== Plan Calendar ===== */
+.cal-header{padding:14px 16px;display:flex;justify-content:space-between;align-items:center}
+.cal-header h4{font-size:16px;font-weight:600}
+.cal-nav{font-size:14px;color:#9ca3af;cursor:pointer}
+.cal-grid{background:#fff;margin:0 16px 10px;padding:12px;border-radius:14px;box-shadow:0 1px 3px rgba(0,0,0,0.04)}
+.cal-weekdays{display:grid;grid-template-columns:repeat(7,1fr);text-align:center;font-size:11px;color:#9ca3af;margin-bottom:8px}
+.cal-days{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.cal-day{aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:center;border-radius:8px;font-size:13px;cursor:pointer;position:relative;gap:2px}
+.cal-day:hover{background:#f5f5f5}
+.cal-day.other-month{color:#ccc}
+.cal-day.today{background:#f59e0b;color:#fff;font-weight:700}
+.cal-day .day-dot{width:5px;height:5px;border-radius:50%;background:#d1d5db;position:absolute;bottom:4px}
+.cal-day.today .day-dot{background:#fff}
+.cal-day .dot-green{background:#22c55e}
+.cal-day .dot-orange{background:#f59e0b}
+.cal-legend{padding:10px 16px;display:flex;gap:14px;font-size:11px;color:#6b7280;justify-content:center}
+.cal-legend span{display:flex;align-items:center;gap:4px}
+.cal-legend .dot{width:8px;height:8px;border-radius:50%}
+.cal-detail{background:#fff;margin:0 16px 10px;padding:12px 14px;border-radius:14px;box-shadow:0 1px 3px rgba(0,0,0,0.04)}
+.cal-detail h4{font-size:14px;font-weight:600;margin-bottom:8px;color:#f59e0b}
+.cal-event{display:flex;align-items:center;gap:8px;padding:6px 0;font-size:13px;color:#1a1a1a;border-bottom:0.5px solid #f5f5f5}
+.cal-event:last-child{border-bottom:none}
+.cal-event .ce-dot{width:8px;height:8px;border-radius:50%;background:#d1d5db;flex-shrink:0}
+.cal-event .ce-dot.green{background:#22c55e}
+.cal-event .ce-dot.orange{background:#f59e0b}
+.cal-event .ce-text{flex:1}
+.cal-event .ce-time{font-size:11px;color:#9ca3af}
+
+/* ===== Records ===== */
+.search-bar{margin:14px 16px;padding:10px 14px;background:#fff;border-radius:14px;display:flex;align-items:center;gap:8px;box-shadow:0 1px 3px rgba(0,0,0,0.04);cursor:pointer}
+.search-bar input{flex:1;border:none;outline:none;font-size:14px;color:#1a1a1a;background:transparent}
+.search-bar input::placeholder{color:#9ca3af}
+.search-bar .ai-tag{font-size:10px;background:linear-gradient(135deg,#3b82f6,#2563eb);color:#fff;padding:2px 6px;border-radius:6px;font-weight:500}
+.tag-chips{display:flex;gap:6px;padding:0 16px 12px;overflow-x:auto}
+.tag-chips::-webkit-scrollbar{display:none}
+.tag-chip{padding:4px 12px;border-radius:14px;font-size:12px;cursor:pointer;background:#fff;color:#6b7280;border:1px solid #e5e5e5;white-space:nowrap}
+.tag-chip.active{background:#f59e0b;color:#fff;border-color:#f59e0b}
+.record-item{display:flex;gap:10px;padding:12px 14px;background:#fff;border-radius:12px;margin:0 16px 8px;box-shadow:0 1px 2px rgba(0,0,0,0.03);cursor:pointer}
+.record-icon{width:40px;height:40px;border-radius:10px;background:#f5f5f5;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.record-info{flex:1;min-width:0}
+.record-info h5{font-size:13px;font-weight:600}
+.record-info .ri-meta{font-size:11px;color:#9ca3af;margin-top:1px;display:flex;gap:6px;align-items:center}
+.record-info .ri-desc{font-size:12px;color:#4b5563;margin-top:3px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.record-info .ri-tags{display:flex;gap:4px;margin-top:4px;flex-wrap:wrap}
+
+/* ===== MINE ===== */
+.menu-group{margin:0 16px 12px}
+.menu-item{display:flex;align-items:center;gap:12px;padding:14px 16px;background:#fff;cursor:pointer;font-size:14px;color:#1a1a1a;border-bottom:0.5px solid #f5f5f5}
+.menu-item:first-child{border-radius:14px 14px 0 0}
+.menu-item:last-child{border-radius:0 0 14px 14px;border-bottom:none}
+.menu-item:only-child{border-radius:14px}
+.menu-item .menu-icon{font-size:20px;width:28px;text-align:center}
+.menu-item .arrow{margin-left:auto;color:#ccc}
+
+.modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.4);z-index:100;display:none;align-items:flex-end;justify-content:center}
+.modal-overlay.active{display:flex}
+.modal-sheet{width:390px;max-height:85vh;background:#fff;border-radius:20px 20px 0 0;overflow-y:auto;padding:20px 16px 30px;animation:slideUp .3s ease}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.modal-handle{width:36px;height:4px;background:#ddd;border-radius:2px;margin:0 auto 16px}
+.btn-primary{width:100%;padding:12px;background:linear-gradient(135deg,#f59e0b,#d97706);color:#fff;border:none;border-radius:12px;font-size:16px;font-weight:600;cursor:pointer}
+.btn-secondary{flex:1;padding:12px;background:#f5f5f5;border:none;border-radius:12px;font-size:15px;color:#6b7280;cursor:pointer}
+.form-group{margin-bottom:14px}
+.form-label{font-size:13px;font-weight:600;color:#4b5563;margin-bottom:6px;display:block}
+.form-textarea,.form-input{width:100%;border:1px solid #e5e5e5;border-radius:10px;padding:10px 12px;font-size:14px;font-family:inherit;background:#fafafa;color:#1a1a1a}
+.tag-input-area{display:flex;flex-wrap:wrap;gap:6px;padding:8px;border:1px solid #e5e5e5;border-radius:10px;background:#fafafa;min-height:40px;align-items:center}
+.tag-input-area .existing-tag{padding:3px 8px;background:#fef3c7;color:#d97706;border-radius:8px;font-size:12px;display:flex;align-items:center;gap:4px}
+.tag-input-area input{border:none;outline:none;background:transparent;font-size:13px;flex:1;min-width:80px}
+
+.toast{position:fixed;top:60px;left:50%;transform:translateX(-50%);background:#1a1a1a;color:#fff;padding:10px 24px;border-radius:20px;font-size:14px;z-index:200;opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap}
+.toast.show{opacity:1}
+/* ===== Quick Note Styles ===== */
+.note-tabs{display:flex;border-bottom:1px solid #e5e5e5;margin-bottom:14px}
+.note-tab{flex:1;text-align:center;padding:10px 0;font-size:14px;color:#999;cursor:pointer;border:none;background:none;border-bottom:2px solid transparent;font-weight:500}
+.note-tab.active{color:#f59e0b;border-bottom-color:#f59e0b}
+.note-panel{display:none}
+.note-panel.active{display:block}
+.voice-btn{width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,#f59e0b,#d97706);color:#fff;font-size:32px;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;margin:20px auto;box-shadow:0 4px 16px rgba(245,158,11,0.3)}
+.voice-btn.recording{animation:pulseVoice 1s infinite}
+@keyframes pulseVoice{0%,100%{box-shadow:0 0 0 0 rgba(245,158,11,0.4)}50%{box-shadow:0 0 0 16px rgba(245,158,11,0)}}
+.ai-parse-result{background:#f0fdf4;border:1px solid #bbf7d0;border-radius:12px;padding:12px;margin-top:12px;font-size:13px;display:none}
+.ai-parse-result.show{display:block}
+.photo-upload-area{border:2px dashed #e5e5e5;border-radius:12px;padding:30px;text-align:center;color:#9ca3af;cursor:pointer;transition:border .2s}
+.photo-upload-area:active{border-color:#f59e0b}
+
+/* ===== Write Diary Page (全屏页面) ===== */
+.diary-edit-page{background:#f5f5f5;min-height:100%}
+.de-header{background:#fff;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;border-bottom:0.5px solid #e5e5e5}
+.de-back{font-size:18px;color:#f59e0b;cursor:pointer;padding:4px 8px}
+.de-title{font-size:16px;font-weight:600;color:#1a1a1a;flex:1;text-align:center}
+.de-save{font-size:14px;color:#f59e0b;font-weight:600;cursor:pointer;padding:4px 8px}
+.de-context{background:linear-gradient(135deg,#fef3c7,#fffbeb);padding:10px 16px;font-size:12px;color:#92400e;display:flex;justify-content:space-between}
+.de-form{padding:16px}
+.de-section{background:#fff;border-radius:14px;padding:14px;margin-bottom:10px;box-shadow:0 1px 3px rgba(0,0,0,0.04)}
+.de-section-title{font-size:13px;font-weight:600;color:#4b5563;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center}
+.de-section-title .req{color:#ef4444;font-size:11px;font-weight:500;margin-left:4px}
+
+/* 空间选择器 */
+.space-picker{display:flex;flex-wrap:wrap;gap:8px}
+.space-chip{padding:8px 14px;border-radius:18px;font-size:13px;cursor:pointer;background:#fafafa;color:#4b5563;border:1px solid #e5e5e5;transition:all .2s}
+.space-chip:active{transform:scale(.96)}
+.space-chip.selected{background:linear-gradient(135deg,#fef3c7,#fde68a);color:#92400e;border-color:#f59e0b;font-weight:600}
+.space-chip.selected::before{content:'✓ ';color:#16a34a}
+
+/* 照片上传网格 */
+.photo-grid-upload{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.photo-slot{aspect-ratio:1;border:2px dashed #d1d5db;border-radius:10px;display:flex;align-items:center;justify-content:center;color:#9ca3af;cursor:pointer;font-size:24px;background:#fafafa;position:relative}
+.photo-slot:hover{border-color:#f59e0b;color:#f59e0b}
+.photo-slot .ps-tip{position:absolute;bottom:4px;font-size:9px;color:#9ca3af}
+.photo-slot.has-image{background:#dbeafe;border:2px solid #3b82f6;color:#fff}
+.photo-slot .ps-del{position:absolute;top:2px;right:2px;background:rgba(0,0,0,0.6);color:#fff;width:18px;height:18px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;cursor:pointer}
+
+/* 标签输入区 */
+.de-tag-area{display:flex;flex-wrap:wrap;gap:6px;padding:8px 10px;border:1px solid #e5e5e5;border-radius:10px;background:#fafafa;min-height:42px;align-items:center;cursor:text}
+.de-tag-area .de-tag{padding:4px 10px;background:#fef3c7;color:#d97706;border-radius:10px;font-size:12px;display:flex;align-items:center;gap:4px}
+.de-tag-area input{border:none;outline:none;background:transparent;font-size:13px;flex:1;min-width:80px;color:#1a1a1a}
+.de-input{width:100%;border:1px solid #e5e5e5;border-radius:10px;padding:10px 12px;font-size:14px;font-family:inherit;background:#fafafa;color:#1a1a1a;min-height:80px;resize:vertical}
+
+/* 记录按空间浏览 */
+.space-browse-card{background:#fff;border-radius:12px;padding:12px 14px;margin-bottom:8px;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,0.04);border:2px solid transparent;transition:border .2s}
+.space-browse-card.active{border-color:#f59e0b;background:#fffbeb}
+.space-browse-header{display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.space-browse-icon{width:36px;height:36px;border-radius:10px;background:#fef3c7;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.space-browse-name{flex:1;font-size:14px;font-weight:600}
+.space-browse-count{font-size:11px;color:#9ca3af;background:#f5f5f5;padding:2px 8px;border-radius:8px}
+.space-browse-latest{font-size:11px;color:#6b7280;line-height:1.5;padding-left:46px;border-left:2px solid #f5f5f5}
+.space-browse-latest .sbl-item{padding:3px 0}
+.space-browse-latest .sbl-date{color:#9ca3af;margin-right:6px}
+.space-filter-banner{margin:0 16px 10px;padding:10px 14px;background:linear-gradient(135deg,#fef3c7,#fde68a);border-radius:10px;display:flex;justify-content:space-between;align-items:center;font-size:13px;color:#92400e}
+
+/* ===== Budget Page Styles ===== */
+.budget-cat-card{background:#fff;border-radius:12px;padding:12px 14px;margin-bottom:8px;box-shadow:0 1px 3px rgba(0,0,0,0.04)}
+.bc-header{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+.bc-icon{font-size:22px;flex-shrink:0}
+.bc-name{font-size:14px;font-weight:600;color:#1a1a1a}
+.bc-sub{font-size:11px;color:#9ca3af;margin-top:1px}
+.bc-amount{font-size:13px;font-weight:700;text-align:right}
+.bc-bar-track{height:5px;background:#f3f4f6;border-radius:3px;overflow:hidden}
+.bc-bar-fill{height:100%;width:0%;border-radius:3px;transition:width .5s}
+.budget-flow-item{display:flex;gap:10px;padding:12px 14px;background:#fff;border-radius:12px;margin:0 16px 8px;box-shadow:0 1px 2px rgba(0,0,0,0.03)}
+.budget-flow-item .bfi-icon{width:36px;height:36px;border-radius:8px;background:#f5f5f5;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.budget-flow-item .bfi-info{flex:1;min-width:0}
+.budget-flow-item .bfi-info h5{font-size:13px;font-weight:600}
+.budget-flow-item .bfi-info .bfi-meta{font-size:11px;color:#9ca3af;margin-top:1px}
+.budget-flow-item .bfi-amount{font-size:14px;font-weight:700;color:#1a1a1a;text-align:right;flex-shrink:0}
+.budget-flow-item .bfi-type{font-size:10px;padding:1px 6px;border-radius:8px;background:#fef3c7;color:#d97706;margin-top:2px;display:inline-block}
+
+@media(max-width:430px){.phone-frame{width:100%;height:100vh;border-radius:0;box-shadow:none}.modal-sheet{width:100%}}
+</style>
+</head>
+<body>
+
+<div class="phone-frame">
+<div class="status-bar"><span>9:41</span><span>WiFi ▮▮▮ ▮▮▮</span></div>
+<div class="nav-bar">
+  <button class="back-btn" id="backBtn" style="visibility:hidden" onclick="goBack()">←</button>
+  <span id="navTitle">筑家记</span>
+  <button class="action-btn" id="actionBtn" style="display:none">编辑</button>
+</div>
+<div class="toast" id="toast"></div>
+<div class="main-content">
+
+<!-- ===== HOME V4.4 主题互动 ===== -->
+<div class="page active" id="page-home">
+  <div class="home-meta" id="homeMeta">
+    <span>📅 2026年7月31日 周五 · 准备第7天</span>
+    <span>距开工 31 天</span>
+  </div>
+  <div class="hero rainy" id="hero">
+    <span class="hg-weather-switch" onclick="cycleWeather()">🌦️ 切换</span>
+    <div class="rain-drops" id="rainDrops">
+      <div class="rain-drop" style="left:10%;animation-delay:0s"></div>
+      <div class="rain-drop" style="left:25%;animation-delay:.3s"></div>
+      <div class="rain-drop" style="left:40%;animation-delay:.6s"></div>
+      <div class="rain-drop" style="left:55%;animation-delay:.1s"></div>
+      <div class="rain-drop" style="left:70%;animation-delay:.4s"></div>
+      <div class="rain-drop" style="left:85%;animation-delay:.7s"></div>
+    </div>
+    <div class="hg-emoji" id="heroEmoji">🌧️</div>
+    <h2 id="heroTitle">雨天，在家做功课</h2>
+    <div class="hg-stage">📍 准备期 · 北欧风格</div>
+    <div class="hg-quote" id="heroQuote">"下雨天更适合规划<br>把想要的家，一笔一笔画出来"</div>
+  </div>
+
+  <div class="weather-card">
+    <div class="wc-icon" id="weatherIcon">🌧️</div>
+    <div class="wc-text">
+      <div class="wc-temp" id="weatherTemp">22-28°C <span style="font-size:12px;color:#3b82f6;font-weight:400" id="weatherDesc">中雨</span></div>
+      <div class="wc-desc" id="weatherAir">空气质量良 · 湿度 78%</div>
+    </div>
+    <div class="wc-tip" id="weatherTip">⛈️ 今天别去建材市场</div>
+  </div>
+
+  <div class="pending-card">
+    <h4>📌 昨天有 2 件事没做完</h4>
+    <div class="pending-item">
+      <span>· 选购客厅筒灯（拖了 2 天）</span>
+      <span class="pi-tag">建议今天补</span>
+    </div>
+    <div class="pending-item">
+      <span>· 预约木工师傅（已约到明早9点）</span>
+      <span class="pi-tag" style="background:#dcfce7;color:#16a34a">已完成</span>
+    </div>
+  </div>
+
+  <div class="dash-stats">
+    <div class="dash-stat" onclick="switchTab('ref')"><div class="s-icon">🎨</div><div class="s-num">北欧</div><div class="s-label">我的风格</div></div>
+    <div class="dash-stat"><div class="s-icon">📚</div><div class="s-num">5</div><div class="s-label">知识库</div></div>
+    <div class="dash-stat" onclick="pushSubPage('budget','预算与流水')"><div class="s-icon">💰</div><div class="s-num" id="dashSpent">¥0</div><div class="s-label">已花费</div></div>
+  </div>
+
+  <div class="prep-card">
+    <div class="prep-header">
+      <h4>📋 开工准备</h4>
+      <span class="prep-progress">2/5 完成</span>
+    </div>
+    <div class="prep-bar-track"><div class="prep-bar-fill" style="width:40%" id="prepBar"></div></div>
+    <div class="prep-items" id="prepItems">
+      <span class="prep-tag done" onclick="togglePrep(this)">选定风格</span>
+      <span class="prep-tag done" onclick="togglePrep(this)">预算规划</span>
+      <span class="prep-tag next" onclick="togglePrep(this)">找施工方</span>
+      <span class="prep-tag" onclick="togglePrep(this)">签合同</span>
+      <span class="prep-tag" onclick="togglePrep(this)">办手续</span>
+    </div>
+    <div class="prep-cta">
+      <span class="prep-cta-text">🎯 下一步：找施工方</span>
+      <span class="prep-cta-btn" onclick="showToast('打开施工方推荐')">去看看</span>
+    </div>
+  </div>
+
+  <div class="next-stage-card">
+    <h4>➡️ 下一阶段预告：泥瓦</h4>
+    <p>开工后第一件大事：贴瓷砖。需要提前准备：瓷砖选型、瓦工预约、卫生间防水高度确认</p>
+    <span class="ns-btn" onclick="showToast('查看泥瓦阶段攻略')">看攻略</span>
+  </div>
+
+  <div class="tip-card">
+    <h4>💡 今日贴士</h4>
+    <p>正在下中雨，不建议去建材城。趁雨天在家做点功课：搜"水电改造避坑"，看 2-3 篇就够了</p>
+  </div>
+</div>
+
+<!-- ===== 参考 Tab (V4.4 完整恢复) ===== -->
+<div class="page" id="page-ref">
+  <div class="ref-tabs">
+    <button class="ref-tab active" onclick="switchRefTab('insp',this)">💡 灵感</button>
+    <button class="ref-tab" onclick="switchRefTab('know',this)">📚 知识</button>
+  </div>
+
+  <div class="ref-panel active" id="ref-insp">
+    <!-- 收藏外部内容 -->
+    <div class="bookmark-entry" onclick="openImportModal()">
+      <div class="be-icon">📥</div>
+      <div style="flex:1"><strong style="font-size:14px">收藏外部内容</strong><br><span style="font-size:11px;color:#9ca3af">小红书/抖音/公众号 · 复制链接即收藏</span></div>
+      <span style="color:#ccc">›</span>
+    </div>
+
+    <!-- 风格速测 -->
+    <div class="style-banner" onclick="showToast('3分钟风格速测')">
+      <div class="sb-icon">🚀</div>
+      <div style="flex:1">
+        <h4>3分钟风格速测</h4>
+        <p>5道题，测测你最爱的装修风格</p>
+      </div>
+      <span style="color:#ccc">›</span>
+    </div>
+
+    <!-- 已收藏内容 -->
+    <div class="saved-bookmarks">
+      <h4>📥 已收藏 <span class="sb-count">5 条</span> <span style="margin-left:auto;font-size:11px;color:#9ca3af;font-weight:400" onclick="switchRefTab('know',document.querySelectorAll('.ref-tab')[1])">全部 ›</span></h4>
+      <div class="sb-item" onclick="showToast('展开：日式厨房收纳')">
+        <div class="sb-thumb" style="background:linear-gradient(135deg,#fce7f3,#fbcfe8)">📱</div>
+        <div class="sb-info">
+          <h5>日式厨房必装这 5 个神器</h5>
+          <p>来自小红书 · 已提炼 5 个要点</p>
+        </div>
+      </div>
+      <div class="sb-item" onclick="showToast('展开：水电避坑')">
+        <div class="sb-thumb" style="background:linear-gradient(135deg,#dbeafe,#bfdbfe)">🎵</div>
+        <div class="sb-info">
+          <h5>水电改造避坑指南</h5>
+          <p>来自抖音 · 已提炼 7 个检查项</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 风格图库 -->
+    <div class="section-header"><span>✨ 装修风格</span><span class="more">8大风格</span></div>
+    <div class="style-grid">
+      <div class="style-card"><div class="sc-img" style="background:linear-gradient(135deg,#f0f9ff,#e0f2fe)">🪵</div><div class="sc-name">北欧</div></div>
+      <div class="style-card"><div class="sc-img" style="background:linear-gradient(135deg,#fefce8,#fef9c3)">🎋</div><div class="sc-name">日式</div></div>
+      <div class="style-card"><div class="sc-img" style="background:linear-gradient(135deg,#faf5ff,#f3e8ff)">🏺</div><div class="sc-name">侘寂</div></div>
+      <div class="style-card"><div class="sc-img" style="background:linear-gradient(135deg,#f8fafc,#f1f5f9)">⬜</div><div class="sc-name">极简</div></div>
+      <div class="style-card"><div class="sc-img" style="background:linear-gradient(135deg,#fff7ed,#ffedd5)">🏮</div><div class="sc-name">新中式</div></div>
+      <div class="style-card"><div class="sc-img" style="background:linear-gradient(135deg,#fdf2f8,#fce7f3)">✨</div><div class="sc-name">轻奢</div></div>
+      <div class="style-card"><div class="sc-img" style="background:linear-gradient(135deg,#fef2f2,#fee2e2)">🥐</div><div class="sc-name">法式</div></div>
+      <div class="style-card"><div class="sc-img" style="background:linear-gradient(135deg,#f0fdf4,#dcfce7)">🛋️</div><div class="sc-name">美式</div></div>
+    </div>
+
+    <!-- 工具行 -->
+    <div class="tools-row">
+      <div class="tool" onclick="showToast('AI风格分析')"><div class="t-icon">🤖</div><div class="t-label">AI风格分析</div></div>
+      <div class="tool" onclick="showToast('户型方案')"><div class="t-icon">📐</div><div class="t-label">户型方案</div></div>
+      <div class="tool" onclick="showToast('预算估算')"><div class="t-icon">💰</div><div class="t-label">预算估算</div></div>
+    </div>
+  </div>
+
+  <div class="ref-panel" id="ref-know">
+    <div class="search-bar">
+      <span style="font-size:16px;color:#9ca3af">🔍</span>
+      <input type="text" placeholder="搜"瓷砖""防水""水电"…">
+      <span class="ai-tag">AI 智能</span>
+    </div>
+    <div class="section-header"><span>📚 知识分类</span></div>
+    <div class="kg-grid">
+      <div class="kg-item"><div class="kg-icon">🧱</div><div class="kg-label">瓷砖</div></div>
+      <div class="kg-item"><div class="kg-icon">🪵</div><div class="kg-label">地板</div></div>
+      <div class="kg-item"><div class="kg-icon">🎨</div><div class="kg-label">涂料</div></div>
+      <div class="kg-item"><div class="kg-icon">🚿</div><div class="kg-label">卫浴</div></div>
+      <div class="kg-item"><div class="kg-icon">💡</div><div class="kg-label">灯具</div></div>
+      <div class="kg-item"><div class="kg-icon">🔌</div><div class="kg-label">开关</div></div>
+      <div class="kg-item"><div class="kg-icon">🪟</div><div class="kg-label">门窗</div></div>
+      <div class="kg-item"><div class="kg-icon">🛁</div><div class="kg-label">家电</div></div>
+    </div>
+    <div class="section-header"><span>🔥 热门问答</span><span class="more">50+</span></div>
+    <div class="faq-list">
+      <div class="faq-item"><span style="color:#f59e0b;font-weight:700;margin-right:8px">Q1</span>装修的正确顺序？<span style="color:#ef4444;font-size:11px;font-weight:600;margin-left:auto">HOT</span></div>
+      <div class="faq-item"><span style="color:#f59e0b;font-weight:700;margin-right:8px">Q2</span>瓷砖选800×800还是750×1500？<span style="color:#ef4444;font-size:11px;font-weight:600;margin-left:auto">HOT</span></div>
+      <div class="faq-item"><span style="color:#f59e0b;font-weight:700;margin-right:8px">Q3</span>卫生间防水要多高？</div>
+      <div class="faq-item"><span style="color:#f59e0b;font-weight:700;margin-right:8px">Q4</span>水管走顶好还是走地？</div>
+      <div class="faq-item"><span style="color:#f59e0b;font-weight:700;margin-right:8px">Q5</span>中央空调什么时候装？</div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== DIARY Tab (V4.4 重组) ===== -->
+<div class="page" id="page-diary">
+  <div class="diary-tab-bar">
+    <button class="diary-tab active" onclick="switchDiaryTab('overview',this)">📊 总览</button>
+    <button class="diary-tab" onclick="switchDiaryTab('plan',this)">📅 计划</button>
+    <button class="diary-tab" onclick="switchDiaryTab('record',this)">📝 记录</button>
+  </div>
+
+  <!-- 总览 V4.4 (分层) -->
+  <div class="diary-panel active" id="diary-overview">
+    <!-- 阶段焦点卡（包含流程） -->
+    <div class="diary-focus">
+      <h3>🏗️ 泥瓦阶段 <span style="font-size:11px;font-weight:400;background:rgba(255,255,255,0.6);padding:2px 8px;border-radius:8px;margin-left:4px">第38天</span></h3>
+      <div class="df-meta">预计还需 12 天 · 整体进度 70%</div>
+      <div class="df-flow">
+        <div class="df-flow-row">
+          <div class="df-step"><div class="dot done">✓</div><div class="lbl done">拆除</div></div>
+          <div class="df-line done"></div>
+          <div class="df-step"><div class="dot done">✓</div><div class="lbl done">空调</div></div>
+          <div class="df-line done"></div>
+          <div class="df-step"><div class="dot done">✓</div><div class="lbl done">水电</div></div>
+          <div class="df-line done"></div>
+          <div class="df-step"><div class="dot current">●</div><div class="lbl current">泥瓦</div></div>
+          <div class="df-line"></div>
+          <div class="df-step"><div class="dot">○</div><div class="lbl">木工</div></div>
+          <div class="df-line"></div>
+          <div class="df-step"><div class="dot">○</div><div class="lbl">油漆</div></div>
+          <div class="df-line"></div>
+          <div class="df-step"><div class="dot">○</div><div class="lbl">安装</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 关键三件事 -->
+    <div class="section-header" style="padding:8px 16px 6px"><span>🎯 今天要做什么</span></div>
+    <div class="diary-key-3">
+      <div class="key-card" onclick="toggleCollapsible('tasks')">
+        <span class="kc-arr">▼</span>
+        <div class="kc-num">3/8</div>
+        <div class="kc-lbl">今日任务</div>
+      </div>
+      <div class="key-card" onclick="toggleCollapsible('checklist')">
+        <span class="kc-arr">▼</span>
+        <div class="kc-num">5/12</div>
+        <div class="kc-lbl">验收清单</div>
+      </div>
+      <div class="key-card" onclick="showToast('下一阶段：木工准备')">
+        <span class="kc-arr">→</span>
+        <div class="kc-num" style="font-size:14px;color:#3b82f6">木工</div>
+        <div class="kc-lbl">下一阶段</div>
+      </div>
+    </div>
+
+    <!-- 今日任务 详细（折叠） -->
+    <div class="diary-detail" id="detail-tasks">
+      <div class="dd-header" onclick="toggleDetail('tasks')">
+        <h4>✅ 今日任务 <span class="dd-progress">(3/8)</span></h4>
+        <span class="dd-toggle open" id="dt-tasks">▼</span>
+      </div>
+      <div class="dd-body open" id="db-tasks">
+        <div class="task-item" onclick="toggleTask(this)"><div class="task-check done">✓</div><span class="task-text done">客厅地砖铺完检查</span></div>
+        <div class="task-item" onclick="toggleTask(this)"><div class="task-check done">✓</div><span class="task-text done">厨房墙砖贴完</span></div>
+        <div class="task-item" onclick="toggleTask(this)"><div class="task-check done">✓</div><span class="task-text done">卫生间闭水试验</span></div>
+        <div class="task-item" onclick="toggleTask(this)"><div class="task-check">○</div><span class="task-text">主卫贴砖（剩3㎡）</span></div>
+        <div class="task-item" onclick="toggleTask(this)"><div class="task-check">○</div><span class="task-text">预约木工师傅（明早9点）</span></div>
+        <div class="task-item" onclick="toggleTask(this)"><div class="task-check">○</div><span class="task-text">选购筒灯8个（客厅）</span></div>
+        <div class="task-add" onclick="showToast('添加任务')">＋ 添加任务</div>
+      </div>
+    </div>
+
+    <!-- 验收清单 详细（折叠） -->
+    <div class="diary-detail">
+      <div class="dd-header" onclick="toggleDetail('checklist')">
+        <h4>🎯 泥瓦验收清单 <span class="dd-progress">(5/12)</span></h4>
+        <span class="dd-toggle" id="dt-checklist">▼</span>
+      </div>
+      <div class="dd-body" id="db-checklist">
+        <div class="check-item" onclick="toggleCheck(this)"><span class="check-mark">✓</span><span class="check-text" style="text-decoration:line-through;color:#9ca3af">表面平整度（2m靠尺≤3mm）</span></div>
+        <div class="check-item" onclick="toggleCheck(this)"><span class="check-mark">✓</span><span class="check-text" style="text-decoration:line-through;color:#9ca3af">阴阳角方正</span></div>
+        <div class="check-item" onclick="toggleCheck(this)"><span class="check-mark">✓</span><span class="check-text" style="text-decoration:line-through;color:#9ca3af">留缝宽度一致（2mm）</span></div>
+        <div class="check-item" onclick="toggleCheck(this)"><span class="check-mark">✓</span><span class="check-text" style="text-decoration:line-through;color:#9ca3af">卫生间坡度</span></div>
+        <div class="check-item" onclick="toggleCheck(this)"><span class="check-mark">✓</span><span class="check-text" style="text-decoration:line-through;color:#9ca3af">闭水试验48h</span></div>
+        <div class="check-item" onclick="toggleCheck(this)"><span class="check-mark">☐</span><span class="check-text">空鼓率检查</span></div>
+        <div class="check-item" onclick="toggleCheck(this)"><span class="check-mark">☐</span><span class="check-text">接缝高低差</span></div>
+        <div class="check-item" onclick="toggleCheck(this)"><span class="check-mark">☐</span><span class="check-text">门口挡水坎</span></div>
+      </div>
+    </div>
+
+    <!-- 资源区 2x2 网格 -->
+    <div class="section-header" style="padding:8px 16px 6px"><span>📦 资料</span></div>
+    <div class="diary-resources">
+      <div class="res-card" onclick="showToast('阶段预算')">
+        <div class="rc-head"><span class="rc-title">💰 阶段预算</span><span class="rc-arr">›</span></div>
+        <div class="rc-content">¥28,500 <span style="font-size:11px;color:#9ca3af">/ ¥30,000</span></div>
+        <div class="budget-bar-track" style="margin:4px 0 2px"><div class="budget-bar-fill" style="width:95%;background:linear-gradient(90deg,#f59e0b,#d97706)"></div></div>
+        <div class="rc-mini" style="color:#dc2626">仅剩 ¥1,500</div>
+      </div>
+      <div class="res-card" onclick="showToast('现场照片')">
+        <div class="rc-head"><span class="rc-title">📷 现场照片</span><span class="rc-arr">›</span></div>
+        <div class="rc-content">24 张</div>
+        <div class="rc-mini">最近 7.30</div>
+      </div>
+      <div class="res-card" onclick="showToast('避坑提醒')">
+        <div class="rc-head"><span class="rc-title">⚠️ 避坑提醒</span><span class="rc-arr">›</span></div>
+        <div class="rc-content">4 条</div>
+        <div class="rc-mini">必看必看</div>
+      </div>
+      <div class="res-card worker-compact" style="margin:0;padding:8px 10px;box-shadow:none" onclick="showToast('工人详情')">
+        <div class="wc-title">👷 今日工人</div>
+        <div class="wc-row">
+          <div class="wc-av">👨‍🔧</div>
+          <div class="wc-name">张师傅</div>
+          <span class="wc-status">在场</span>
+        </div>
+        <div class="wc-row">
+          <div class="wc-av">🧑‍💼</div>
+          <div class="wc-name">王工长</div>
+          <span class="wc-status off">已离</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- 下一阶段 单独一行 -->
+    <div class="next-stage-card">
+      <h4>➡️ 下一阶段：木工</h4>
+      <p>木工进场前需准备：吊顶方案图、定制柜体设计、筒灯开孔位置</p>
+      <span class="ns-btn" onclick="showToast('联系木工')">立即预约木工</span>
+    </div>
+  </div>
+
+  <!-- 计划 - 日历 (V4.4 保留) -->
+  <div class="diary-panel" id="diary-plan">
+    <div class="cal-header">
+      <span class="cal-nav">‹ 6月</span>
+      <h4>📅 2026年7月</h4>
+      <span class="cal-nav">8月 ›</span>
+    </div>
+    <div class="cal-grid">
+      <div class="cal-weekdays"><div>日</div><div>一</div><div>二</div><div>三</div><div>四</div><div>五</div><div>六</div></div>
+      <div class="cal-days">
+        <div class="cal-day other-month"><span>28</span></div>
+        <div class="cal-day other-month"><span>29</span></div>
+        <div class="cal-day other-month"><span>30</span></div>
+        <div class="cal-day"><span>1</span><span class="day-dot dot-green"></span></div>
+        <div class="cal-day"><span>2</span><span class="day-dot dot-green"></span></div>
+        <div class="cal-day"><span>3</span><span class="day-dot dot-green"></span></div>
+        <div class="cal-day"><span>4</span><span class="day-dot dot-green"></span></div>
+        <div class="cal-day"><span>5</span><span class="day-dot dot-green"></span></div>
+        <div class="cal-day"><span>6</span><span class="day-dot dot-green"></span></div>
+        <div class="cal-day"><span>7</span><span class="day-dot dot-green"></span></div>
+        <div class="cal-day"><span>8</span><span class="day-dot dot-green"></span></div>
+        <div class="cal-day"><span>9</span><span class="day-dot dot-green"></span></div>
+        <div class="cal-day"><span>10</span><span class="day-dot dot-green"></span></div>
+        <div class="cal-day"><span>11</span><span class="day-dot dot-green"></span></div>
+        <div class="cal-day"><span>12</span><span class="day-dot dot-green"></span></div>
+        <div class="cal-day"><span>13</span><span class="day-dot dot-green"></span></div>
+        <div class="cal-day"><span>14</span><span class="day-dot dot-green"></span></div>
+        <div class="cal-day"><span>15</span><span class="day-dot dot-green"></span></div>
+        <div class="cal-day"><span>16</span><span class="day-dot dot-green"></span></div>
+        <div class="cal-day"><span>17</span><span class="day-dot dot-green"></span></div>
+        <div class="cal-day"><span>18</span><span class="day-dot dot-green"></span></div>
+        <div class="cal-day"><span>19</span><span class="day-dot dot-green"></span></div>
+        <div class="cal-day"><span>20</span><span class="day-dot dot-green"></span></div>
+        <div class="cal-day"><span>21</span><span class="day-dot dot-green"></span></div>
+        <div class="cal-day"><span>22</span><span class="day-dot dot-green"></span></div>
+        <div class="cal-day"><span>23</span><span class="day-dot dot-green"></span></div>
+        <div class="cal-day"><span>24</span><span class="day-dot dot-green"></span></div>
+        <div class="cal-day"><span>25</span><span class="day-dot dot-green"></span></div>
+        <div class="cal-day"><span>26</span><span class="day-dot dot-green"></span></div>
+        <div class="cal-day"><span>27</span><span class="day-dot dot-green"></span></div>
+        <div class="cal-day"><span>28</span><span class="day-dot dot-green"></span></div>
+        <div class="cal-day"><span>29</span><span class="day-dot dot-green"></span></div>
+        <div class="cal-day"><span>30</span><span class="day-dot dot-green"></span></div>
+        <div class="cal-day today"><span>31</span><span class="day-dot"></span></div>
+        <div class="cal-day other-month"><span>1</span></div>
+        <div class="cal-day other-month"><span>2</span></div>
+        <div class="cal-day other-month"><span>3</span><span class="day-dot dot-orange"></span></div>
+        <div class="cal-day other-month"><span>4</span><span class="day-dot dot-orange"></span></div>
+        <div class="cal-day other-month"><span>5</span><span class="day-dot dot-orange"></span></div>
+        <div class="cal-day other-month"><span>6</span><span class="day-dot dot-orange"></span></div>
+        <div class="cal-day other-month"><span>7</span><span class="day-dot dot-orange"></span></div>
+        <div class="cal-day other-month"><span>8</span><span class="day-dot dot-orange"></span></div>
+      </div>
+    </div>
+    <div class="cal-legend">
+      <span><span class="dot" style="background:#22c55e"></span>已完成</span>
+      <span><span class="dot" style="background:#f59e0b"></span>进行中</span>
+      <span><span class="dot" style="background:#d1d5db"></span>未开始</span>
+    </div>
+    <div class="cal-detail">
+      <h4>📅 7月31日（今天）</h4>
+      <div class="cal-event"><span class="ce-dot orange"></span><span class="ce-text">🟠 泥瓦工继续进行</span><span class="ce-time">第38天</span></div>
+      <div class="cal-event"><span class="ce-dot green"></span><span class="ce-text">客厅地砖铺完第3天</span><span class="ce-time">7.30</span></div>
+      <div class="cal-event"><span class="ce-dot green"></span><span class="ce-text">卫生间闭水试验通过</span><span class="ce-time">7.30</span></div>
+      <div class="cal-event"><span class="ce-dot"></span><span class="ce-text" style="color:#9ca3af">预约木工师傅（明天）</span><span class="ce-time">8.1</span></div>
+    </div>
+  </div>
+
+  <!-- 记录 -->
+  <div class="diary-panel" id="diary-record">
+    <div class="search-bar">
+      <span style="font-size:16px;color:#9ca3af">🔍</span>
+      <input type="text" placeholder="搜"闭水试验"…" oninput="searchRecords(this.value)">
+      <span class="ai-tag">AI 智能</span>
+    </div>
+    <div class="tag-chips">
+      <span class="tag-chip active" onclick="filterRecordTag('all',this)">全部</span>
+      <span class="tag-chip" onclick="filterRecordTag('客厅',this)">#客厅</span>
+      <span class="tag-chip" onclick="filterRecordTag('水电',this)">#水电</span>
+      <span class="tag-chip" onclick="filterRecordTag('防水',this)">#防水</span>
+      <span class="tag-chip" onclick="filterRecordTag('验收',this)">#验收</span>
+      <span class="tag-chip" onclick="filterRecordTag('开工',this)">#开工</span>
+    </div>
+
+    <!-- 按空间浏览 -->
+    <div class="section-header" style="padding:8px 16px 6px"><span>📍 按空间浏览</span></div>
+    <div style="padding:0 16px">
+      <div class="space-browse-card" data-space="客厅" onclick="filterBySpace('客厅')">
+        <div class="space-browse-header">
+          <div class="space-browse-icon" style="background:linear-gradient(135deg,#fef3c7,#fde68a)">🛋️</div>
+          <div class="space-browse-name">客厅</div>
+          <div class="space-browse-count">1 条</div>
+        </div>
+        <div class="space-browse-latest">
+          <div class="sbl-item"><span class="sbl-date">7.30</span>客厅地砖铺完第3天</div>
+        </div>
+      </div>
+      <div class="space-browse-card" data-space="主卫" onclick="filterBySpace('主卫')">
+        <div class="space-browse-header">
+          <div class="space-browse-icon" style="background:linear-gradient(135deg,#dcfce7,#bbf7d0)">🚿</div>
+          <div class="space-browse-name">主卫</div>
+          <div class="space-browse-count">1 条</div>
+        </div>
+        <div class="space-browse-latest">
+          <div class="sbl-item"><span class="sbl-date">7.30</span>卫生间闭水试验通过</div>
+        </div>
+      </div>
+      <div class="space-browse-card" data-space="厨房" onclick="filterBySpace('厨房')">
+        <div class="space-browse-header">
+          <div class="space-browse-icon" style="background:linear-gradient(135deg,#fce7f3,#fbcfe8)">🍳</div>
+          <div class="space-browse-name">厨房</div>
+          <div class="space-browse-count">1 条</div>
+        </div>
+        <div class="space-browse-latest">
+          <div class="sbl-item"><span class="sbl-date">7.25</span>厨房水电走完</div>
+        </div>
+      </div>
+      <div class="space-browse-card" data-space="全屋" onclick="filterBySpace('全屋')">
+        <div class="space-browse-header">
+          <div class="space-browse-icon" style="background:linear-gradient(135deg,#dbeafe,#bfdbfe)">🏠</div>
+          <div class="space-browse-name">全屋</div>
+          <div class="space-browse-count">2 条</div>
+        </div>
+        <div class="space-browse-latest">
+          <div class="sbl-item"><span class="sbl-date">7.28</span>水电验收通过</div>
+          <div class="sbl-item"><span class="sbl-date">7.22</span>开工大吉</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 空间筛选提示条 -->
+    <div class="space-filter-banner" id="spaceFilterBanner" style="display:none">
+      <span>🏷️ 仅显示 <strong id="spaceFilterName"></strong> 的记录</span>
+      <span style="color:#f59e0b;cursor:pointer;font-weight:600" onclick="clearSpaceFilter()">查看全部 ›</span>
+    </div>
+
+    <div style="padding:0 16px;font-size:11px;color:#9ca3af;margin-bottom:8px">🕐 最新记录 · 按时间倒序</div>
+    <div class="record-item" data-tags="客厅 泥瓦 验收" data-space="客厅">
+      <div class="record-icon">🧱</div>
+      <div class="record-info">
+        <h5>客厅地砖铺完第3天</h5>
+        <div class="ri-meta"><span>客厅 · 泥瓦</span><span>7.30</span></div>
+        <div class="ri-desc">800×800浅灰色通体大理石瓷砖，留缝2mm。师傅手艺不错，平整度目测OK。</div>
+        <div class="ri-tags"><span class="tag tag-orange">#客厅</span><span class="tag tag-blue">#泥瓦</span><span class="tag tag-green">#验收</span></div>
+      </div>
+    </div>
+    <div class="record-item" data-tags="卫生间 防水 验收" data-space="主卫">
+      <div class="record-icon">💧</div>
+      <div class="record-info">
+        <h5>卫生间闭水试验通过</h5>
+        <div class="ri-meta"><span>主卫 · 防水</span><span>7.30</span></div>
+        <div class="ri-desc">蓄水48小时，楼下无渗漏。防水涂料刷到1.8米高，门槛石位置做了挡水坎。</div>
+        <div class="ri-tags"><span class="tag tag-blue">#防水</span><span class="tag tag-green">#验收</span></div>
+      </div>
+    </div>
+    <div class="record-item" data-tags="全屋 水电 验收" data-space="全屋">
+      <div class="record-icon">✅</div>
+      <div class="record-info">
+        <h5>水电验收通过</h5>
+        <div class="ri-meta"><span>全屋 · 水电</span><span>7.28</span></div>
+        <div class="ri-desc">水管打压0.8MPa保持30分钟不掉压，电路通断测试正常。</div>
+        <div class="ri-tags"><span class="tag tag-blue">#水电</span><span class="tag tag-green">#验收</span></div>
+      </div>
+    </div>
+    <div class="record-item" data-tags="厨房 水电" data-space="厨房">
+      <div class="record-icon">🍳</div>
+      <div class="record-info">
+        <h5>厨房水电走完</h5>
+        <div class="ri-meta"><span>厨房 · 水电</span><span>7.25</span></div>
+        <div class="ri-desc">橱柜下方预留4个插座（洗碗机/净水器/垃圾处理器/备用）。</div>
+        <div class="ri-tags"><span class="tag tag-blue">#水电</span><span class="tag tag-orange">#厨房</span></div>
+      </div>
+    </div>
+    <div class="record-item" data-tags="全屋 开工" data-space="全屋">
+      <div class="record-icon">🎉</div>
+      <div class="record-info">
+        <h5>开工大吉</h5>
+        <div class="ri-meta"><span>全屋 · 开工</span><span>7.22</span></div>
+        <div class="ri-desc">砸墙完成，垃圾清运完毕。明天开始开槽布线。</div>
+        <div class="ri-tags"><span class="tag tag-green">#开工</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== BUDGET PAGE ===== -->
+<div class="page" id="page-budget">
+  <!-- 段1：核心数据卡 -->
+  <div style="background:linear-gradient(135deg,#fef3c7 0%,#fffbeb 100%);margin:0 0 10px;padding:16px 14px 18px;border-radius:0 0 20px 20px">
+    <div style="font-size:12px;color:#92400e;margin-bottom:4px">💰 整体预算</div>
+    <div style="font-size:13px;color:#1a1a1a;margin-bottom:10px">已花费 ¥0 · 还有 ¥200,000 可用</div>
+    <div style="display:flex;gap:8px;margin-bottom:10px">
+      <div style="flex:1;text-align:center;background:rgba(255,255,255,0.6);border-radius:10px;padding:8px 4px">
+        <div style="font-size:18px;font-weight:700;color:#d97706" id="bSpent">¥0</div>
+        <div style="font-size:11px;color:#92400e">已花费</div>
+      </div>
+      <div style="flex:1;text-align:center;background:rgba(255,255,255,0.6);border-radius:10px;padding:8px 4px">
+        <div style="font-size:18px;font-weight:700;color:#1a1a1a">¥200,000</div>
+        <div style="font-size:11px;color:#92400e">总预算</div>
+      </div>
+      <div style="flex:1;text-align:center;background:rgba(255,255,255,0.6);border-radius:10px;padding:8px 4px">
+        <div style="font-size:18px;font-weight:700;color:#16a34a" id="bRemain">¥200,000</div>
+        <div style="font-size:11px;color:#92400e">剩余</div>
+      </div>
+    </div>
+    <div style="height:6px;background:rgba(255,255,255,0.5);border-radius:3px;overflow:hidden">
+      <div style="height:100%;width:0%;background:linear-gradient(90deg,#f59e0b,#d97706);border-radius:3px;transition:width .5s" id="bBar"></div>
+    </div>
+  </div>
+
+  <!-- 段2：预算分配 -->
+  <div class="section-header"><span>📊 预算分配</span></div>
+  <div style="padding:0 16px">
+    <div class="budget-cat-card" data-key="material">
+      <div class="bc-header"><span class="bc-icon">🔨</span><div style="flex:1"><div class="bc-name">材料</div><div class="bc-sub">瓷砖/地板/涂料/卫浴/灯具</div></div><div class="bc-amount" style="color:#d97706">¥<span class="bc-spent">0</span><span style="color:#9ca3af;font-size:11px;font-weight:400">/80,000</span></div></div>
+      <div class="bc-bar-track"><div class="bc-bar-fill" style="background:linear-gradient(90deg,#f59e0b,#d97706)"></div></div>
+    </div>
+    <div class="budget-cat-card" data-key="labor">
+      <div class="bc-header"><span class="bc-icon">👷</span><div style="flex:1"><div class="bc-name">人工</div><div class="bc-sub">拆除/水电/瓦工/木工/油漆</div></div><div class="bc-amount" style="color:#3b82f6">¥<span class="bc-spent">0</span><span style="color:#9ca3af;font-size:11px;font-weight:400">/60,000</span></div></div>
+      <div class="bc-bar-track"><div class="bc-bar-fill" style="background:linear-gradient(90deg,#3b82f6,#2563eb)"></div></div>
+    </div>
+    <div class="budget-cat-card" data-key="furniture">
+      <div class="bc-header"><span class="bc-icon">🪑</span><div style="flex:1"><div class="bc-name">家具</div><div class="bc-sub">沙发/床/柜体/餐桌</div></div><div class="bc-amount" style="color:#8b5cf6">¥<span class="bc-spent">0</span><span style="color:#9ca3af;font-size:11px;font-weight:400">/40,000</span></div></div>
+      <div class="bc-bar-track"><div class="bc-bar-fill" style="background:linear-gradient(90deg,#a78bfa,#8b5cf6)"></div></div>
+    </div>
+    <div class="budget-cat-card" data-key="appliance">
+      <div class="bc-header"><span class="bc-icon">🛁</span><div style="flex:1"><div class="bc-name">家电</div><div class="bc-sub">厨电/卫浴/空调/洗衣机</div></div><div class="bc-amount" style="color:#10b981">¥<span class="bc-spent">0</span><span style="color:#9ca3af;font-size:11px;font-weight:400">/20,000</span></div></div>
+      <div class="bc-bar-track"><div class="bc-bar-fill" style="background:linear-gradient(90deg,#34d399,#10b981)"></div></div>
+    </div>
+  </div>
+
+  <!-- 段3：近期流水 -->
+  <div class="section-header"><span>💰 近期流水</span><span class="more" onclick="showToast('查看全部流水')">全部</span></div>
+  <div id="flowEmpty" style="margin:0 16px 12px;padding:20px 16px;background:#fff;border-radius:14px;text-align:center;color:#9ca3af;box-shadow:0 1px 3px rgba(0,0,0,0.04)">
+    <div style="font-size:36px;margin-bottom:6px">📭</div>
+    <div style="font-size:14px;color:#4b5563;margin-bottom:6px">暂无记录</div>
+    <div style="font-size:12px">点击下方 <span style="color:#f59e0b;font-weight:600">+</span> 按钮 →「✏️ 随手记」<br>快速记录每一笔，自动归类到这里</div>
+  </div>
+  <div id="flowList" style="display:none"></div>
+</div>
+
+<!-- ===== MINE ===== -->
+<div class="page" id="page-mine">
+  <div style="padding:24px 0;text-align:center">
+    <div style="width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#fef3c7,#fde68a);display:inline-flex;align-items:center;justify-content:center;font-size:24px">🏠</div>
+    <div style="font-size:16px;font-weight:600;margin-top:8px">阳光花园 3-201</div>
+    <div style="font-size:12px;color:#999;margin-top:2px">准备期 · 北欧风格</div>
+  </div>
+  <div class="menu-group">
+    <div class="menu-item"><span class="menu-icon">📚</span>我的知识库<span style="margin-left:auto;font-size:12px;color:#999">5条</span><span class="arrow">›</span></div>
+    <div class="menu-item" onclick="pushSubPage('budget','预算与流水')"><span class="menu-icon">💰</span>预算与流水<span class="arrow">›</span></div>
+    <div class="menu-item"><span class="menu-icon">🏗️</span>空间管理<span class="arrow">›</span></div>
+    <div class="menu-item"><span class="menu-icon">👨‍👩‍👧</span>家庭成员<span style="margin-left:auto;font-size:12px;color:#999">你 · 老婆</span><span class="arrow">›</span></div>
+  </div>
+  <div class="menu-group">
+    <div class="menu-item"><span class="menu-icon">✅</span>验收清单<span class="arrow">›</span></div>
+    <div class="menu-item"><span class="menu-icon">🔌</span>家电选购指南<span class="arrow">›</span></div>
+    <div class="menu-item"><span class="menu-icon">⚙️</span>设置<span class="arrow">›</span></div>
+  </div>
+</div>
+
+<!-- ===== Write Diary Page (全屏) ===== -->
+<div class="page diary-edit-page" id="page-diary-edit">
+  <div class="de-header">
+    <span class="de-back" onclick="closeDiaryEdit()">←</span>
+    <span class="de-title">📝 写施工日记</span>
+    <span class="de-save" onclick="saveDiaryEdit()">保存</span>
+  </div>
+  <div class="de-context">
+    <span>📅 2026年7月31日 周五 · 准备第7天</span>
+    <span>🏗️ 当前：泥瓦阶段</span>
+  </div>
+  <div class="de-form">
+    <div class="de-section">
+      <div class="de-section-title">📍 所属空间 <span class="req">必选</span></div>
+      <div class="space-picker" id="diarySpacePicker">
+        <span class="space-chip" onclick="selectSpace(this,'客厅')">🛋️ 客厅</span>
+        <span class="space-chip" onclick="selectSpace(this,'主卧')">🛏️ 主卧</span>
+        <span class="space-chip" onclick="selectSpace(this,'次卧')">🛏️ 次卧</span>
+        <span class="space-chip" onclick="selectSpace(this,'厨房')">🍳 厨房</span>
+        <span class="space-chip" onclick="selectSpace(this,'主卫')">🚿 主卫</span>
+        <span class="space-chip" onclick="selectSpace(this,'次卫')">🚿 次卫</span>
+        <span class="space-chip" onclick="selectSpace(this,'书房')">📚 书房</span>
+        <span class="space-chip" onclick="selectSpace(this,'餐厅')">🍽️ 餐厅</span>
+        <span class="space-chip" onclick="selectSpace(this,'玄关')">🚪 玄关</span>
+        <span class="space-chip" onclick="selectSpace(this,'阳台')">🌳 阳台</span>
+        <span class="space-chip" onclick="selectSpace(this,'全屋')">🏠 全屋</span>
+      </div>
+    </div>
+
+    <div class="de-section">
+      <div class="de-section-title">🔨 施工类型</div>
+      <div class="space-picker">
+        <span class="space-chip" onclick="selectType(this,'拆除改造')">拆除改造</span>
+        <span class="space-chip" onclick="selectType(this,'水电改造')">水电改造</span>
+        <span class="space-chip" onclick="selectType(this,'防水')">防水</span>
+        <span class="space-chip" onclick="selectType(this,'泥瓦工')">泥瓦工</span>
+        <span class="space-chip" onclick="selectType(this,'木工')">木工</span>
+        <span class="space-chip" onclick="selectType(this,'油漆')">油漆</span>
+        <span class="space-chip" onclick="selectType(this,'安装')">安装</span>
+        <span class="space-chip" onclick="selectType(this,'验收')">验收</span>
+        <span class="space-chip" onclick="selectType(this,'其他')">其他</span>
+      </div>
+    </div>
+
+    <div class="de-section">
+      <div class="de-section-title">📷 现场照片 <span style="color:#9ca3af;font-size:11px;font-weight:400">(0/9)</span></div>
+      <div class="photo-grid-upload" id="diaryPhotoGrid">
+        <div class="photo-slot" onclick="addDiaryPhoto(this)">+<span class="ps-tip">点击拍照</span></div>
+        <div class="photo-slot" onclick="addDiaryPhoto(this)">+<span class="ps-tip">点击拍照</span></div>
+        <div class="photo-slot" onclick="addDiaryPhoto(this)">+<span class="ps-tip">点击拍照</span></div>
+      </div>
+      <div style="font-size:11px;color:#9ca3af;margin-top:6px">💡 建议拍施工细节、管线位置、隐蔽工程</div>
+    </div>
+
+    <div class="de-section">
+      <div class="de-section-title">✍️ 今天做了什么</div>
+      <textarea class="de-input" id="diaryContent" placeholder="例：客厅地砖铺完了，800×800浅灰色通体大理石，留缝2mm。师傅手艺不错..."></textarea>
+    </div>
+
+    <div class="de-section">
+      <div class="de-section-title">🏷️ 标签 <span style="color:#9ca3af;font-size:11px;font-weight:400">(方便日后搜索)</span></div>
+      <div class="de-tag-area" id="diaryTagArea">
+        <input type="text" placeholder="输入标签按回车..." onkeydown="if(event.key==='Enter')addDiaryTag(this)">
+      </div>
+    </div>
+
+    <div style="padding:8px 0 60px;color:#9ca3af;font-size:11px;text-align:center">
+      💡 提示：填好后点右上「保存」即可
+    </div>
+  </div>
+</div>
+
+</div><!-- /main-content -->
+
+<!-- FAB -->
+<div class="fab-backdrop" id="fabBackdrop" onclick="closeFab()"></div>
+<div class="fab-menu" id="fabMenu">
+  <div class="fab-grid">
+    <button class="fab-item" onclick="openQuickNote();closeFab()"><div class="f-icon">✏️</div>随手记</button>
+    <button class="fab-item" onclick="showToast('拍照留档');closeFab()"><div class="f-icon">📷</div>拍照留档</button>
+    <button class="fab-item" onclick="showToast('AI装修小管家');closeFab()"><div class="f-icon">🤖</div>问AI</button>
+    <button class="fab-item" onclick="openDiaryEdit();closeFab()"><div class="f-icon">📝</div>写日记</button>
+  </div>
+</div>
+
+<!-- Tab Bar -->
+<div class="tab-bar">
+  <button class="tab-item active" data-page="home" onclick="switchTab('home')"><span class="tab-icon">🏠</span><span class="tab-label">首页</span></button>
+  <button class="tab-item" data-page="ref" onclick="switchTab('ref')"><span class="tab-icon">📖</span><span class="tab-label">参考</span></button>
+  <button class="fab-btn" id="fabBtn" onclick="toggleFab()">+</button>
+  <button class="tab-item" data-page="diary" onclick="switchTab('diary')"><span class="tab-icon">📓</span><span class="tab-label">日记</span></button>
+  <button class="tab-item" data-page="mine" onclick="switchTab('mine')"><span class="tab-icon">👤</span><span class="tab-label">我的</span></button>
+</div>
+</div>
+
+<!-- 写日记已迁移到独立全屏页面 page-diary-edit -->
+
+<!-- 快速记录 -->
+<div class="modal-overlay" id="quickNoteModal">
+<div class="modal-sheet">
+<div class="modal-handle"></div>
+<div style="font-size:17px;font-weight:600;text-align:center;margin-bottom:12px">✏️ 随手记</div>
+<div class="note-tabs">
+  <button class="note-tab active" onclick="switchNoteTab('text',this)">📝 文字</button>
+  <button class="note-tab" onclick="switchNoteTab('voice',this)">🎤 语音</button>
+  <button class="note-tab" onclick="switchNoteTab('photo',this)">📷 拍照</button>
+</div>
+
+<div class="note-panel active" id="note-text">
+  <textarea class="form-textarea" id="noteText" placeholder="例：买了瓷砖 800×800 68元/片 × 52片"></textarea>
+  <button class="btn-primary" onclick="parseNote()" style="margin-top:12px">智能识别归类</button>
+  <div class="ai-parse-result" id="parseResult">
+    <div style="font-weight:600;color:#16a34a;margin-bottom:6px">🤖 AI 识别结果</div>
+    <div style="display:flex;justify-content:space-between;padding:3px 0">金额 <strong>¥3,536</strong></div>
+    <div style="display:flex;justify-content:space-between;padding:3px 0">品类 <strong>材料 > 瓷砖</strong></div>
+    <div style="display:flex;justify-content:space-between;padding:3px 0">空间 <strong>客厅</strong></div>
+    <div style="display:flex;justify-content:space-between;padding:3px 0">规格 <strong>800×800 通体</strong></div>
+    <div style="margin-top:10px;padding:8px;background:#fef3c7;border-radius:8px;font-size:12px;color:#92400e">💡 提示：你可以修改分类后保存</div>
+  </div>
+</div>
+
+<div class="note-panel" id="note-voice">
+  <div class="voice-btn" id="voiceBtn" onclick="toggleVoice()">🎤</div>
+  <div style="text-align:center;font-size:12px;color:#9ca3af">按住说话，松手发送</div>
+  <div id="voiceResult" style="margin-top:14px;padding:12px;background:#f5f5f5;border-radius:10px;font-size:13px;display:none">
+    <div style="color:#999;font-size:11px;margin-bottom:4px">语音转文字：</div>
+    <span id="voiceText">在建材市场买了3个筒灯，欧普7瓦4000K，一共126块钱</span>
+  </div>
+</div>
+
+<div class="note-panel" id="note-photo">
+  <div class="photo-upload-area" onclick="showToast('模拟拍照（实际小程序调用 wx.chooseImage）')">
+    <div style="font-size:36px;margin-bottom:6px">📸</div>
+    <div style="font-size:13px;color:#4b5563">点击拍照或选择照片</div>
+    <div style="font-size:11px;color:#9ca3af;margin-top:4px">建议拍购物小票或商品包装</div>
+  </div>
+  <button class="btn-primary" style="margin-top:12px" onclick="showToast('AI识别：瓷砖 800×800 ×52片 ¥3,536')">AI 识别商品</button>
+</div>
+
+<div style="display:flex;gap:10px;margin-top:16px">
+  <button class="btn-secondary" onclick="closeQuickNote()">取消</button>
+  <button class="btn-primary" style="flex:2" onclick="saveExpense();closeQuickNote()">保存到预算</button>
+</div>
+</div>
+</div>
+
+<!-- 收藏 -->
+<div class="modal-overlay" id="importModal">
+<div class="modal-sheet">
+<div class="modal-handle"></div>
+<div style="font-size:17px;font-weight:600;text-align:center;margin-bottom:12px">📥 收藏外部内容</div>
+<div style="display:flex;gap:8px;margin-bottom:14px">
+  <button style="flex:1;padding:10px;background:#dbeafe;color:#1e40af;border:none;border-radius:10px;font-size:13px;font-weight:500;cursor:pointer">🔗 链接</button>
+  <button style="flex:1;padding:10px;background:#fef3c7;color:#92400e;border:none;border-radius:10px;font-size:13px;font-weight:500;cursor:pointer">📸 截图</button>
+  <button style="flex:1;padding:10px;background:#f3f4f6;color:#6b7280;border:none;border-radius:10px;font-size:13px;font-weight:500;cursor:pointer">📋 文本</button>
+</div>
+<input class="form-input" placeholder="https://...">
+<button class="btn-primary" style="margin-top:12px" onclick="showToast('AI分析完成')">AI 分析提取</button>
+</div>
+</div>
+
+<script>
+let currentTab='home',fabOpen=false;
+
+// Budget state (mock - in real app would sync from cloud)
+const budgetState = {
+  total: 200000,
+  spent: 0,
+  byCategory: { material: 0, labor: 0, furniture: 0, appliance: 0 },
+  categoryBudget: { material: 80000, labor: 60000, furniture: 40000, appliance: 20000 },
+  flow: []  // 流水列表
+};
+
+// Simulate saving an expense from quick note
+function saveExpense() {
+  // 演示用真实场景数据
+  const sample = {
+    id: Date.now(),
+    icon: '🧱',
+    title: '瓷砖 800×800 通体',
+    meta: '客厅 · 刚刚',
+    amount: 3536,
+    category: 'material',
+    typeLabel: '材料'
+  };
+  budgetState.flow.unshift(sample);
+  budgetState.spent += sample.amount;
+  budgetState.byCategory[sample.category] += sample.amount;
+  renderBudget();
+  showToast('已保存！已自动计入预算');
+}
+
+function renderBudget() {
+  // 更新首页 dash-stat
+  const dashSpent = document.getElementById('dashSpent');
+  if (dashSpent) dashSpent.textContent = '¥' + budgetState.spent.toLocaleString();
+
+  // 更新预算页顶部
+  const bSpent = document.getElementById('bSpent');
+  const bRemain = document.getElementById('bRemain');
+  const bBar = document.getElementById('bBar');
+  if (bSpent) bSpent.textContent = '¥' + budgetState.spent.toLocaleString();
+  if (bRemain) bRemain.textContent = '¥' + (budgetState.total - budgetState.spent).toLocaleString();
+  if (bBar) {
+    const pct = Math.min(100, budgetState.spent / budgetState.total * 100);
+    bBar.style.width = pct + '%';
+    if (pct >= 90) bBar.style.background = 'linear-gradient(90deg,#ef4444,#dc2626)';
+  }
+
+  // 更新各类目进度
+  document.querySelectorAll('.budget-cat-card').forEach(card => {
+    const key = card.getAttribute('data-key');
+    const spent = budgetState.byCategory[key];
+    const limit = budgetState.categoryBudget[key];
+    const pct = Math.min(100, spent / limit * 100);
+    card.querySelector('.bc-spent').textContent = spent.toLocaleString();
+    const fill = card.querySelector('.bc-bar-fill');
+    fill.style.width = pct + '%';
+    if (pct >= 90) fill.style.background = 'linear-gradient(90deg,#ef4444,#dc2626)';
+  });
+
+  // 渲染流水列表
+  const flowList = document.getElementById('flowList');
+  const flowEmpty = document.getElementById('flowEmpty');
+  if (budgetState.flow.length === 0) {
+    if (flowEmpty) flowEmpty.style.display = 'block';
+    if (flowList) flowList.style.display = 'none';
+  } else {
+    if (flowEmpty) flowEmpty.style.display = 'none';
+    if (flowList) {
+      flowList.style.display = 'block';
+      flowList.innerHTML = budgetState.flow.map(item => `
+        <div class="budget-flow-item">
+          <div class="bfi-icon">${item.icon}</div>
+          <div class="bfi-info">
+            <h5>${item.title}</h5>
+            <div class="bfi-meta">${item.meta}</div>
+            <span class="bfi-type">${item.typeLabel}</span>
+          </div>
+          <div class="bfi-amount">¥${item.amount.toLocaleString()}</div>
+        </div>
+      `).join('');
+    }
+  }
+}
+let weatherState=1; // 0=晴 1=雨 2=云
+
+const weatherConfigs = [
+  {
+    cls: 'sunny', emoji: '☀️', title: '早安，准备中的家',
+    quote: '"每个家都是独一无二的<br>你今天挑选的每一样，都在让家更近一点"',
+    icon: '☀️', temp: '26-32°C', desc: '晴', air: '优 · 湿度 45%',
+    tip: '☀️ 适合出门选材'
+  },
+  {
+    cls: 'rainy', emoji: '🌧️', title: '雨天，在家做功课',
+    quote: '"下雨天更适合规划<br>把想要的家，一笔一笔画出来"',
+    icon: '🌧️', temp: '22-28°C', desc: '中雨', air: '良 · 湿度 78%',
+    tip: '⛈️ 今天别去建材市场'
+  },
+  {
+    cls: 'cloudy', emoji: '⛅', title: '阴天，柔和的灵感',
+    quote: '"不急不躁的日子<br>才是看清自己真实想要的时刻"',
+    icon: '⛅', temp: '24-30°C', desc: '多云', air: '良 · 湿度 60%',
+    tip: '🌥️ 出门记得带件外套'
+  }
+];
+
+function cycleWeather() {
+  weatherState = (weatherState + 1) % 3;
+  applyWeather();
+}
+
+function applyWeather() {
+  const w = weatherConfigs[weatherState];
+  const hero = document.getElementById('hero');
+  const rain = document.getElementById('rainDrops');
+  hero.className = 'hero ' + w.cls;
+  document.getElementById('heroEmoji').textContent = w.emoji;
+  document.getElementById('heroTitle').textContent = w.title;
+  document.getElementById('heroQuote').innerHTML = w.quote;
+  document.getElementById('weatherIcon').textContent = w.icon;
+  document.getElementById('weatherTemp').innerHTML = w.temp + ' <span style="font-size:12px;color:#3b82f6;font-weight:400">' + w.desc + '</span>';
+  document.getElementById('weatherAir').textContent = w.air;
+  document.getElementById('weatherTip').textContent = w.tip;
+  rain.style.display = weatherState === 1 ? 'block' : 'none';
+}
+
+// Sub-page navigation (for budget / mykb pages)
+function pushSubPage(name, title) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  document.getElementById('backBtn').style.visibility = 'visible';
+  document.getElementById('navTitle').textContent = title;
+}
+
+function goBack() {
+  const currentId = document.querySelector('.page.active').id.replace('page-','');
+  const backTarget = (currentId === 'budget' || currentId === 'mykb') ? currentTab : 'home';
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + backTarget).classList.add('active');
+  document.getElementById('backBtn').style.visibility = 'hidden';
+  const titles = {home:'筑家记',ref:'参考',diary:'装修日记',mine:'我的'};
+  document.getElementById('navTitle').textContent = titles[currentTab] || '筑家记';
+}
+
+function switchTab(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  currentTab=name;
+  const titles={home:'筑家记',ref:'参考',diary:'装修日记',mine:'我的'};
+  document.getElementById('navTitle').textContent=titles[name]||'筑家记';
+  document.querySelectorAll('.tab-item').forEach(t=>{
+    t.classList.remove('active');
+    if(t.getAttribute('data-page')===name) t.classList.add('active');
+  });
+}
+
+function switchRefTab(name,el) {
+  document.querySelectorAll('.ref-tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.ref-panel').forEach(p=>p.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('ref-'+name).classList.add('active');
+}
+
+function switchDiaryTab(name,el) {
+  document.querySelectorAll('.diary-tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.diary-panel').forEach(p=>p.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('diary-'+name).classList.add('active');
+}
+
+function toggleDetail(id) {
+  const body=document.getElementById('db-'+id);
+  const toggle=document.getElementById('dt-'+id);
+  body.classList.toggle('open');
+  toggle.classList.toggle('open');
+}
+
+function toggleCollapsible(id) { toggleDetail(id); }
+
+function toggleTask(el) {
+  const c=el.querySelector('.task-check');
+  const t=el.querySelector('.task-text');
+  if(c.classList.contains('done')){c.classList.remove('done');c.textContent='○';t.classList.remove('done');}
+  else{c.classList.add('done');c.textContent='✓';t.classList.add('done');}
+}
+function toggleCheck(el) {
+  const m=el.querySelector('.check-mark');
+  const t=el.querySelector('.check-text');
+  if(m.textContent==='✓'){m.textContent='☐';t.style.textDecoration='none';t.style.color='#1a1a1a';}
+  else{m.textContent='✓';t.style.textDecoration='line-through';t.style.color='#9ca3af';}
+}
+function togglePrep(el) {
+  el.classList.toggle('done');
+  if (el.classList.contains('done')) el.classList.remove('next');
+  updatePrepProgress();
+}
+function updatePrepProgress() {
+  const total = document.querySelectorAll('#prepItems .prep-tag').length;
+  const done = document.querySelectorAll('#prepItems .prep-tag.done').length;
+  document.getElementById('prepBar').style.width = (done/total*100)+'%';
+  document.querySelector('.prep-progress').textContent = done+'/'+total+' 完成';
+}
+
+function searchRecords(query) {
+  const q = query.toLowerCase();
+  document.querySelectorAll('#diary-record .record-item').forEach(item => {
+    const text = item.textContent.toLowerCase();
+    item.style.display = text.includes(q) ? '' : 'none';
+  });
+}
+function filterRecordTag(tag, el) {
+  document.querySelectorAll('.tag-chips .tag-chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  document.querySelectorAll('#diary-record .record-item').forEach(item => {
+    if (tag === 'all') { item.style.display = ''; return; }
+    item.style.display = item.getAttribute('data-tags').includes(tag) ? '' : 'none';
+  });
+}
+function addTag(input) {
+  const v = input.value.trim();
+  if (!v) return;
+  const area = document.getElementById('tagInputArea');
+  const tag = document.createElement('span');
+  tag.className = 'existing-tag';
+  tag.textContent = v + ' ×';
+  area.insertBefore(tag, input);
+  input.value = '';
+}
+
+function toggleFab() {
+  fabOpen=!fabOpen;
+  document.getElementById('fabMenu').classList.toggle('open',fabOpen);
+  document.getElementById('fabBackdrop').classList.toggle('open',fabOpen);
+  document.getElementById('fabBtn').classList.toggle('open',fabOpen);
+}
+function closeFab() { fabOpen=false; document.getElementById('fabMenu').classList.remove('open'); document.getElementById('fabBackdrop').classList.remove('open'); document.getElementById('fabBtn').classList.remove('open'); }
+
+// 写日记 - 独立页面
+function openDiaryEdit() {
+  pushSubPage('diary-edit', '写施工日记');
+  // Reset form
+  document.querySelectorAll('#diarySpacePicker .space-chip').forEach(c => c.classList.remove('selected'));
+  document.getElementById('diaryContent').value = '';
+  document.getElementById('diaryTagArea').innerHTML = '<input type="text" placeholder="输入标签按回车..." onkeydown="if(event.key===\'Enter\')addDiaryTag(this)">';
+  document.getElementById('diaryPhotoGrid').innerHTML = `
+    <div class="photo-slot" onclick="addDiaryPhoto(this)">+<span class="ps-tip">点击拍照</span></div>
+    <div class="photo-slot" onclick="addDiaryPhoto(this)">+<span class="ps-tip">点击拍照</span></div>
+    <div class="photo-slot" onclick="addDiaryPhoto(this)">+<span class="ps-tip">点击拍照</span></div>
+  `;
+}
+function closeDiaryEdit() {
+  // 返回日记-记录 Tab
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-diary').classList.add('active');
+  document.getElementById('backBtn').style.visibility = 'hidden';
+  document.getElementById('navTitle').textContent = '装修日记';
+}
+function saveDiaryEdit() {
+  const content = document.getElementById('diaryContent').value.trim();
+  if (!content) { showToast('请填写今天做了什么'); return; }
+  // 简单校验必填空间（演示）
+  const spaceSelected = document.querySelector('#diarySpacePicker .space-chip.selected');
+  if (!spaceSelected) { showToast('请选择所属空间'); return; }
+  showToast('日记已保存！带空间和标签方便搜索');
+  closeDiaryEdit();
+}
+
+function selectSpace(el, name) {
+  document.querySelectorAll('#diarySpacePicker .space-chip').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+function selectType(el, name) {
+  // Toggle behavior for施工类型
+  document.querySelectorAll('.de-section:nth-child(2) .space-chip').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+function addDiaryPhoto(slot) {
+  if (slot.classList.contains('has-image')) return;
+  slot.classList.add('has-image');
+  slot.innerHTML = '🧱<span class="ps-del" onclick="event.stopPropagation();removeDiaryPhoto(this)">×</span>';
+  showToast('照片已添加（实际小程序调用 wx.chooseImage）');
+}
+
+function removeDiaryPhoto(del) {
+  const slot = del.parentElement;
+  slot.classList.remove('has-image');
+  slot.innerHTML = '+<span class="ps-tip">点击拍照</span>';
+}
+
+function addDiaryTag(input) {
+  const v = input.value.trim();
+  if (!v) return;
+  const area = document.getElementById('diaryTagArea');
+  const tag = document.createElement('span');
+  tag.className = 'de-tag';
+  tag.textContent = v + ' ×';
+  tag.onclick = function() { this.remove(); };
+  area.insertBefore(tag, input);
+  input.value = '';
+}
+
+// 记录按空间筛选
+let currentSpaceFilter = null;
+function filterBySpace(space) {
+  currentSpaceFilter = space;
+  document.querySelectorAll('#diary-record .record-item').forEach(item => {
+    item.style.display = (item.getAttribute('data-space') === space) ? '' : 'none';
+  });
+  document.querySelectorAll('.space-browse-card').forEach(c => {
+    c.classList.toggle('active', c.getAttribute('data-space') === space);
+  });
+  document.getElementById('spaceFilterBanner').style.display = 'flex';
+  document.getElementById('spaceFilterName').textContent = space;
+  // Reset tag filter
+  document.querySelectorAll('.tag-chips .tag-chip').forEach(c => c.classList.remove('active'));
+}
+function clearSpaceFilter() {
+  currentSpaceFilter = null;
+  document.querySelectorAll('#diary-record .record-item').forEach(item => item.style.display = '');
+  document.querySelectorAll('.space-browse-card').forEach(c => c.classList.remove('active'));
+  document.getElementById('spaceFilterBanner').style.display = 'none';
+}
+function openQuickNote() {
+  document.getElementById('quickNoteModal').classList.add('active');
+  document.getElementById('parseResult').classList.remove('show');
+  document.getElementById('voiceResult').style.display = 'none';
+  document.getElementById('noteText').value = '';
+  switchNoteTab('text');
+}
+
+function switchNoteTab(name, el) {
+  document.querySelectorAll('.note-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.note-panel').forEach(p => p.classList.remove('active'));
+  if (el) el.classList.add('active');
+  document.getElementById('note-' + name).classList.add('active');
+}
+
+function parseNote() {
+  const text = document.getElementById('noteText').value.trim();
+  if (!text) { showToast('请输入内容'); return; }
+  document.getElementById('parseResult').classList.add('show');
+}
+
+function toggleVoice() {
+  const btn = document.getElementById('voiceBtn');
+  btn.classList.add('recording');
+  btn.textContent = '⏺️';
+  setTimeout(() => {
+    btn.classList.remove('recording');
+    btn.textContent = '🎤';
+    document.getElementById('voiceResult').style.display = 'block';
+  }, 2000);
+}
+function closeQuickNote() { document.getElementById('quickNoteModal').classList.remove('active'); }
+function openImportModal() { document.getElementById('importModal').classList.add('active'); }
+function closeImportModal() { document.getElementById('importModal').classList.remove('active'); }
+
+function showToast(msg) {
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),1800);
+}
+
+// 写日记已改为全屏页面，无需 modal backdrop
+document.getElementById('quickNoteModal').addEventListener('click',function(e){if(e.target===this)closeQuickNote()});
+document.getElementById('importModal').addEventListener('click',function(e){if(e.target===this)closeImportModal()});
+
+applyWeather();
+console.log('🏠 筑家记 V4.4');
+console.log('🎨 主题互动: 3 种天气主题可切换（点击首页右上"🌦️ 切换"）');
+console.log('📖 灵感Tab: 风格速测+已收藏+8大风格+AI工具 完整恢复');
+console.log('📊 日记总览: 阶段焦点+关键3件事+资源2x2 重组');
+</script>
+</body>
+</html>

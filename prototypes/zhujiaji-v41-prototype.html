@@ -1,0 +1,847 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>筑家记 V4.1 - 首页Dashboard版</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{font-size:16px}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;background:#f0f0f0;display:flex;justify-content:center;align-items:center;min-height:100vh;padding:20px;-webkit-font-smoothing:antialiased}
+.phone-frame{width:390px;height:844px;background:#f5f5f5;border-radius:44px;overflow:hidden;box-shadow:0 25px 80px rgba(0,0,0,0.25),0 0 0 2px #1a1a1a,0 0 0 6px #2d2d2d,0 0 0 8px #1a1a1a;position:relative;display:flex;flex-direction:column}
+.status-bar{height:44px;background:#fff;display:flex;justify-content:space-between;align-items:center;padding:0 28px;font-size:12px;font-weight:600;color:#1a1a1a;flex-shrink:0}
+.nav-bar{height:44px;background:#fff;display:flex;align-items:center;justify-content:center;padding:0 16px;font-size:17px;font-weight:600;color:#1a1a1a;position:relative;flex-shrink:0;border-bottom:0.5px solid #e5e5e5}
+.nav-bar .back-btn{position:absolute;left:12px;width:32px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;border:none;background:none;font-size:20px;color:#f59e0b}
+.main-content{flex:1;overflow-y:auto;overflow-x:hidden;background:#f5f5f5;-webkit-overflow-scrolling:touch}
+.main-content::-webkit-scrollbar{display:none}
+.page{display:none;min-height:100%;padding-bottom:20px;animation:fadeIn .25s ease}
+.page.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+.tab-bar{height:60px;background:#fff;display:flex;align-items:center;border-top:0.5px solid #e5e5e5;flex-shrink:0;position:relative}
+.tab-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer;padding:4px 0;border:none;background:none;color:#999;transition:color .2s}
+.tab-item.active{color:#f59e0b}
+.tab-item .tab-icon{font-size:20px;line-height:1}
+.tab-item .tab-label{font-size:10px;line-height:1}
+.fab-btn{position:absolute;left:50%;top:-22px;transform:translateX(-50%);width:44px;height:44px;background:linear-gradient(135deg,#f59e0b,#d97706);border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:28px;cursor:pointer;z-index:50;border:none;box-shadow:0 4px 12px rgba(245,158,11,0.4);transition:transform .2s}
+.fab-btn.open{transform:translateX(-50%) rotate(45deg)}
+.fab-menu{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);display:none;z-index:90}
+.fab-menu.open{display:block}
+.fab-backdrop{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.35);z-index:80;display:none}
+.fab-backdrop.open{display:block}
+.fab-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;width:200px}
+.fab-item{background:#fff;border-radius:16px;padding:16px 10px;cursor:pointer;box-shadow:0 4px 16px rgba(0,0,0,0.12);transition:transform .15s;display:flex;flex-direction:column;align-items:center;gap:6px;border:none;font-size:13px;color:#1a1a1a;font-weight:500}
+.fab-item:active{transform:scale(.95)}
+.fab-item .f-icon{font-size:24px}
+.section-header{display:flex;justify-content:space-between;align-items:center;padding:20px 16px 10px;font-size:15px;font-weight:600;color:#1a1a1a}
+.section-header .more{font-size:13px;color:#999;cursor:pointer;font-weight:400}
+.tag{display:inline-flex;align-items:center;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:500}
+.tag-orange{background:#fef3c7;color:#d97706}
+.tag-green{background:#dcfce7;color:#16a34a}
+.tag-blue{background:#dbeafe;color:#2563eb}
+.tag-red{background:#fee2e2;color:#dc2626}
+.card{background:#fff;border-radius:14px;margin:0 16px 10px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.04)}
+.card-body{padding:14px}
+
+/* ===== HOME DASHBOARD V4.1 ===== */
+.dash-header{background:linear-gradient(135deg,#fef3c7 0%,#fffbeb 100%);padding:20px 20px 24px;text-align:center}
+.dash-header h2{font-size:19px;font-weight:700;color:#1a1a1a}
+.dash-header .stage-badge{display:inline-block;margin-top:6px;padding:4px 12px;border-radius:12px;font-size:12px;font-weight:600;background:#fff;color:#d97706}
+.dash-header .stage-badge.active{background:#fef3c7;color:#d97706}
+
+/* 3-stat overview row */
+.dash-stats{display:flex;gap:10px;padding:0 16px;margin-top:-12px;position:relative;z-index:2}
+.dash-stat{flex:1;background:#fff;border-radius:14px;padding:12px;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,0.06);cursor:pointer}
+.dash-stat .s-icon{font-size:24px;margin-bottom:2px}
+.dash-stat .s-num{font-size:20px;font-weight:700;color:#1a1a1a}
+.dash-stat .s-label{font-size:11px;color:#9ca3af;margin-top:1px}
+
+/* Preparation progress */
+.prep-section{margin:16px 16px 0}
+.prep-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.prep-header h4{font-size:14px;font-weight:600}
+.prep-bar-track{height:6px;background:#f3f4f6;border-radius:3px;overflow:hidden;margin-bottom:10px}
+.prep-bar-fill{height:100%;background:linear-gradient(90deg,#f59e0b,#d97706);border-radius:3px;transition:width .5s}
+.prep-items{display:flex;flex-wrap:wrap;gap:6px}
+.prep-tag{padding:4px 10px;border-radius:12px;font-size:11px;cursor:pointer;background:#fff;color:#6b7280;border:1px solid #e5e5e5}
+.prep-tag.done{background:#dcfce7;color:#16a34a;border-color:#bbf7d0}
+.prep-tag.done::before{content:'✓ '}
+
+/* My knowledge base preview */
+.mykb-section{margin:16px 16px 0}
+.mykb-search{display:flex;align-items:center;gap:8px;padding:10px 14px;background:#fff;border-radius:10px;margin-bottom:8px;cursor:pointer;box-shadow:0 1px 2px rgba(0,0,0,0.03)}
+.mykb-search .placeholder{color:#9ca3af;font-size:13px;flex:1}
+.mykb-item{display:flex;align-items:center;gap:10px;padding:12px 14px;background:#fff;border-radius:10px;margin-bottom:6px;cursor:pointer;font-size:13px;color:#1a1a1a}
+.mykb-item .kb-cat{font-size:18px;flex-shrink:0}
+.mykb-item .kb-text{flex:1;min-width:0}
+.mykb-item .kb-text .kb-title{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:13px}
+.mykb-item .kb-text .kb-src{font-size:11px;color:#9ca3af;margin-top:1px}
+
+/* Budget flow preview */
+.flow-section{margin:16px 16px 0}
+.flow-item{display:flex;align-items:center;gap:10px;padding:10px 12px;background:#fff;border-radius:10px;margin-bottom:4px;font-size:13px}
+.flow-item .fl-icon{font-size:16px;flex-shrink:0}
+.flow-item .fl-info{flex:1}
+.flow-item .fl-amount{font-weight:600;color:#1a1a1a}
+.flow-empty{text-align:center;padding:20px;color:#ccc;font-size:13px}
+
+/* ===== My Knowledge Base Page ===== */
+.kb-page-header{background:linear-gradient(135deg,#dbeafe,#eff6ff);padding:16px 20px}
+.kb-search-bar{display:flex;align-items:center;gap:8px;padding:10px 14px;background:#fff;border-radius:12px;box-shadow:0 1px 3px rgba(0,0,0,0.04)}
+.kb-search-bar input{flex:1;border:none;outline:none;font-size:14px;color:#1a1a1a;background:transparent}
+.kb-search-bar input::placeholder{color:#ccc}
+.kb-filters{display:flex;gap:6px;padding:12px 16px;overflow-x:auto}
+.kb-filters::-webkit-scrollbar{display:none}
+.kb-filter{padding:5px 12px;border-radius:16px;font-size:12px;cursor:pointer;border:1px solid #e5e5e5;background:#fff;color:#6b7280;white-space:nowrap}
+.kb-filter.active{background:#f59e0b;color:#fff;border-color:#f59e0b}
+.kb-card{margin:0 16px 10px;background:#fff;border-radius:14px;padding:14px;box-shadow:0 1px 3px rgba(0,0,0,0.04);cursor:pointer}
+.kb-card .kb-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px}
+.kb-card .kb-source{font-size:11px;color:#9ca3af;display:flex;align-items:center;gap:4px}
+.kb-card h4{font-size:14px;font-weight:600;margin-bottom:6px}
+.kb-card .kb-tags{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:8px}
+.kb-card .kb-extract{font-size:12px;color:#6b7280;line-height:1.6;background:#fafafa;padding:10px;border-radius:8px}
+
+/* ===== Budget/Flow Page ===== */
+.flow-summary{display:flex;gap:10px;padding:0 16px 10px}
+.flow-sum-card{flex:1;background:#fff;border-radius:14px;padding:12px;text-align:center;box-shadow:0 1px 3px rgba(0,0,0,0.04)}
+.flow-sum-card .fc-amount{font-size:20px;font-weight:700}
+.flow-sum-card .fc-label{font-size:11px;color:#9ca3af;margin-top:2px}
+.budget-bar-track{height:6px;background:#f3f4f6;border-radius:3px;overflow:hidden;margin:0 16px 10px}
+.budget-bar-fill{height:100%;background:linear-gradient(90deg,#f59e0b,#d97706);border-radius:3px}
+.flow-entry{display:flex;align-items:center;gap:10px;padding:12px 14px;background:#fff;border-radius:10px;margin:0 16px 4px;font-size:13px;cursor:pointer}
+.flow-entry .fe-cat{font-size:20px;flex-shrink:0}
+.flow-entry .fe-info{flex:1}
+.flow-entry .fe-info .fe-title{font-weight:600}
+.flow-entry .fe-info .fe-meta{font-size:11px;color:#9ca3af;margin-top:1px}
+.flow-entry .fe-amount{font-weight:600;color:#1a1a1a;text-align:right}
+.flow-entry .fe-type{font-size:11px;padding:2px 6px;border-radius:8px;background:#fef3c7;color:#d97706}
+
+/* ===== Process Switcher ===== */
+.process-view{display:none}
+.process-view.show{display:block}
+
+/* ===== Inspiration (simplified keep) ===== */
+.insp-banner{background:linear-gradient(135deg,#f0f9ff,#e0f2fe);margin:0 16px 14px;padding:16px;border-radius:14px;display:flex;align-items:center;gap:12px;cursor:pointer}
+.bookmark-entry{display:flex;align-items:center;gap:12px;margin:0 16px 12px;padding:14px;background:#fff;border-radius:12px;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,0.04)}
+.bookmark-entry .be-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;background:linear-gradient(135deg,#f59e0b,#d97706);color:#fff;flex-shrink:0}
+.style-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:0 16px}
+.style-card{border-radius:12px;overflow:hidden;cursor:pointer}
+.style-card .sc-img{height:80px;display:flex;align-items:center;justify-content:center;font-size:32px}
+.style-card .sc-name{text-align:center;font-size:11px;padding:6px 4px;font-weight:500;color:#4b5563}
+
+/* ===== Knowledge (keep) ===== */
+.kg-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:0 16px}
+.kg-item{background:#fff;border-radius:12px;padding:14px 6px;text-align:center;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,0.04)}
+.kg-item:active{transform:scale(.96)}
+.kg-item .kg-icon{font-size:26px;margin-bottom:4px}
+.kg-item .kg-label{font-size:11px;color:#4b5563;font-weight:500}
+
+/* ===== Mine (keep) ===== */
+.menu-group{margin:0 16px 12px}
+.menu-item{display:flex;align-items:center;gap:12px;padding:14px 16px;background:#fff;cursor:pointer;font-size:14px;color:#1a1a1a;border-bottom:0.5px solid #f5f5f5}
+.menu-item:first-child{border-radius:14px 14px 0 0}
+.menu-item:last-child{border-radius:0 0 14px 14px;border-bottom:none}
+.menu-item:only-child{border-radius:14px}
+.menu-item .menu-icon{font-size:20px;width:28px;text-align:center}
+.menu-item .arrow{margin-left:auto;color:#ccc}
+
+/* ===== Modals ===== */
+.modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.4);z-index:100;display:none;align-items:flex-end;justify-content:center}
+.modal-overlay.active{display:flex}
+.modal-sheet{width:390px;max-height:85vh;background:#fff;border-radius:20px 20px 0 0;overflow-y:auto;padding:20px 16px 30px;animation:slideUp .3s ease}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.modal-handle{width:36px;height:4px;background:#ddd;border-radius:2px;margin:0 auto 16px}
+.btn-primary{width:100%;padding:12px;background:linear-gradient(135deg,#f59e0b,#d97706);color:#fff;border:none;border-radius:12px;font-size:16px;font-weight:600;cursor:pointer}
+.btn-secondary{flex:1;padding:12px;background:#f5f5f5;border:none;border-radius:12px;font-size:15px;color:#6b7280;cursor:pointer}
+.form-group{margin-bottom:14px}
+.form-label{font-size:13px;font-weight:600;color:#4b5563;margin-bottom:6px;display:block}
+.form-textarea,.form-input{width:100%;border:1px solid #e5e5e5;border-radius:10px;padding:10px 12px;font-size:14px;font-family:inherit;background:#fafafa;color:#1a1a1a}
+.form-textarea{min-height:60px;resize:vertical}
+.note-tabs,.import-tabs{display:flex;border-bottom:1px solid #e5e5e5;margin-bottom:14px}
+.note-tab,.import-tab{flex:1;text-align:center;padding:10px 0;font-size:14px;color:#999;cursor:pointer;border:none;background:none;border-bottom:2px solid transparent;font-weight:500}
+.note-tab.active,.import-tab.active{color:#f59e0b;border-bottom-color:#f59e0b}
+.note-panel,.import-panel{display:none}
+.note-panel.active,.import-panel.active{display:block}
+.voice-btn{width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,#f59e0b,#d97706);color:#fff;font-size:32px;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;margin:20px auto;box-shadow:0 4px 16px rgba(245,158,11,0.3)}
+.voice-btn.recording{animation:pulse2 1s infinite}
+@keyframes pulse2{0%,100%{box-shadow:0 0 0 0 rgba(245,158,11,0.4)}50%{box-shadow:0 0 0 16px rgba(245,158,11,0)}}
+.ai-parse-result,.ai-result-card{background:#f0fdf4;border:1px solid #bbf7d0;border-radius:12px;padding:12px;margin-top:12px;font-size:13px;display:none}
+.ai-parse-result.show,.ai-result-card.show{display:block}
+.url-paste{border:2px dashed #bfdbfe;border-radius:12px;padding:24px;text-align:center;color:#3b82f6;cursor:pointer;margin-bottom:12px}
+
+.test-question{text-align:center;padding:30px 20px}
+.test-question h3{font-size:18px;font-weight:700;color:#1a1a1a;margin-bottom:8px}
+.test-options{display:flex;gap:12px;justify-content:center}
+.test-option{width:130px;padding:20px 12px;border-radius:16px;cursor:pointer;text-align:center;font-size:36px;border:2px solid #e5e5e5;background:#fff;transition:all .2s}
+.test-option:active{border-color:#f59e0b;background:#fef3c7}
+.test-option .opt-label{font-size:13px;color:#4b5563;margin-top:8px;display:block}
+.test-result{padding:24px 20px;text-align:center}
+
+.toast{position:fixed;top:60px;left:50%;transform:translateX(-50%);background:#1a1a1a;color:#fff;padding:10px 24px;border-radius:20px;font-size:14px;z-index:200;opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap}
+.toast.show{opacity:1}
+
+@media(max-width:430px){.phone-frame{width:100%;height:100vh;border-radius:0;box-shadow:none}.modal-sheet{width:100%}}
+</style>
+</head>
+<body>
+
+<div class="phone-frame">
+<div class="status-bar"><span>9:41</span><span>WiFi ▮▮▮ ▮▮▮</span></div>
+<div class="nav-bar">
+  <button class="back-btn" id="backBtn" style="visibility:hidden" onclick="goBack()">←</button>
+  <span id="navTitle">筑家记</span>
+</div>
+<div class="toast" id="toast"></div>
+<div class="main-content" id="mainContent">
+
+<!-- ===== HOME DASHBOARD (V4.1 REWRITE) ===== -->
+<div class="page active" id="page-home">
+  <div class="dash-header">
+    <h2>阳光花园 3-201</h2>
+    <div class="stage-badge active" id="stageBadge">📍 准备期 · 计划9月开工</div>
+  </div>
+
+  <!-- 3 Stats -->
+  <div class="dash-stats">
+    <div class="dash-stat" onclick="switchTab('inspiration')">
+      <div class="s-icon">🎨</div>
+      <div class="s-num">北欧</div>
+      <div class="s-label">我的风格</div>
+    </div>
+    <div class="dash-stat" onclick="pushSubPage('mykb','我的知识库')">
+      <div class="s-icon">📚</div>
+      <div class="s-num" id="kbCount">5</div>
+      <div class="s-label">知识库</div>
+    </div>
+    <div class="dash-stat" onclick="pushSubPage('budget','预算流水')">
+      <div class="s-icon">💰</div>
+      <div class="s-num" id="flowTotal">¥0</div>
+      <div class="s-label">已花费</div>
+    </div>
+  </div>
+
+  <!-- Preparation Progress -->
+  <div class="prep-section">
+    <div class="prep-header">
+      <h4>📋 开工准备</h4>
+      <span style="font-size:12px;color:#f59e0b">2/5 完成</span>
+    </div>
+    <div class="prep-bar-track"><div class="prep-bar-fill" style="width:40%" id="prepBar"></div></div>
+    <div class="prep-items" id="prepItems">
+      <span class="prep-tag done" onclick="togglePrepTag(this)">选定风格</span>
+      <span class="prep-tag done" onclick="togglePrepTag(this)">预算规划</span>
+      <span class="prep-tag" onclick="togglePrepTag(this)">找施工方</span>
+      <span class="prep-tag" onclick="togglePrepTag(this)">签合同</span>
+      <span class="prep-tag" onclick="togglePrepTag(this)">办手续</span>
+    </div>
+    <!-- After completion hint -->
+    <div style="font-size:11px;color:#9ca3af;margin-top:8px;padding:8px 12px;background:#fafafa;border-radius:8px">
+      💡 全部完成后，首页自动切换为「装修中」模式：工序进度条 + 今日待办 + 主动提醒
+      <br><span style="color:#f59e0b;cursor:pointer" onclick="toggleDemoMode()">→ 点这里预览「装修中」模式</span>
+    </div>
+  </div>
+
+  <!-- My Knowledge Base Preview -->
+  <div class="mykb-section">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <span style="font-size:14px;font-weight:600">📚 我的知识库</span>
+      <span class="more" onclick="pushSubPage('mykb','我的知识库')">全部 5条</span>
+    </div>
+    <div class="mykb-search" onclick="pushSubPage('mykb','我的知识库')">
+      <span style="font-size:16px">🔍</span>
+      <span class="placeholder">搜索我的知识库（支持搜收纳、水电、避坑…）</span>
+    </div>
+    <div class="mykb-item" onclick="showToast('展开查看：日式厨房收纳技巧')">
+      <span class="kb-cat">📱</span>
+      <div class="kb-text">
+        <div class="kb-title">日式厨房必装这 5 个神器</div>
+        <div class="kb-src">来自小红书 · 已提炼 5 个要点</div>
+      </div>
+      <span style="color:#ccc">›</span>
+    </div>
+    <div class="mykb-item" onclick="showToast('展开查看：水电改造避坑')">
+      <span class="kb-cat">🎵</span>
+      <div class="kb-text">
+        <div class="kb-title">水电改造避坑指南</div>
+        <div class="kb-src">来自抖音 · 已提炼 7 个检查项</div>
+      </div>
+      <span style="color:#ccc">›</span>
+    </div>
+  </div>
+
+  <!-- Flow Preview -->
+  <div class="flow-section">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <span style="font-size:14px;font-weight:600">💰 近期流水</span>
+      <span class="more" onclick="pushSubPage('budget','预算流水')">查看全部</span>
+    </div>
+    <div class="flow-empty" id="flowEmpty">暂无记录。用中间 + 按钮 → 「随手记」快速记录每一笔花销</div>
+    <div id="flowList" style="display:none"></div>
+  </div>
+
+  <!-- Recommended Reading -->
+  <div class="section-header"><span>📖 推荐必读</span></div>
+  <div style="padding:0 16px">
+    <div class="card" style="margin:0 0 8px;cursor:pointer" onclick="showToast('装修完整流程')">
+      <div class="card-body" style="display:flex;align-items:center;gap:10px">
+        <span style="font-size:20px">📋</span>
+        <div style="flex:1"><div style="font-size:14px;font-weight:600">装修完整流程</div><div style="font-size:11px;color:#9ca3af">小白必看，从拆到入住</div></div>
+        <span style="color:#ccc">›</span>
+      </div>
+    </div>
+    <div class="card" style="margin:0 0 8px;cursor:pointer" onclick="showToast('预算分配指南')">
+      <div class="card-body" style="display:flex;align-items:center;gap:10px">
+        <span style="font-size:20px">💰</span>
+        <div style="flex:1"><div style="font-size:14px;font-weight:600">预算怎么分配</div><div style="font-size:11px;color:#9ca3af">材料:人工:家具 = 4:3:3</div></div>
+        <span style="color:#ccc">›</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== IN-PROGRESS MODE (Demo) ===== -->
+<div class="page" id="page-progress">
+  <!-- Process Flow -->
+  <div style="background:#fff;margin:0 16px 12px;border-radius:14px;padding:16px;box-shadow:0 1px 3px rgba(0,0,0,0.04)">
+    <div style="font-size:15px;font-weight:700;color:#1a1a1a;margin-bottom:14px">装修进度 · 泥瓦阶段</div>
+    <div style="display:flex;align-items:center;overflow-x:auto;padding-bottom:4px;gap:0">
+      <div style="display:flex;flex-direction:column;align-items:center;gap:6px;flex-shrink:0;min-width:50px"><div style="width:26px;height:26px;border-radius:50%;background:#22c55e;color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px">✓</div><span style="font-size:10px">拆除</span></div>
+      <div style="height:2px;background:#22c55e;flex:1;min-width:16px;align-self:center;margin-bottom:18px"></div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:6px;flex-shrink:0;min-width:50px"><div style="width:26px;height:26px;border-radius:50%;background:#22c55e;color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px">✓</div><span style="font-size:10px">水电</span></div>
+      <div style="height:2px;background:#22c55e;flex:1;min-width:16px;align-self:center;margin-bottom:18px"></div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:6px;flex-shrink:0;min-width:50px"><div style="width:26px;height:26px;border-radius:50%;background:#f59e0b;color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;box-shadow:0 0 0 5px rgba(245,158,11,0.2);animation:pulse3 2s infinite">●</div><span style="font-size:10px;font-weight:700;color:#d97706">泥瓦</span></div>
+      <div style="height:2px;background:#e5e5e5;flex:1;min-width:16px;align-self:center;margin-bottom:18px"></div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:6px;flex-shrink:0;min-width:50px"><div style="width:26px;height:26px;border-radius:50%;background:#e5e5e5;color:#999;display:flex;align-items:center;justify-content:center;font-size:12px">○</div><span style="font-size:10px;color:#999">木工</span></div>
+      <div style="height:2px;background:#e5e5e5;flex:1;min-width:16px;align-self:center;margin-bottom:18px"></div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:6px;flex-shrink:0;min-width:50px"><div style="width:26px;height:26px;border-radius:50%;background:#e5e5e5;color:#999;display:flex;align-items:center;justify-content:center;font-size:12px">○</div><span style="font-size:10px;color:#999">油漆</span></div>
+      <div style="height:2px;background:#e5e5e5;flex:1;min-width:16px;align-self:center;margin-bottom:18px"></div>
+      <div style="display:flex;flex-direction:column;align-items:center;gap:6px;flex-shrink:0;min-width:50px"><div style="width:26px;height:26px;border-radius:50%;background:#e5e5e5;color:#999;display:flex;align-items:center;justify-content:center;font-size:12px">○</div><span style="font-size:10px;color:#999">安装</span></div>
+    </div>
+  </div>
+  <div style="margin:0 16px 12px;padding:14px;border-radius:12px;background:linear-gradient(135deg,#fef3c7,#fffbeb);border-left:4px solid #f59e0b;display:flex;gap:10px;align-items:flex-start">
+    <span style="font-size:22px">💡</span>
+    <div style="font-size:13px;color:#92400e;line-height:1.5"><strong>泥瓦快结束了：</strong><br>1. 提前预约木工师傅<br>2. 确认吊顶方案和筒灯开孔<br>3. 定制柜体可以量尺了</div>
+  </div>
+  <div style="padding:0 16px;font-size:11px;color:#9ca3af;text-align:center;cursor:pointer;margin-top:12px" onclick="toggleDemoMode()">← 返回「准备期」模式</div>
+</div>
+
+<!-- ===== My Knowledge Base (SUB PAGE) ===== -->
+<div class="page" id="page-mykb">
+  <div class="kb-page-header">
+    <div style="font-size:13px;color:#1e40af;margin-bottom:8px">📚 我的知识库 · 从收藏内容提炼而来</div>
+    <div class="kb-search-bar">
+      <span style="font-size:16px">🔍</span>
+      <input type="text" placeholder="搜「水电」「收纳」「避坑」…" oninput="filterKB(this.value)">
+    </div>
+  </div>
+  <div class="kb-filters" id="kbFilters">
+    <span class="kb-filter active" onclick="filterKBBy('all',this)">全部</span>
+    <span class="kb-filter" onclick="filterKBBy('厨房',this)">厨房</span>
+    <span class="kb-filter" onclick="filterKBBy('避坑',this)">避坑</span>
+    <span class="kb-filter" onclick="filterKBBy('水电',this)">水电</span>
+    <span class="kb-filter" onclick="filterKBBy('风格',this)">风格</span>
+    <span class="kb-filter" onclick="filterKBBy('材料',this)">材料</span>
+  </div>
+  <div style="padding-top:4px">
+    <div class="kb-card" data-tags="厨房 收纳 日式">
+      <div class="kb-header">
+        <span class="kb-source">📱 来自小红书</span>
+        <span style="font-size:11px;color:#9ca3af">7月28日</span>
+      </div>
+      <h4>日式厨房必装这 5 个神器</h4>
+      <div class="kb-tags">
+        <span class="tag tag-blue">#厨房</span><span class="tag tag-green">#收纳</span><span class="tag tag-orange">#日式</span>
+      </div>
+      <div class="kb-extract">
+        <strong>AI 提炼要点：</strong><br>
+        ① 推拉式调味篮 — 窄柜利用，¥200-500<br>
+        ② 转角拉篮 — 角落取物，¥300-800<br>
+        ③ 下拉吊柜 — 矮个子福音，¥500-1000<br>
+        ④ 内嵌垃圾桶 — 台面干净，¥150-300<br>
+        ⑤ 磁性刀架 — 不占台面，¥80-150<br>
+        <strong style="color:#dc2626">⚠️ 避坑：</strong>转角拉篮要量柜体尺寸
+      </div>
+    </div>
+    <div class="kb-card" data-tags="水电 避坑">
+      <div class="kb-header">
+        <span class="kb-source">🎵 来自抖音</span>
+        <span style="font-size:11px;color:#9ca3af">7月26日</span>
+      </div>
+      <h4>水电改造避坑指南 | 老李讲装修</h4>
+      <div class="kb-tags">
+        <span class="tag tag-red">#避坑</span><span class="tag tag-blue">#水电</span>
+      </div>
+      <div class="kb-extract">
+        <strong>AI 提炼要点：</strong><br>
+        ① 水管打压 0.8MPa 30分钟不掉压<br>
+        ② 强弱电分槽，间距 ≥30cm<br>
+        ③ 水电完工后拍照留线路图<br>
+        ④ 厨卫水管建议走顶（易检修）<br>
+        <strong style="color:#dc2626">⚠️ 避坑：</strong>别信"线管走最短距离"，以后维修找不到
+      </div>
+    </div>
+    <div class="kb-card" data-tags="材料 地板">
+      <div class="kb-header">
+        <span class="kb-source">📋 来自公众号</span>
+        <span style="font-size:11px;color:#9ca3af">7月24日</span>
+      </div>
+      <h4>地板选购终极指南——看完不再纠结</h4>
+      <div class="kb-tags">
+        <span class="tag tag-blue">#材料</span><span class="tag tag-orange">#地板</span>
+      </div>
+      <div class="kb-extract">
+        <strong>AI 提炼要点：</strong><br>
+        ① 实木好看但娇气，有地暖别用<br>
+        ② 多层实木最均衡，推荐<br>
+        ③ 强化地板性价比最高，环保看E1级<br>
+        ④ SPC石塑防水，适合阳台厨卫<br>
+      </div>
+    </div>
+    <div class="kb-card" data-tags="风格 北欧">
+      <div class="kb-header">
+        <span class="kb-source">📱 来自小红书</span>
+        <span style="font-size:11px;color:#9ca3af">7月22日</span>
+      </div>
+      <h4>北欧风装修5个关键元素</h4>
+      <div class="kb-tags">
+        <span class="tag tag-blue">#风格</span><span class="tag tag-orange">#北欧</span>
+      </div>
+      <div class="kb-extract">
+        <strong>AI 提炼要点：</strong><br>
+        ① 大面积白色/浅灰打底<br>
+        ② 原木色家具（橡木/白蜡木）<br>
+        ③ 绿植点缀（琴叶榕/龟背竹）<br>
+        ④ 棉麻材质布艺<br>
+        ⑤ 重点照明 + 氛围灯带
+      </div>
+    </div>
+    <div class="kb-card" data-tags="材料 灯具">
+      <div class="kb-header">
+        <span class="kb-source">📱 来自小红书</span>
+        <span style="font-size:11px;color:#9ca3af">7月20日</span>
+      </div>
+      <h4>无主灯设计避坑，别装完才发现暗了</h4>
+      <div class="kb-tags">
+        <span class="tag tag-blue">#材料</span><span class="tag tag-green">#灯具</span><span class="tag-red">#避坑</span>
+      </div>
+      <div class="kb-extract">
+        <strong>AI 提炼要点：</strong><br>
+        ① 筒灯间距 90-120cm 最佳<br>
+        ② 色温统一（客厅 3500K，卧室 3000K）<br>
+        ③ 显色指数 Ra≥90 才不偏色<br>
+        ④ 一定要分组控制，别一个开关全亮
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== Budget/Flow Page ===== -->
+<div class="page" id="page-budget">
+  <div class="flow-summary" style="padding-top:16px">
+    <div class="flow-sum-card">
+      <div class="fc-amount">¥0</div>
+      <div class="fc-label">已花费</div>
+    </div>
+    <div class="flow-sum-card">
+      <div class="fc-amount">¥200,000</div>
+      <div class="fc-label">总预算</div>
+    </div>
+    <div class="flow-sum-card">
+      <div class="fc-amount">¥200,000</div>
+      <div class="fc-label">剩余</div>
+    </div>
+  </div>
+  <div style="padding:0 16px 10px;font-size:12px;color:#9ca3af;text-align:center">
+    使用中间 + 按钮 → 「✏️ 随手记」快速记录花销，自动归类统计
+  </div>
+  <div class="flow-empty">暂无记录</div>
+</div>
+
+<!-- ===== INSPIRATION (keep slim) ===== -->
+<div class="page" id="page-inspiration">
+  <div class="bookmark-entry" onclick="openImportModal()">
+    <div class="be-icon">📥</div>
+    <div style="flex:1"><strong style="font-size:14px">收藏外部内容</strong><br><span style="font-size:11px;color:#9ca3af">小红书/抖音/公众号 · 复制链接即收藏</span></div>
+    <span style="color:#ccc">›</span>
+  </div>
+  <div class="insp-banner" onclick="startStyleTest()">
+    <span style="font-size:28px">🚀</span>
+    <div style="flex:1"><h4 style="font-size:14px;font-weight:600">3分钟风格速测</h4><p style="font-size:12px;color:#6b7280">5道题，测测你最爱的装修风格</p></div>
+    <span style="color:#ccc;font-size:20px">›</span>
+  </div>
+  <div class="section-header"><span>✨ 风格图库</span><span class="more">8大风格</span></div>
+  <div class="style-grid">
+    <div class="style-card" onclick="showToast('北欧风 · 23张')"><div class="sc-img" style="background:linear-gradient(135deg,#f0f9ff,#e0f2fe)">🪵</div><div class="sc-name">北欧</div></div>
+    <div class="style-card" onclick="showToast('日式风 · 18张')"><div class="sc-img" style="background:linear-gradient(135deg,#fefce8,#fef9c3)">🎋</div><div class="sc-name">日式</div></div>
+    <div class="style-card" onclick="showToast('侘寂风 · 15张')"><div class="sc-img" style="background:linear-gradient(135deg,#faf5ff,#f3e8ff)">🏺</div><div class="sc-name">侘寂</div></div>
+    <div class="style-card" onclick="showToast('极简风 · 20张')"><div class="sc-img" style="background:linear-gradient(135deg,#f8fafc,#f1f5f9)">⬜</div><div class="sc-name">极简</div></div>
+    <div class="style-card" onclick="showToast('新中式 · 17张')"><div class="sc-img" style="background:linear-gradient(135deg,#fff7ed,#ffedd5)">🏮</div><div class="sc-name">新中式</div></div>
+    <div class="style-card" onclick="showToast('轻奢风 · 22张')"><div class="sc-img" style="background:linear-gradient(135deg,#fdf2f8,#fce7f3)">✨</div><div class="sc-name">轻奢</div></div>
+    <div class="style-card" onclick="showToast('法式风 · 19张')"><div class="sc-img" style="background:linear-gradient(135deg,#fef2f2,#fee2e2)">🥐</div><div class="sc-name">法式</div></div>
+    <div class="style-card" onclick="showToast('美式风 · 16张')"><div class="sc-img" style="background:linear-gradient(135deg,#f0fdf4,#dcfce7)">🛋️</div><div class="sc-name">美式</div></div>
+  </div>
+  <div style="display:flex;gap:10px;padding:16px">
+    <div style="flex:1;background:#fff;border-radius:14px;padding:14px;text-align:center;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,0.04)" onclick="showToast('拍照分析风格')"><div style="font-size:24px">🤖</div><div style="font-size:12px;font-weight:500;margin-top:4px">AI风格分析</div></div>
+    <div style="flex:1;background:#fff;border-radius:14px;padding:14px;text-align:center;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,0.04)" onclick="showToast('上传户型图')"><div style="font-size:24px">📐</div><div style="font-size:12px;font-weight:500;margin-top:4px">户型方案</div></div>
+    <div style="flex:1;background:#fff;border-radius:14px;padding:14px;text-align:center;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,0.04)" onclick="showToast('预算估算')"><div style="font-size:24px">💰</div><div style="font-size:12px;font-weight:500;margin-top:4px">预算估算</div></div>
+  </div>
+</div>
+
+<!-- ===== STYLE TEST ===== -->
+<div class="page" id="page-test"><div id="testContent"></div></div>
+
+<!-- ===== KNOWLEDGE ===== -->
+<div class="page" id="page-knowledge">
+  <div style="background:#fff;margin:0 16px 12px;border-radius:14px;padding:14px;text-align:center;box-shadow:0 1px 3px rgba(0,0,0,0.04)">
+    <span class="tag tag-orange" style="margin-bottom:6px">📍 当前推荐</span>
+    <h4 style="font-size:15px;font-weight:600;margin-top:6px">开工前的准备工作</h4>
+    <p style="font-size:12px;color:#9ca3af;margin-top:2px">基于你的项目状态自动推荐</p>
+  </div>
+  <div class="section-header"><span>📚 知识分类</span></div>
+  <div class="kg-grid">
+    <div class="kg-item"><div class="kg-icon">🧱</div><div class="kg-label">瓷砖</div></div>
+    <div class="kg-item"><div class="kg-icon">🪵</div><div class="kg-label">地板</div></div>
+    <div class="kg-item"><div class="kg-icon">🎨</div><div class="kg-label">涂料</div></div>
+    <div class="kg-item"><div class="kg-icon">🚿</div><div class="kg-label">卫浴</div></div>
+    <div class="kg-item"><div class="kg-icon">💡</div><div class="kg-label">灯具</div></div>
+    <div class="kg-item"><div class="kg-icon">🔌</div><div class="kg-label">开关</div></div>
+    <div class="kg-item"><div class="kg-icon">🪟</div><div class="kg-label">门窗</div></div>
+    <div class="kg-item"><div class="kg-icon">🛁</div><div class="kg-label">家电</div></div>
+  </div>
+  <div class="section-header"><span>🔥 热门问答</span><span class="more">50+</span></div>
+  <div style="padding:0 16px">
+    <div style="display:flex;align-items:center;gap:10px;padding:12px 14px;background:#fff;border-radius:10px;margin-bottom:6px;cursor:pointer;font-size:13px;color:#1a1a1a" onclick="showToast('装修完整流程')"><span style="color:#f59e0b;font-weight:700">Q1</span>装修的正确顺序是什么？<span style="color:#ef4444;font-size:11px;font-weight:600;margin-left:auto">HOT</span></div>
+    <div style="display:flex;align-items:center;gap:10px;padding:12px 14px;background:#fff;border-radius:10px;margin-bottom:6px;cursor:pointer;font-size:13px;color:#1a1a1a" onclick="showToast('瓷砖规格选择')"><span style="color:#f59e0b;font-weight:700">Q2</span>瓷砖选800×800还是750×1500？<span style="color:#ef4444;font-size:11px;font-weight:600;margin-left:auto">HOT</span></div>
+    <div style="display:flex;align-items:center;gap:10px;padding:12px 14px;background:#fff;border-radius:10px;margin-bottom:6px;cursor:pointer;font-size:13px;color:#1a1a1a" onclick="showToast('防水高度')"><span style="color:#f59e0b;font-weight:700">Q3</span>卫生间防水要做多高？</div>
+    <div style="display:flex;align-items:center;gap:10px;padding:12px 14px;background:#fff;border-radius:10px;margin-bottom:6px;cursor:pointer;font-size:13px;color:#1a1a1a" onclick="showToast('水管走法')"><span style="color:#f59e0b;font-weight:700">Q4</span>水管走顶好还是走地好？</div>
+    <div style="display:flex;align-items:center;gap:10px;padding:12px 14px;background:#fff;border-radius:10px;margin-bottom:6px;cursor:pointer;font-size:13px;color:#1a1a1a" onclick="showToast('中央空调时机')"><span style="color:#f59e0b;font-weight:700">Q5</span>中央空调什么时候装？</div>
+  </div>
+</div>
+
+<!-- ===== MINE ===== -->
+<div class="page" id="page-mine">
+  <div style="padding:24px 0;text-align:center">
+    <div style="width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#fef3c7,#fde68a);display:inline-flex;align-items:center;justify-content:center;font-size:24px">🏠</div>
+    <div style="font-size:16px;font-weight:600;margin-top:8px">阳光花园 3-201</div>
+    <div style="font-size:12px;color:#999;margin-top:2px">准备期 · 计划9月开工</div>
+  </div>
+  <div class="menu-group">
+    <div class="menu-item" onclick="pushSubPage('mykb','我的知识库')"><span class="menu-icon">📚</span>我的知识库<span style="margin-left:auto;font-size:12px;color:#999">5条</span><span class="arrow">›</span></div>
+    <div class="menu-item" onclick="pushSubPage('budget','预算流水')"><span class="menu-icon">💰</span>预算与流水<span class="arrow">›</span></div>
+    <div class="menu-item"><span class="menu-icon">🏗️</span>空间管理<span class="arrow">›</span></div>
+    <div class="menu-item"><span class="menu-icon">👨‍👩‍👧</span>家庭成员<span style="margin-left:auto;font-size:12px;color:#999">你 · 老婆</span><span class="arrow">›</span></div>
+  </div>
+  <div class="menu-group">
+    <div class="menu-item"><span class="menu-icon">✅</span>验收清单<span class="arrow">›</span></div>
+    <div class="menu-item"><span class="menu-icon">🔌</span>家电选购指南<span class="arrow">›</span></div>
+    <div class="menu-item"><span class="menu-icon">⚙️</span>设置<span class="arrow">›</span></div>
+  </div>
+</div>
+
+</div><!-- /main-content -->
+
+<!-- FAB -->
+<div class="fab-backdrop" id="fabBackdrop" onclick="closeFab()"></div>
+<div class="fab-menu" id="fabMenu">
+  <div class="fab-grid">
+    <button class="fab-item" onclick="openQuickNote();closeFab()"><div class="f-icon">✏️</div>随手记</button>
+    <button class="fab-item" onclick="showToast('拍照留档');closeFab()"><div class="f-icon">📷</div>拍照留档</button>
+    <button class="fab-item" onclick="showToast('AI装修小管家');closeFab()"><div class="f-icon">🤖</div>问AI</button>
+    <button class="fab-item" onclick="showToast('写施工日记');closeFab()"><div class="f-icon">📝</div>写日记</button>
+  </div>
+</div>
+
+<!-- Tab Bar -->
+<div class="tab-bar">
+  <button class="tab-item active" data-page="home" onclick="switchTab('home')"><span class="tab-icon">🏠</span><span class="tab-label">首页</span></button>
+  <button class="tab-item" data-page="inspiration" onclick="switchTab('inspiration')"><span class="tab-icon">💡</span><span class="tab-label">灵感</span></button>
+  <button class="fab-btn" id="fabBtn" onclick="toggleFab()">+</button>
+  <button class="tab-item" data-page="knowledge" onclick="switchTab('knowledge')"><span class="tab-icon">📚</span><span class="tab-label">知识</span></button>
+  <button class="tab-item" data-page="mine" onclick="switchTab('mine')"><span class="tab-icon">👤</span><span class="tab-label">我的</span></button>
+</div>
+</div><!-- /phone-frame -->
+
+<!-- Quick Note Modal (keep) -->
+<div class="modal-overlay" id="quickNoteModal">
+<div class="modal-sheet">
+<div class="modal-handle"></div>
+<div style="font-size:17px;font-weight:600;text-align:center;margin-bottom:12px">✏️ 随手记</div>
+<div class="note-tabs">
+  <button class="note-tab active" onclick="switchNoteTab('text')">📝 文字</button>
+  <button class="note-tab" onclick="switchNoteTab('voice')">🎤 语音</button>
+  <button class="note-tab" onclick="switchNoteTab('photo')">📷 拍照</button>
+</div>
+<div class="note-panel active" id="note-text">
+  <textarea class="form-textarea" id="noteText" placeholder="例：买了瓷砖 800×800 68元/片 × 52片"></textarea>
+  <button class="btn-primary" onclick="parseNote()">智能识别归类</button>
+  <div class="ai-parse-result" id="parseResult">
+    <div style="font-weight:600;color:#16a34a;margin-bottom:6px">🤖 AI 识别结果</div>
+    <div>金额 <strong>¥3,536</strong> · 品类 <strong>材料 > 瓷砖</strong> · 空间 <strong>客厅</strong></div>
+  </div>
+</div>
+<div class="note-panel" id="note-voice">
+  <div class="voice-btn" id="voiceBtn" onclick="toggleVoice()">🎤</div>
+  <div style="text-align:center;font-size:12px;color:#9ca3af">按住说话，松手发送</div>
+</div>
+<div class="note-panel" id="note-photo">
+  <div style="border:2px dashed #e5e5e5;border-radius:12px;padding:30px;text-align:center;cursor:pointer" onclick="showToast('模拟拍照')">📸 拍购物小票</div>
+</div>
+<div style="display:flex;gap:10px;margin-top:16px">
+  <button class="btn-secondary" onclick="closeQuickNote()">取消</button>
+  <button class="btn-primary" style="flex:2" onclick="saveNote()">保存到预算</button>
+</div>
+</div>
+</div>
+
+<!-- Import Modal (keep) -->
+<div class="modal-overlay" id="importModal">
+<div class="modal-sheet">
+<div class="modal-handle"></div>
+<div style="font-size:17px;font-weight:600;text-align:center;margin-bottom:12px">📥 收藏外部内容</div>
+<div class="import-tabs">
+  <button class="import-tab active" onclick="switchImportTab('url')">🔗 链接</button>
+  <button class="import-tab" onclick="switchImportTab('screenshot')">📸 截图</button>
+  <button class="import-tab" onclick="switchImportTab('text')">📋 文本</button>
+</div>
+<div class="import-panel active" id="import-url">
+  <div class="url-paste" onclick="document.getElementById('urlInput').focus()">🔗 粘贴小红书/抖音链接</div>
+  <input class="form-input" id="urlInput" value="https://www.xiaohongshu.com/explore/66a1b...">
+  <button class="btn-primary" onclick="simulateImport()">AI 分析提取</button>
+  <div class="ai-result-card" id="importResultUrl">
+    <h4 style="font-size:14px;color:#1e40af;margin-bottom:8px">🤖 AI 分析完成</h4>
+    <div>📄 来源：小红书 · 日式厨房5个神器</div>
+    <div style="margin-top:4px">📝 已提炼 5 个要点 + 避坑提醒</div>
+    <div style="margin-top:4px">🏷️ #厨房 #收纳 #日式</div>
+    <div style="margin-top:8px;padding:8px;background:#fef3c7;border-radius:8px;font-size:12px;color:#92400e">💡 已保存到「我的知识库」，首页可见</div>
+  </div>
+</div>
+<div class="import-panel" id="import-screenshot">
+  <div class="url-paste" onclick="simulateScreenshotImport()">📸 上传截图</div>
+  <div class="ai-result-card" id="importResultImg"><h4>🤖 OCR + AI分析</h4><div>已提取文字并归类到知识库</div></div>
+</div>
+<div class="import-panel" id="import-text">
+  <textarea class="form-textarea" id="importText" placeholder="复制一段装修笔记内容..." style="min-height:80px"></textarea>
+  <button class="btn-primary" onclick="simulateTextImport()" style="margin-top:12px">AI 分析</button>
+  <div class="ai-result-card" id="importResultText"><h4>🤖 分析完成</h4><div>已提取关键信息到知识库</div></div>
+</div>
+<div style="display:flex;gap:10px;margin-top:16px">
+  <button class="btn-secondary" onclick="closeImportModal()">关闭</button>
+  <button class="btn-primary" style="flex:2" onclick="saveBookmark()">保存到知识库</button>
+</div>
+</div>
+</div>
+
+<script>
+let currentTab = 'home';
+let inSubPage = false;
+let fabOpen = false;
+let demoMode = false;
+
+function switchTab(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  currentTab = name; inSubPage = false;
+  document.getElementById('backBtn').style.visibility = 'hidden';
+  const titles = {home:'筑家记',inspiration:'灵感',knowledge:'装修知识',mine:'我的'};
+  document.getElementById('navTitle').textContent = titles[name] || '筑家记';
+  document.querySelectorAll('.tab-item').forEach(t => {
+    t.classList.remove('active');
+    if (t.getAttribute('data-page') === name) t.classList.add('active');
+  });
+}
+
+function pushSubPage(name, title) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  inSubPage = true;
+  document.getElementById('backBtn').style.visibility = 'visible';
+  document.getElementById('navTitle').textContent = title;
+}
+
+function goBack() {
+  if (inSubPage) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById('page-' + currentTab).classList.add('active');
+    inSubPage = false;
+    document.getElementById('backBtn').style.visibility = 'hidden';
+    const titles = {home:'筑家记',inspiration:'灵感',knowledge:'装修知识',mine:'我的'};
+    document.getElementById('navTitle').textContent = titles[currentTab] || '筑家记';
+  }
+}
+
+function toggleFab() {
+  fabOpen = !fabOpen;
+  document.getElementById('fabMenu').classList.toggle('open', fabOpen);
+  document.getElementById('fabBackdrop').classList.toggle('open', fabOpen);
+  document.getElementById('fabBtn').classList.toggle('open', fabOpen);
+}
+function closeFab() {
+  fabOpen = false;
+  document.getElementById('fabMenu').classList.remove('open');
+  document.getElementById('fabBackdrop').classList.remove('open');
+  document.getElementById('fabBtn').classList.remove('open');
+}
+
+// Prep tags
+function togglePrepTag(el) {
+  el.classList.toggle('done');
+  updatePrepProgress();
+}
+
+function updatePrepProgress() {
+  const total = document.querySelectorAll('#prepItems .prep-tag').length;
+  const done = document.querySelectorAll('#prepItems .prep-tag.done').length;
+  document.getElementById('prepBar').style.width = (done/total*100)+'%';
+  const header = document.querySelector('.prep-header span:last-child');
+  header.textContent = done+'/'+total+' 完成';
+  if (done === total) {
+    showToast('🎉 全部完成！首页已切换为装修模式');
+    toggleDemoMode();
+  }
+}
+
+// Demo mode toggle
+function toggleDemoMode() {
+  demoMode = !demoMode;
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  if (demoMode) {
+    document.getElementById('page-progress').classList.add('active');
+    document.getElementById('stageBadge').textContent = '🏗️ 装修中 · 泥瓦阶段';
+    document.getElementById('stageBadge').classList.remove('active');
+    document.getElementById('stageBadge').style.background = '#fef3c7';
+    document.getElementById('stageBadge').style.color = '#d97706';
+    document.getElementById('backBtn').style.visibility = 'visible';
+    document.getElementById('navTitle').textContent = '筑家记 · 装修中';
+  } else {
+    document.getElementById('page-home').classList.add('active');
+    document.getElementById('stageBadge').textContent = '📍 准备期 · 计划9月开工';
+    document.getElementById('stageBadge').style.background = '#fff';
+    document.getElementById('stageBadge').style.color = '#d97706';
+    document.getElementById('backBtn').style.visibility = 'hidden';
+    document.getElementById('navTitle').textContent = '筑家记';
+  }
+}
+
+// KB filters
+function filterKB(query) {
+  const q = query.toLowerCase();
+  document.querySelectorAll('#page-mykb .kb-card').forEach(card => {
+    const text = card.textContent.toLowerCase();
+    card.style.display = text.includes(q) ? '' : 'none';
+  });
+}
+function filterKBBy(tag, el) {
+  document.querySelectorAll('#kbFilters .kb-filter').forEach(f => f.classList.remove('active'));
+  el.classList.add('active');
+  document.querySelectorAll('#page-mykb .kb-card').forEach(card => {
+    if (tag === 'all') { card.style.display = ''; return; }
+    card.style.display = card.getAttribute('data-tags').includes(tag) ? '' : 'none';
+  });
+}
+
+// Style test
+let testStep = 0;
+const questions = [
+  {q:'你喜欢哪种感觉的客厅？',o1:{icon:'🛋️',label:'温馨自然，原木风'},o2:{icon:'✨',label:'精致高级，大理石金属'}},
+  {q:'偏爱什么色调？',o1:{icon:'🤎',label:'暖色（米色/木色）'},o2:{icon:'⬜',label:'冷色（黑白灰）'}},
+  {q:'哪种餐桌更吸引你？',o1:{icon:'🪑',label:'圆桌，围坐热闹'},o2:{icon:'🍽️',label:'长桌，简约大气'}},
+  {q:'卧室你选？',o1:{icon:'🧸',label:'浅色温暖好睡'},o2:{icon:'🎭',label:'深色稳重质感'}},
+  {q:'卫浴更在意？',o1:{icon:'🪴',label:'像泡温泉'},o2:{icon:'🏨',label:'像五星酒店'}},
+];
+function startStyleTest() { testStep = 0; pushSubPage('test','风格速测'); renderTest(); }
+function renderTest() {
+  if (testStep >= questions.length) { showTestResult(); return; }
+  const q = questions[testStep];
+  document.getElementById('testContent').innerHTML = `
+    <div class="test-question">
+      <div style="font-size:12px;color:#9ca3af;margin-bottom:16px">${testStep+1}/${questions.length}</div>
+      <h3>${q.q}</h3>
+      <div class="test-options">
+        <div class="test-option" onclick="answerTest()">${q.o1.icon}<span class="opt-label">${q.o1.label}</span></div>
+        <div class="test-option" onclick="answerTest()">${q.o2.icon}<span class="opt-label">${q.o2.label}</span></div>
+      </div>
+    </div>`;
+}
+function answerTest() { testStep++; renderTest(); }
+function showTestResult() {
+  document.getElementById('testContent').innerHTML = `
+    <div class="test-result">
+      <h2>🎉 你的风格画像</h2>
+      <div style="background:#fff;border-radius:14px;padding:16px;margin:16px 0">
+        <div style="font-size:24px;font-weight:700;color:#d97706">北欧为主 · 日式为辅</div>
+        <p style="font-size:13px;color:#6b7280;margin-top:8px">你偏爱温暖自然、简约实用的空间，建议重点看北欧和日式的搭配</p>
+      </div>
+      <button class="btn-primary" style="width:auto;display:inline-block;padding:10px 30px" onclick="goBack()">去灵感库看看</button>
+    </div>`;
+}
+
+// Quick note
+function openQuickNote() { document.getElementById('quickNoteModal').classList.add('active'); document.getElementById('parseResult').classList.remove('show'); }
+function closeQuickNote() { document.getElementById('quickNoteModal').classList.remove('active'); }
+function switchNoteTab(type) {
+  document.querySelectorAll('.note-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.note-panel').forEach(p => p.classList.remove('active'));
+  const tabs = document.querySelectorAll('.note-tab');
+  if (type === 'text') tabs[0].classList.add('active');
+  else if (type === 'voice') tabs[1].classList.add('active');
+  else tabs[2].classList.add('active');
+  document.getElementById('note-' + type).classList.add('active');
+}
+function parseNote() { document.getElementById('parseResult').classList.add('show'); }
+function toggleVoice() {
+  const btn = document.getElementById('voiceBtn');
+  btn.classList.add('recording'); btn.textContent = '⏺️';
+  setTimeout(() => { btn.classList.remove('recording'); btn.textContent = '🎤'; showToast('语音已识别：买了瓷砖'); }, 2000);
+}
+function saveNote() {
+  closeQuickNote();
+  showToast('已保存到预算流水！首页可查看');
+  document.getElementById('flowTotal').textContent = '¥3,536';
+  document.getElementById('flowEmpty').style.display = 'none';
+  document.getElementById('flowList').style.display = 'block';
+  document.getElementById('flowList').innerHTML = `
+    <div class="flow-entry">
+      <span class="fe-cat">🧱</span>
+      <div class="fe-info"><div class="fe-title">瓷砖 800×800 通体</div><div class="fe-meta">客厅 · 刚刚</div></div>
+      <div style="text-align:right"><div class="fe-amount">¥3,536</div><span class="fe-type">材料</span></div>
+    </div>`;
+}
+
+// Import
+function openImportModal() { document.getElementById('importModal').classList.add('active'); }
+function closeImportModal() { document.getElementById('importModal').classList.remove('active'); }
+function switchImportTab(type) {
+  document.querySelectorAll('.import-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.import-panel').forEach(p => p.classList.remove('active'));
+  const tabs = document.querySelectorAll('.import-tab');
+  if (type === 'url') tabs[0].classList.add('active');
+  else if (type === 'screenshot') tabs[1].classList.add('active');
+  else tabs[2].classList.add('active');
+  document.getElementById('import-' + type).classList.add('active');
+}
+function simulateImport() { document.getElementById('importResultUrl').classList.add('show'); }
+function simulateScreenshotImport() { document.getElementById('importResultImg').classList.add('show'); }
+function simulateTextImport() { document.getElementById('importResultText').classList.add('show'); }
+function saveBookmark() {
+  closeImportModal();
+  const count = parseInt(document.getElementById('kbCount').textContent) + 1;
+  document.getElementById('kbCount').textContent = count;
+  showToast('已保存到知识库！首页可查看');
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 1800);
+}
+
+document.getElementById('quickNoteModal').addEventListener('click',function(e){if(e.target===this)closeQuickNote()});
+document.getElementById('importModal').addEventListener('click',function(e){if(e.target===this)closeImportModal()});
+
+console.log('🏠 筑家记 V4.1 · Dashboard首页');
+console.log('📊 首页 = 总览Dashboard：风格 + 知识库 + 支出 + 准备进度 + 推荐');
+console.log('📚 我的知识库：搜索 + 标签筛选 + AI提炼内容');
+console.log('💰 预算流水：随手记 → 自动归类 → 首页可见');
+console.log('🔄 首页双模式：准备期 ↔ 装修中（完成准备自动切换）');
+</script>
+</body>
+</html>

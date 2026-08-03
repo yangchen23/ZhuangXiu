@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>筑家记 V4 - 装修智能管家</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{font-size:16px}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI','PingFang SC','Microsoft YaHei',sans-serif;background:#f0f0f0;display:flex;justify-content:center;align-items:center;min-height:100vh;padding:20px;-webkit-font-smoothing:antialiased}
+.phone-frame{width:390px;height:844px;background:#f5f5f5;border-radius:44px;overflow:hidden;box-shadow:0 25px 80px rgba(0,0,0,0.25),0 0 0 2px #1a1a1a,0 0 0 6px #2d2d2d,0 0 0 8px #1a1a1a;position:relative;display:flex;flex-direction:column}
+.status-bar{height:44px;background:#fff;display:flex;justify-content:space-between;align-items:center;padding:0 28px;font-size:12px;font-weight:600;color:#1a1a1a;flex-shrink:0}
+.nav-bar{height:44px;background:#fff;display:flex;align-items:center;justify-content:center;padding:0 16px;font-size:17px;font-weight:600;color:#1a1a1a;position:relative;flex-shrink:0;border-bottom:0.5px solid #e5e5e5}
+.nav-bar .back-btn{position:absolute;left:12px;width:32px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;border:none;background:none;font-size:20px;color:#f59e0b}
+.main-content{flex:1;overflow-y:auto;overflow-x:hidden;background:#f5f5f5;-webkit-overflow-scrolling:touch;position:relative}
+.main-content::-webkit-scrollbar{display:none}
+.page{display:none;min-height:100%;padding-bottom:20px;animation:fadeIn .25s ease}
+.page.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+
+/* Tab Bar */
+.tab-bar{height:60px;background:#fff;display:flex;align-items:center;border-top:0.5px solid #e5e5e5;flex-shrink:0;position:relative}
+.tab-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer;padding:4px 0;border:none;background:none;color:#999;transition:color .2s;position:relative}
+.tab-item.active{color:#f59e0b}
+.tab-item .tab-icon{font-size:20px;line-height:1}
+.tab-item .tab-label{font-size:10px;line-height:1}
+
+/* FAB Button */
+.fab-btn{position:absolute;left:50%;top:-22px;transform:translateX(-50%);width:44px;height:44px;background:linear-gradient(135deg,#f59e0b,#d97706);border-radius:50%;display:flex;align-items:center;justify-content:center;color:#fff;font-size:28px;cursor:pointer;z-index:50;border:none;box-shadow:0 4px 12px rgba(245,158,11,0.4);transition:transform .2s}
+.fab-btn.open{transform:translateX(-50%) rotate(45deg)}
+
+/* FAB Menu */
+.fab-menu{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);display:none;z-index:90}
+.fab-menu.open{display:block}
+.fab-backdrop{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.35);z-index:80;display:none}
+.fab-backdrop.open{display:block}
+.fab-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;width:200px;text-align:center}
+.fab-item{background:#fff;border-radius:16px;padding:16px 10px;cursor:pointer;box-shadow:0 4px 16px rgba(0,0,0,0.12);transition:transform .15s;display:flex;flex-direction:column;align-items:center;gap:6px;border:none;font-size:13px;color:#1a1a1a;font-weight:500}
+.fab-item:active{transform:scale(.95)}
+.fab-item .f-icon{font-size:24px}
+
+/* Shared */
+.section-header{display:flex;justify-content:space-between;align-items:center;padding:20px 16px 10px;font-size:15px;font-weight:600;color:#1a1a1a}
+.section-header .more{font-size:13px;color:#999;cursor:pointer;font-weight:400}
+.tag{display:inline-flex;align-items:center;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:500}
+.tag-orange{background:#fef3c7;color:#d97706}
+.tag-green{background:#dcfce7;color:#16a34a}
+.tag-blue{background:#dbeafe;color:#2563eb}
+.tag-red{background:#fee2e2;color:#dc2626}
+.card{background:#fff;border-radius:14px;margin:0 16px 10px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,0.04)}
+.card-body{padding:14px}
+
+/* ===== Home: Pre-renovation ===== */
+.home-hero{background:linear-gradient(135deg,#fef3c7,#fff7ed);padding:20px 16px;text-align:center}
+.home-hero h2{font-size:18px;font-weight:700;color:#1a1a1a}
+.home-hero .sub{font-size:13px;color:#92400e;margin-top:4px}
+.home-hero .countdown{display:inline-flex;align-items:center;gap:6px;margin-top:10px;padding:6px 14px;background:rgba(255,255,255,.7);border-radius:20px;font-size:13px;color:#d97706;font-weight:600}
+.prep-checklist{margin:0 16px 10px}
+.prep-item{display:flex;align-items:center;gap:10px;padding:12px 14px;background:#fff;border-radius:12px;margin-bottom:6px;font-size:14px;color:#1a1a1a;cursor:pointer}
+.prep-circle{width:22px;height:22px;border-radius:50%;border:2px solid #d1d5db;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:11px;color:transparent}
+.prep-circle.done{background:#22c55e;border-color:#22c55e;color:#fff}
+.guide-cards{display:flex;gap:10px;padding:0 16px;overflow-x:auto}
+.guide-cards::-webkit-scrollbar{display:none}
+.guide-card{flex-shrink:0;width:140px;padding:14px;border-radius:14px;cursor:pointer;background:linear-gradient(135deg,#dbeafe,#eff6ff);border:1px solid #bfdbfe}
+.guide-card h4{font-size:13px;color:#1e40af;margin-bottom:4px}
+.guide-card p{font-size:11px;color:#3b82f6}
+
+/* ===== Inspiration Page ===== */
+.insp-banner{background:linear-gradient(135deg,#f0f9ff,#e0f2fe);margin:0 16px 14px;padding:16px;border-radius:14px;display:flex;align-items:center;gap:12px;cursor:pointer}
+.insp-banner .i-icon{font-size:32px;flex-shrink:0}
+.insp-banner .i-text{flex:1}
+.insp-banner .i-text h4{font-size:14px;font-weight:600;color:#1a1a1a}
+.insp-banner .i-text p{font-size:12px;color:#6b7280;margin-top:2px}
+
+.style-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:0 16px}
+.style-card{border-radius:12px;overflow:hidden;cursor:pointer;position:relative}
+.style-card .sc-img{height:80px;display:flex;align-items:center;justify-content:center;font-size:32px}
+.style-card .sc-name{text-align:center;font-size:11px;padding:6px 4px;font-weight:500;color:#4b5563}
+.sc-nordic{background:linear-gradient(135deg,#f0f9ff,#e0f2fe)}
+.sc-japanese{background:linear-gradient(135deg,#fefce8,#fef9c3)}
+.sc-wabisabi{background:linear-gradient(135deg,#faf5ff,#f3e8ff)}
+.sc-minimal{background:linear-gradient(135deg,#f8fafc,#f1f5f9)}
+.sc-chinese{background:linear-gradient(135deg,#fff7ed,#ffedd5)}
+.sc-luxury{background:linear-gradient(135deg,#fdf2f8,#fce7f3)}
+.sc-french{background:linear-gradient(135deg,#fef2f2,#fee2e2)}
+.sc-american{background:linear-gradient(135deg,#f0fdf4,#dcfce7)}
+
+.bookmark-entry{display:flex;align-items:center;gap:12px;margin:0 16px 12px;padding:14px;background:#fff;border-radius:12px;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,0.04)}
+.bookmark-entry .be-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;background:linear-gradient(135deg,#f59e0b,#d97706);color:#fff;flex-shrink:0}
+.bookmark-entry .be-text{flex:1}
+.bookmark-entry .be-text strong{font-size:14px;display:block}
+.bookmark-entry .be-text span{font-size:11px;color:#9ca3af}
+
+.bookmark-item{display:flex;gap:10px;padding:12px;margin:0 16px 8px;background:#fff;border-radius:12px;cursor:pointer;box-shadow:0 1px 2px rgba(0,0,0,0.03)}
+.bookmark-item .bm-thumb{width:56px;height:56px;border-radius:8px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:24px;background:#f5f5f5}
+.bookmark-item .bm-info{flex:1;min-width:0}
+.bookmark-item .bm-info h5{font-size:13px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bookmark-item .bm-info .bm-summary{font-size:11px;color:#6b7280;margin-top:2px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.bookmark-item .bm-info .bm-tags{margin-top:4px;display:flex;gap:4px;flex-wrap:wrap}
+
+/* ===== Knowledge (slim V3) ===== */
+.kg-stage{background:#fff;margin:0 16px 12px;border-radius:14px;padding:14px;text-align:center}
+.kg-stage .kg-badge{display:inline-block;padding:4px 12px;border-radius:12px;font-size:12px;font-weight:600;background:#fef3c7;color:#d97706;margin-bottom:6px}
+.kg-stage h4{font-size:15px;font-weight:600}
+.kg-stage p{font-size:12px;color:#9ca3af;margin-top:2px}
+.kg-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:0 16px}
+.kg-item{background:#fff;border-radius:12px;padding:14px 6px;text-align:center;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,0.04)}
+.kg-item:active{transform:scale(.96)}
+.kg-item .kg-icon{font-size:26px;margin-bottom:4px}
+.kg-item .kg-label{font-size:11px;color:#4b5563;font-weight:500}
+.faq-list{padding:0 16px}
+.faq-item{display:flex;align-items:center;gap:10px;padding:12px 14px;background:#fff;border-radius:10px;margin-bottom:6px;cursor:pointer;font-size:13px;color:#1a1a1a}
+
+/* ===== Mine ===== */
+.menu-group{margin:0 16px 12px}
+.menu-item{display:flex;align-items:center;gap:12px;padding:14px 16px;background:#fff;cursor:pointer;font-size:14px;color:#1a1a1a;border-bottom:0.5px solid #f5f5f5}
+.menu-item:first-child{border-radius:14px 14px 0 0}
+.menu-item:last-child{border-radius:0 0 14px 14px;border-bottom:none}
+.menu-item:only-child{border-radius:14px}
+.menu-item .menu-icon{font-size:20px;width:28px;text-align:center}
+.menu-item .arrow{margin-left:auto;color:#ccc}
+
+/* ===== Modals ===== */
+.modal-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.4);z-index:100;display:none;align-items:flex-end;justify-content:center}
+.modal-overlay.active{display:flex}
+.modal-sheet{width:390px;max-height:85vh;background:#fff;border-radius:20px 20px 0 0;overflow-y:auto;padding:20px 16px 30px;animation:slideUp .3s ease}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.modal-handle{width:36px;height:4px;background:#ddd;border-radius:2px;margin:0 auto 16px}
+.btn-primary{width:100%;padding:12px;background:linear-gradient(135deg,#f59e0b,#d97706);color:#fff;border:none;border-radius:12px;font-size:16px;font-weight:600;cursor:pointer}
+.btn-secondary{flex:1;padding:12px;background:#f5f5f5;border:none;border-radius:12px;font-size:15px;color:#6b7280;cursor:pointer}
+.form-group{margin-bottom:14px}
+.form-label{font-size:13px;font-weight:600;color:#4b5563;margin-bottom:6px;display:block}
+.form-textarea,.form-input{width:100%;border:1px solid #e5e5e5;border-radius:10px;padding:10px 12px;font-size:14px;font-family:inherit;background:#fafafa;color:#1a1a1a}
+.form-textarea:focus,.form-input:focus{border-color:#f59e0b;outline:none;background:#fff}
+.form-textarea{min-height:60px;resize:vertical}
+
+/* Quick Note */
+.note-tabs{display:flex;border-bottom:1px solid #e5e5e5;margin-bottom:14px}
+.note-tab{flex:1;text-align:center;padding:10px 0;font-size:14px;color:#999;cursor:pointer;border:none;background:none;border-bottom:2px solid transparent;font-weight:500}
+.note-tab.active{color:#f59e0b;border-bottom-color:#f59e0b}
+.note-panel{display:none}
+.note-panel.active{display:block}
+.voice-btn{width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,#f59e0b,#d97706);color:#fff;font-size:32px;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;margin:20px auto;box-shadow:0 4px 16px rgba(245,158,11,0.3)}
+.voice-btn.recording{animation:pulse2 1s infinite}
+@keyframes pulse2{0%,100%{box-shadow:0 0 0 0 rgba(245,158,11,0.4)}50%{box-shadow:0 0 0 16px rgba(245,158,11,0)}}
+.ai-parse-result{background:#f0fdf4;border:1px solid #bbf7d0;border-radius:12px;padding:12px;margin-top:12px;font-size:13px;display:none}
+.ai-parse-result.show{display:block}
+
+/* Bookmark Import Modal */
+.import-tabs{display:flex;border-bottom:1px solid #e5e5e5;margin-bottom:14px}
+.import-tab{flex:1;text-align:center;padding:10px 0;font-size:14px;color:#999;cursor:pointer;border:none;background:none;border-bottom:2px solid transparent;font-weight:500}
+.import-tab.active{color:#3b82f6;border-bottom-color:#3b82f6}
+.import-panel{display:none}
+.import-panel.active{display:block}
+.url-paste{border:2px dashed #bfdbfe;border-radius:12px;padding:24px;text-align:center;color:#3b82f6;cursor:pointer;margin-bottom:12px}
+.ai-result-card{background:#f0f9ff;border:1px solid #bfdbfe;border-radius:12px;padding:14px;font-size:12px;line-height:1.6;display:none;margin-bottom:12px}
+.ai-result-card.show{display:block}
+.ai-result-card h4{font-size:14px;color:#1e40af;margin-bottom:8px}
+
+/* Toast */
+.toast{position:fixed;top:60px;left:50%;transform:translateX(-50%);background:#1a1a1a;color:#fff;padding:10px 24px;border-radius:20px;font-size:14px;z-index:200;opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap}
+.toast.show{opacity:1}
+
+/* Style Test */
+.test-question{text-align:center;padding:30px 20px}
+.test-question h3{font-size:18px;font-weight:700;color:#1a1a1a;margin-bottom:8px}
+.test-question p{font-size:13px;color:#6b7280;margin-bottom:20px}
+.test-options{display:flex;gap:12px;justify-content:center}
+.test-option{width:130px;padding:20px 12px;border-radius:16px;cursor:pointer;text-align:center;font-size:36px;border:2px solid #e5e5e5;background:#fff;transition:all .2s}
+.test-option:active{border-color:#f59e0b;background:#fef3c7}
+.test-option .opt-label{font-size:13px;color:#4b5563;margin-top:8px;display:block}
+.test-result{padding:24px 20px;text-align:center}
+.test-result h2{font-size:22px;font-weight:700;margin-bottom:16px}
+.test-score{display:flex;gap:8px;margin:16px 0;text-align:left;background:#fff;border-radius:14px;padding:16px}
+
+@media(max-width:430px){.phone-frame{width:100%;height:100vh;border-radius:0;box-shadow:none}.modal-sheet{width:100%}}
+</style>
+</head>
+<body>
+
+<div class="phone-frame">
+<div class="status-bar"><span>9:41</span><span>WiFi ▮▮▮ ▮▮▮</span></div>
+<div class="nav-bar">
+  <button class="back-btn" id="backBtn" style="visibility:hidden" onclick="goBack()">←</button>
+  <span id="navTitle">筑家记</span>
+</div>
+<div class="toast" id="toast"></div>
+<div class="main-content" id="mainContent">
+
+<!-- ===== HOME ===== -->
+<div class="page active" id="page-home">
+  <div class="home-hero">
+    <h2>阳光花园 3-201</h2>
+    <div class="sub">套内 90㎡ · 三室两厅</div>
+    <div class="countdown">📅 计划 9月开工 · 还有 31 天</div>
+  </div>
+
+  <div class="section-header"><span>🎨 还没定风格？</span></div>
+  <div style="padding:0 16px 10px">
+    <div class="card" style="margin:0;cursor:pointer" onclick="switchTab('inspiration')">
+      <div class="card-body" style="display:flex;align-items:center;gap:12px">
+        <div style="font-size:32px">🎨</div>
+        <div style="flex:1">
+          <div style="font-size:14px;font-weight:600">3分钟风格速测</div>
+          <div style="font-size:12px;color:#9ca3af">测测你骨子里喜欢什么风格</div>
+        </div>
+        <div style="color:#ccc">›</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section-header"><span>📋 开工准备</span><span class="more">编辑</span></div>
+  <div class="prep-checklist">
+    <div class="prep-item" onclick="togglePrep(this)"><div class="prep-circle">✓</div>看房验收</div>
+    <div class="prep-item" onclick="togglePrep(this)"><div class="prep-circle done">✓</div>选定风格</div>
+    <div class="prep-item" onclick="togglePrep(this)"><div class="prep-circle">✓</div>预算规划</div>
+    <div class="prep-item" onclick="togglePrep(this)"><div class="prep-circle">✓</div>找施工方</div>
+    <div class="prep-item" onclick="togglePrep(this)"><div class="prep-circle">✓</div>签合同</div>
+  </div>
+
+  <div class="section-header"><span>📚 入门必读</span></div>
+  <div class="guide-cards">
+    <div class="guide-card" onclick="showToast('装修流程详解')"><h4>装修完整流程</h4><p>小白必看，别踩坑</p></div>
+    <div class="guide-card" onclick="showToast('预算分配指南')"><h4>预算怎么分配</h4><p>材料:人工:家具 = 4:3:3</p></div>
+    <div class="guide-card" onclick="showToast('半包全包选择')"><h4>半包 vs 全包</h4><p>哪个更适合你？</p></div>
+    <div class="guide-card" onclick="showToast('合同注意事项')"><h4>装修合同避坑</h4><p>这5条一定要写</p></div>
+  </div>
+
+  <div class="section-header"><span>📊 预算预估</span></div>
+  <div class="card">
+    <div class="card-body">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <div style="font-size:12px;color:#9ca3af">90㎡ / 北欧风 / 中档装修</div>
+          <div style="font-size:20px;font-weight:700;margin-top:4px">预估 ¥15-22万</div>
+        </div>
+        <button style="padding:6px 14px;border-radius:16px;border:1px solid #f59e0b;color:#f59e0b;background:#fff;font-size:12px;cursor:pointer" onclick="showToast('打开预算计算器')">调整参数</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== INSPIRATION ===== -->
+<div class="page" id="page-inspiration">
+  <!-- Bookmark Entry (top, prominent) -->
+  <div class="bookmark-entry" onclick="openImportModal()">
+    <div class="be-icon">📥</div>
+    <div class="be-text">
+      <strong>收藏外部内容</strong>
+      <span>小红书/抖音/公众号 · 复制链接即收藏</span>
+    </div>
+    <span style="color:#ccc">›</span>
+  </div>
+
+  <!-- Style Test Banner -->
+  <div class="insp-banner" onclick="startStyleTest()">
+    <div class="i-icon">🚀</div>
+    <div class="i-text">
+      <h4>3分钟风格速测</h4>
+      <p>5道题，测测你最爱的装修风格</p>
+    </div>
+    <span style="color:#ccc;font-size:20px">›</span>
+  </div>
+
+  <!-- Saved Bookmarks Preview -->
+  <div class="section-header">
+    <span>📥 已收藏 5 条外部内容</span>
+    <span class="more">全部</span>
+  </div>
+  <div class="bookmark-item" onclick="showToast('展开AI分析详情')">
+    <div class="bm-thumb" style="background:linear-gradient(135deg,#fce7f3,#fbcfe8)">📱</div>
+    <div class="bm-info">
+      <h5>日式厨房必装这 5 个神器</h5>
+      <div class="bm-summary">AI提炼：推拉式调味篮、转角拉篮、下拉吊柜、内嵌垃圾桶、磁性刀架</div>
+      <div class="bm-tags">
+        <span class="tag tag-blue">#厨房</span><span class="tag tag-green">#收纳</span><span class="tag tag-orange">#日式</span>
+      </div>
+    </div>
+  </div>
+  <div class="bookmark-item" onclick="showToast('展开AI分析详情')">
+    <div class="bm-thumb" style="background:linear-gradient(135deg,#dbeafe,#bfdbfe)">🎵</div>
+    <div class="bm-info">
+      <h5>水电改造避坑指南 | 老李讲装修</h5>
+      <div class="bm-summary">AI提炼：7个必查项 — 水管打压、强弱电分槽、线路留图纸...</div>
+      <div class="bm-tags">
+        <span class="tag tag-red">#避坑</span><span class="tag tag-blue">#水电</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Style Gallery -->
+  <div class="section-header"><span>✨ 风格图库</span><span class="more">8大风格</span></div>
+  <div class="style-grid">
+    <div class="style-card" onclick="showToast('北欧风 · 23张图')"><div class="sc-img sc-nordic">🪵</div><div class="sc-name">北欧</div></div>
+    <div class="style-card" onclick="showToast('日式风 · 18张图')"><div class="sc-img sc-japanese">🎋</div><div class="sc-name">日式</div></div>
+    <div class="style-card" onclick="showToast('侘寂风 · 15张图')"><div class="sc-img sc-wabisabi">🏺</div><div class="sc-name">侘寂</div></div>
+    <div class="style-card" onclick="showToast('极简风 · 20张图')"><div class="sc-img sc-minimal">⬜</div><div class="sc-name">极简</div></div>
+    <div class="style-card" onclick="showToast('新中式 · 17张图')"><div class="sc-img sc-chinese">🏮</div><div class="sc-name">新中式</div></div>
+    <div class="style-card" onclick="showToast('轻奢风 · 22张图')"><div class="sc-img sc-luxury">✨</div><div class="sc-name">轻奢</div></div>
+    <div class="style-card" onclick="showToast('法式风 · 19张图')"><div class="sc-img sc-french">🥐</div><div class="sc-name">法式</div></div>
+    <div class="style-card" onclick="showToast('美式风 · 16张图')"><div class="sc-img sc-american">🛋️</div><div class="sc-name">美式</div></div>
+  </div>
+
+  <!-- AI Analysis -->
+  <div style="margin:16px">
+    <div class="card" style="margin:0;cursor:pointer" onclick="showToast('拍照分析风格')">
+      <div class="card-body" style="display:flex;align-items:center;gap:12px">
+        <div style="font-size:28px">🤖</div>
+        <div>
+          <div style="font-size:14px;font-weight:600">AI 风格分析</div>
+          <div style="font-size:12px;color:#9ca3af">拍照你家/画册 → AI推荐风格</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Professional -->
+  <div class="section-header"><span>📐 专业方案</span></div>
+  <div style="display:flex;gap:10px;padding:0 16px">
+    <div style="flex:1;background:#fff;border-radius:14px;padding:16px;text-align:center;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,0.04)" onclick="showToast('上传户型图')">
+      <div style="font-size:28px">📐</div>
+      <div style="font-size:12px;font-weight:500;margin-top:6px">上传户型图</div>
+    </div>
+    <div style="flex:1;background:#fff;border-radius:14px;padding:16px;text-align:center;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,0.04)" onclick="showToast('预算估算')">
+      <div style="font-size:28px">💰</div>
+      <div style="font-size:12px;font-weight:500;margin-top:6px">预算估算</div>
+    </div>
+    <div style="flex:1;background:#fff;border-radius:14px;padding:16px;text-align:center;cursor:pointer;box-shadow:0 1px 3px rgba(0,0,0,0.04)" onclick="showToast('设计师对接')">
+      <div style="font-size:28px">🤝</div>
+      <div style="font-size:12px;font-weight:500;margin-top:6px">设计师对接</div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== STYLE TEST (sub-page) ===== -->
+<div class="page" id="page-test">
+  <div id="testContent"></div>
+</div>
+
+<!-- ===== KNOWLEDGE ===== -->
+<div class="page" id="page-knowledge">
+  <div class="kg-stage">
+    <div class="kg-badge">📍 当前推荐</div>
+    <h4>开工前的准备工作</h4>
+    <p>基于你的项目状态自动推荐</p>
+  </div>
+  <div class="section-header"><span>📚 知识分类</span></div>
+  <div class="kg-grid">
+    <div class="kg-item"><div class="kg-icon">🧱</div><div class="kg-label">瓷砖</div></div>
+    <div class="kg-item"><div class="kg-icon">🪵</div><div class="kg-label">地板</div></div>
+    <div class="kg-item"><div class="kg-icon">🎨</div><div class="kg-label">涂料</div></div>
+    <div class="kg-item"><div class="kg-icon">🚿</div><div class="kg-label">卫浴</div></div>
+    <div class="kg-item"><div class="kg-icon">💡</div><div class="kg-label">灯具</div></div>
+    <div class="kg-item"><div class="kg-icon">🔌</div><div class="kg-label">开关</div></div>
+    <div class="kg-item"><div class="kg-icon">🪟</div><div class="kg-label">门窗</div></div>
+    <div class="kg-item"><div class="kg-icon">🛁</div><div class="kg-label">家电</div></div>
+  </div>
+  <div class="section-header"><span>🔥 热门问答</span><span class="more">50+</span></div>
+  <div class="faq-list">
+    <div class="faq-item" onclick="showToast('装修完整流程')"><span style="color:#f59e0b;font-weight:700;margin-right:8px">Q1</span>装修的正确顺序是什么？<span style="color:#ef4444;font-size:11px;font-weight:600;margin-left:auto">HOT</span></div>
+    <div class="faq-item" onclick="showToast('瓷砖规格选择')"><span style="color:#f59e0b;font-weight:700;margin-right:8px">Q2</span>瓷砖选800×800还是750×1500？<span style="color:#ef4444;font-size:11px;font-weight:600;margin-left:auto">HOT</span></div>
+    <div class="faq-item" onclick="showToast('防水高度')"><span style="color:#f59e0b;font-weight:700;margin-right:8px">Q3</span>卫生间防水要做多高？</div>
+    <div class="faq-item" onclick="showToast('水管走法')"><span style="color:#f59e0b;font-weight:700;margin-right:8px">Q4</span>水管走顶好还是走地好？</div>
+    <div class="faq-item" onclick="showToast('中央��调时机')"><span style="color:#f59e0b;font-weight:700;margin-right:8px">Q5</span>中央空调什么时候装？</div>
+    <div class="faq-item" onclick="showToast('半包全包')"><span style="color:#f59e0b;font-weight:700;margin-right:8px">Q6</span>半包和全包哪个划算？</div>
+    <div class="faq-item" onclick="showToast('装修预算分配')"><span style="color:#f59e0b;font-weight:700;margin-right:8px">Q7</span>装修预算怎么分配？</div>
+    <div class="faq-item" onclick="showToast('合同避坑')"><span style="color:#f59e0b;font-weight:700;margin-right:8px">Q8</span>装修合同要注意什么？</div>
+  </div>
+</div>
+
+<!-- ===== MINE ===== -->
+<div class="page" id="page-mine">
+  <div style="padding:24px 0;text-align:center">
+    <div style="width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,#fef3c7,#fde68a);display:inline-flex;align-items:center;justify-content:center;font-size:24px">🏠</div>
+    <div style="font-size:16px;font-weight:600;margin-top:8px">阳光花园 3-201</div>
+    <div style="font-size:12px;color:#999;margin-top:2px">计划 9月开工 · 准备期</div>
+  </div>
+  <div class="menu-group">
+    <div class="menu-item"><span class="menu-icon">🏗️</span>空间管理<span class="arrow">›</span></div>
+    <div class="menu-item"><span class="menu-icon">💰</span>预算与流水<span class="arrow">›</span></div>
+    <div class="menu-item"><span class="menu-icon">👨‍👩‍👧</span>家庭成员<span style="margin-left:auto;font-size:12px;color:#999">你 · 老婆</span><span class="arrow">›</span></div>
+  </div>
+  <div class="menu-group">
+    <div class="menu-item"><span class="menu-icon">✅</span>验收清单<span class="arrow">›</span></div>
+    <div class="menu-item"><span class="menu-icon">🔌</span>家电选购指南<span class="arrow">›</span></div>
+    <div class="menu-item"><span class="menu-icon">📤</span>导出水电报告<span class="arrow">›</span></div>
+  </div>
+  <div class="menu-group">
+    <div class="menu-item"><span class="menu-icon">⚙️</span>设置<span class="arrow">›</span></div>
+  </div>
+</div>
+
+</div><!-- /main-content -->
+
+<!-- FAB -->
+<div class="fab-backdrop" id="fabBackdrop" onclick="closeFab()"></div>
+<div class="fab-menu" id="fabMenu">
+  <div class="fab-grid">
+    <button class="fab-item" onclick="openQuickNote();closeFab()"><div class="f-icon">✏️</div>随手记</button>
+    <button class="fab-item" onclick="showToast('拍照留档');closeFab()"><div class="f-icon">📷</div>拍照留档</button>
+    <button class="fab-item" onclick="showToast('AI装修小管家');closeFab()"><div class="f-icon">🤖</div>问AI</button>
+    <button class="fab-item" onclick="showToast('写施工日记');closeFab()"><div class="f-icon">📝</div>写日记</button>
+  </div>
+</div>
+
+<!-- Tab Bar -->
+<div class="tab-bar">
+  <button class="tab-item active" data-page="home" onclick="switchTab('home')"><span class="tab-icon">🏠</span><span class="tab-label">首页</span></button>
+  <button class="tab-item" data-page="inspiration" onclick="switchTab('inspiration')"><span class="tab-icon">💡</span><span class="tab-label">灵感</span></button>
+  <button class="fab-btn" id="fabBtn" onclick="toggleFab()">+</button>
+  <button class="tab-item" data-page="knowledge" onclick="switchTab('knowledge')"><span class="tab-icon">📚</span><span class="tab-label">知识</span></button>
+  <button class="tab-item" data-page="mine" onclick="switchTab('mine')"><span class="tab-icon">👤</span><span class="tab-label">我的</span></button>
+</div>
+</div><!-- /phone-frame -->
+
+<!-- Quick Note Modal -->
+<div class="modal-overlay" id="quickNoteModal">
+<div class="modal-sheet">
+  <div class="modal-handle"></div>
+  <div style="font-size:17px;font-weight:600;text-align:center;margin-bottom:12px">✏️ 随手记</div>
+
+  <div class="note-tabs">
+    <button class="note-tab active" onclick="switchNoteTab('text')">📝 文字</button>
+    <button class="note-tab" onclick="switchNoteTab('voice')">🎤 语音</button>
+    <button class="note-tab" onclick="switchNoteTab('photo')">📷 拍照</button>
+  </div>
+
+  <div class="note-panel active" id="note-text">
+    <div class="form-group">
+      <textarea class="form-textarea" id="noteText" placeholder="例：在居然之家买了瓷砖 800×800通体 68元/片 ×52片"></textarea>
+    </div>
+    <button class="btn-primary" onclick="parseNote()">智能识别归类</button>
+    <div class="ai-parse-result" id="parseResult">
+      <div style="font-size:14px;font-weight:600;color:#16a34a;margin-bottom:8px">🤖 AI 识别结果</div>
+      <div style="display:flex;justify-content:space-between;padding:3px 0">金额 <strong>¥3,536</strong></div>
+      <div style="display:flex;justify-content:space-between;padding:3px 0">品类 <strong>材料 > 瓷砖</strong></div>
+      <div style="display:flex;justify-content:space-between;padding:3px 0">空间 <strong>客厅</strong></div>
+      <div style="display:flex;justify-content:space-between;padding:3px 0">规格 <strong>800×800 通体</strong></div>
+      <div style="margin-top:10px;padding:8px;background:#fef3c7;border-radius:8px;font-size:12px;color:#92400e">💡 提示：你可以修改分类后保存</div>
+    </div>
+  </div>
+
+  <div class="note-panel" id="note-voice">
+    <div class="voice-btn" id="voiceBtn" onclick="toggleVoice()">🎤</div>
+    <div style="text-align:center;font-size:12px;color:#9ca3af">按住说话，松手发送</div>
+    <div id="voiceResult" style="margin-top:12px;padding:12px;background:#f5f5f5;border-radius:10px;font-size:13px;display:none">
+      <div style="color:#999;font-size:11px;margin-bottom:4px">语音转文字：</div>
+      <span id="voiceText">在建材市场买了3个筒灯，欧普7瓦4000K，一共126块钱</span>
+    </div>
+  </div>
+
+  <div class="note-panel" id="note-photo">
+    <div style="border:2px dashed #e5e5e5;border-radius:12px;padding:30px;text-align:center;color:#999;cursor:pointer" onclick="showToast('模拟拍照')">
+      <div style="font-size:36px">📸</div>
+      <div style="font-size:13px;margin-top:8px">拍购物小票或商品</div>
+    </div>
+  </div>
+
+  <div style="display:flex;gap:10px;margin-top:16px">
+    <button class="btn-secondary" onclick="closeQuickNote()">取消</button>
+    <button class="btn-primary" style="flex:2" onclick="saveNote()">保存到预算</button>
+  </div>
+</div>
+</div>
+
+<!-- Import Modal (外部内容收藏) -->
+<div class="modal-overlay" id="importModal">
+<div class="modal-sheet">
+  <div class="modal-handle"></div>
+  <div style="font-size:17px;font-weight:600;text-align:center;margin-bottom:12px">📥 收藏外部内容</div>
+
+  <div class="import-tabs">
+    <button class="import-tab active" onclick="switchImportTab('url')">🔗 粘贴链接</button>
+    <button class="import-tab" onclick="switchImportTab('screenshot')">📸 截图上���</button>
+    <button class="import-tab" onclick="switchImportTab('text')">📋 粘贴文本</button>
+  </div>
+
+  <div class="import-panel active" id="import-url">
+    <div class="url-paste" onclick="document.getElementById('urlInput').focus()">
+      <div style="font-size:28px;margin-bottom:8px">🔗</div>
+      <div style="font-size:13px">粘贴小红书/抖音/公众号链接</div>
+    </div>
+    <input class="form-input" id="urlInput" placeholder="https://..." value="https://www.xiaohongshu.com/explore/66a1b..." style="margin-bottom:12px">
+    <button class="btn-primary" onclick="simulateImport()">AI 分析提取</button>
+    <div class="ai-result-card" id="importResultUrl">
+      <h4>🤖 AI 分析结果</h4>
+      <div style="margin-bottom:6px"><strong>📄 来源：</strong>小红书 · 日式厨房必装这 5 个神器</div>
+      <div style="margin-bottom:6px"><strong>📝 提炼要点：</strong></div>
+      <div>① 推拉式调味篮 — 充分利用窄柜，¥200-500</div>
+      <div>② 转角拉篮 — 解决角落取物难，¥300-800</div>
+      <div>③ 下拉式吊柜 — 个子矮也够得着，¥500-1000</div>
+      <div>④ 内嵌垃圾桶 — 台面干净整洁，¥150-300</div>
+      <div>⑤ 磁性刀架 — 刀具不占台面，¥80-150</div>
+      <div style="margin-top:8px"><strong>🏷️ 标签：</strong>#厨房 #收纳 #日式</div>
+      <div style="margin-top:4px"><strong>⚠️ 避坑：</strong>转角拉篮要量柜体尺寸，买错了装不上；下拉吊柜需预留柜内空间</div>
+      <div style="margin-top:8px;padding:8px;background:#fef3c7;border-radius:8px;font-size:12px;color:#92400e">💡 以上5件已自动加入「材料清单」，可到预算页查看</div>
+    </div>
+  </div>
+
+  <div class="import-panel" id="import-screenshot">
+    <div class="url-paste" onclick="showToast('从相册选择截图')">
+      <div style="font-size:28px;margin-bottom:8px">📸</div>
+      <div style="font-size:13px">上传小红书/抖音截图</div>
+    </div>
+    <button class="btn-primary" onclick="simulateScreenshotImport()" style="margin-top:12px">上传并分析</button>
+    <div class="ai-result-card" id="importResultImg">
+      <h4>🤖 AI OCR + 图像分析</h4>
+      <div><strong>识别文字：</strong>水电改造避坑指南</div>
+      <div style="margin-top:4px"><strong>提取要点：</strong>水管打压0.8MPa、强弱电分槽≥30cm、留完整线路图</div>
+      <div style="margin-top:4px"><strong>🏷️ 标签：</strong>#水电 #避坑</div>
+    </div>
+  </div>
+
+  <div class="import-panel" id="import-text">
+    <textarea class="form-textarea" id="importText" placeholder="复制一段装修笔记内容粘贴到这里..." style="min-height:100px"></textarea>
+    <button class="btn-primary" onclick="simulateTextImport()" style="margin-top:12px">AI 分析</button>
+    <div class="ai-result-card" id="importResultText">
+      <h4>🤖 AI 分析完成</h4>
+      <div><strong>📝 摘要：</strong>这是一篇关于客厅无主灯设计的笔记...</div>
+      <div style="margin-top:4px"><strong>🏷️ 标签：</strong>#灯光 #客厅 #无主灯</div>
+    </div>
+  </div>
+
+  <div style="display:flex;gap:10px;margin-top:16px">
+    <button class="btn-secondary" onclick="closeImportModal()">关闭</button>
+    <button class="btn-primary" style="flex:2" onclick="saveBookmark()">保存到灵感库</button>
+  </div>
+</div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast2"></div>
+
+<script>
+// ===== State =====
+let currentTab = 'home';
+let inSubPage = false;
+let subPage = null;
+let fabOpen = false;
+
+// ===== Navigation =====
+function switchTab(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  currentTab = name;
+  inSubPage = false;
+  subPage = null;
+  document.getElementById('backBtn').style.visibility = 'hidden';
+  const titles = {home:'筑家记',inspiration:'灵感',knowledge:'装修知识',mine:'我的'};
+  document.getElementById('navTitle').textContent = titles[name] || '筑家记';
+  document.querySelectorAll('.tab-item').forEach(t => {
+    t.classList.remove('active');
+    if (t.getAttribute('data-page') === name) t.classList.add('active');
+  });
+}
+
+function pushSubPage(name, title) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  inSubPage = true;
+  subPage = name;
+  document.getElementById('backBtn').style.visibility = 'visible';
+  document.getElementById('navTitle').textContent = title;
+}
+
+function goBack() {
+  if (inSubPage) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById('page-' + currentTab).classList.add('active');
+    inSubPage = false;
+    subPage = null;
+    document.getElementById('backBtn').style.visibility = 'hidden';
+    const titles = {home:'筑家记',inspiration:'灵感',knowledge:'装修知识',mine:'我的'};
+    document.getElementById('navTitle').textContent = titles[currentTab] || '筑家记';
+  }
+}
+
+// ===== FAB =====
+function toggleFab() {
+  fabOpen = !fabOpen;
+  document.getElementById('fabMenu').classList.toggle('open', fabOpen);
+  document.getElementById('fabBackdrop').classList.toggle('open', fabOpen);
+  document.getElementById('fabBtn').classList.toggle('open', fabOpen);
+}
+function closeFab() {
+  fabOpen = false;
+  document.getElementById('fabMenu').classList.remove('open');
+  document.getElementById('fabBackdrop').classList.remove('open');
+  document.getElementById('fabBtn').classList.remove('open');
+}
+
+// ===== Style Test =====
+let testStep = 0;
+const testQuestions = [
+  {q:'你喜欢哪种感觉的客厅？',o1:{icon:'🛋️',label:'温馨舒适，原木自然'},o2:{icon:'✨',label:'精致高级，大理石金属'}},
+  {q:'你更偏爱什么色调？',o1:{icon:'🤎',label:'暖色调（米色/木色/奶咖）'},o2:{icon:'⬜',label:'冷色调（黑白灰/蓝灰）'}},
+  {q:'哪种餐桌更吸引你？',o1:{icon:'🪑',label:'圆桌，围坐热闹'},o2:{icon:'🍽️',label:'长桌，简约大气'}},
+  {q:'卫浴空间你更在意？',o1:{icon:'🪴',label:'质朴轻松，像泡温泉'},o2:{icon:'🏨',label:'干净利落，像五星酒店'}},
+  {q:'卧室色调你选？',o1:{icon:'🧸',label:'浅色温暖，好入睡'},o2:{icon:'🎭',label:'深色稳重，有质感'}},
+];
+
+function startStyleTest() {
+  testStep = 0;
+  pushSubPage('test','风格速测');
+  renderTestQuestion();
+}
+function renderTestQuestion() {
+  if (testStep >= testQuestions.length) { showTestResult(); return; }
+  const q = testQuestions[testStep];
+  document.getElementById('testContent').innerHTML = `
+    <div class="test-question">
+      <div style="font-size:12px;color:#9ca3af;margin-bottom:16px">第 ${testStep+1}/${testQuestions.length} 题</div>
+      <h3>${q.q}</h3>
+      <div class="test-options">
+        <div class="test-option" onclick="answerTest('a')"><span>${q.o1.icon}</span><span class="opt-label">${q.o1.label}</span></div>
+        <div class="test-option" onclick="answerTest('b')"><span>${q.o2.icon}</span><span class="opt-label">${q.o2.label}</span></div>
+      </div>
+    </div>
+  `;
+}
+function answerTest() {
+  testStep++;
+  renderTestQuestion();
+}
+function showTestResult() {
+  document.getElementById('testContent').innerHTML = `
+    <div class="test-result">
+      <h2>🎉 你的风格画像</h2>
+      <div class="test-score">
+        <div style="flex:1">
+          <div style="font-size:13px;color:#9ca3af">主风格</div>
+          <div style="font-size:24px;font-weight:700;color:#d97706">北欧</div>
+          <div style="font-size:12px;color:#92400e">自然 / 温暖 / 实用</div>
+        </div>
+        <div style="flex:1">
+          <div style="font-size:13px;color:#9ca3af">副风格</div>
+          <div style="font-size:20px;font-weight:600;color:#9ca3af">日式 60%</div>
+          <div style="font-size:12px;color:#9ca3af">侘寂 40%</div>
+        </div>
+      </div>
+      <p style="font-size:13px;color:#6b7280;margin:16px 0">你偏爱温暖自然、简约实用的空间，建议重点看北欧和日式的搭配方案</p>
+      <button class="btn-primary" style="width:auto;display:inline-block;padding:10px 30px" onclick="goBack()">去灵感库看看</button>
+    </div>
+  `;
+}
+
+// ===== Quick Note =====
+function openQuickNote() {
+  document.getElementById('quickNoteModal').classList.add('active');
+  document.getElementById('parseResult').classList.remove('show');
+  document.getElementById('voiceResult').style.display = 'none';
+  document.getElementById('noteText').value = '';
+  switchNoteTab('text');
+}
+function closeQuickNote() { document.getElementById('quickNoteModal').classList.remove('active'); }
+function switchNoteTab(type) {
+  document.querySelectorAll('.note-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.note-panel').forEach(p => p.classList.remove('active'));
+  event.target.classList.add('active');
+  document.getElementById('note-' + type).classList.add('active');
+}
+function parseNote() {
+  const text = document.getElementById('noteText').value.trim();
+  if (!text) { showToast('请输入内容'); return; }
+  document.getElementById('parseResult').classList.add('show');
+}
+function toggleVoice() {
+  const btn = document.getElementById('voiceBtn');
+  btn.classList.add('recording');
+  btn.textContent = '⏺️';
+  setTimeout(() => {
+    btn.classList.remove('recording');
+    btn.textContent = '🎤';
+    document.getElementById('voiceResult').style.display = 'block';
+  }, 2000);
+}
+function saveNote() {
+  closeQuickNote();
+  showToast('已保存到预算流水！');
+}
+
+// ===== Import Modal =====
+function openImportModal() {
+  document.getElementById('importModal').classList.add('active');
+  document.querySelectorAll('.ai-result-card').forEach(c => c.classList.remove('show'));
+  switchImportTab('url');
+}
+function closeImportModal() { document.getElementById('importModal').classList.remove('active'); }
+function switchImportTab(type) {
+  document.querySelectorAll('.import-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.import-panel').forEach(p => p.classList.remove('active'));
+  event.target.classList.add('active');
+  document.getElementById('import-' + type).classList.add('active');
+}
+function simulateImport() {
+  document.getElementById('importResultUrl').classList.add('show');
+}
+function simulateScreenshotImport() {
+  document.getElementById('importResultImg').classList.add('show');
+}
+function simulateTextImport() {
+  document.getElementById('importResultText').classList.add('show');
+}
+function saveBookmark() {
+  closeImportModal();
+  showToast('已保存到灵感库！AI 分析要点已自动关联到知识库');
+}
+
+// ===== Prep Checklist =====
+function togglePrep(el) {
+  const c = el.querySelector('.prep-circle');
+  if (c.classList.contains('done')) { c.classList.remove('done'); c.textContent = '✓'; }
+  else { c.classList.add('done'); c.textContent = '✓'; }
+}
+
+// ===== Toast =====
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 1800);
+}
+
+// ===== Modal backdrop =====
+document.getElementById('quickNoteModal').addEventListener('click',function(e){if(e.target===this)closeQuickNote()});
+document.getElementById('importModal').addEventListener('click',function(e){if(e.target===this)closeImportModal()});
+
+console.log('🏠 筑家记 V4 · 装修智能管家');
+console.log('📐 架构: 4 Tab + FAB 4宫格');
+console.log('💡 灵感: 风格速测 · 外部收藏 · 风格图库 · AI分析 · 专业方案');
+console.log('✏️ 随手记: 文字/语音/拍照 · AI归类 · 进预算');
+console.log('📥 外部收藏: 链接/截图/文本 → AI提炼 → 关联知识库');
+</script>
+</body>
+</html>
