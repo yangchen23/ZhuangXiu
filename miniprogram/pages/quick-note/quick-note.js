@@ -1,5 +1,6 @@
 const store = require('../../utils/store');
 const util = require('../../utils/util');
+const ai = require('../../utils/ai');
 
 const CATEGORIES = [
   { key: 'material', label: '材料', icon: '🔨' },
@@ -76,7 +77,8 @@ Page({
     voiceRecording: false,
     voiceText: '',
     voiceShown: false,
-    photoPath: ''
+    photoPath: '',
+    parsing: false
   },
 
   switchNoteTab(e) {
@@ -94,10 +96,29 @@ Page({
       wx.showToast({ title: '请输入内容', icon: 'none' });
       return;
     }
-    const parsed = parseText(text);
-    if (!parsed.amount) {
-      wx.showToast({ title: '没识别到金额，可手动填写', icon: 'none' });
-    }
+    this.setData({ parsing: true });
+    ai.parseExpense(text)
+      .then(parsed => {
+        this.applyParsed(parsed);
+        if (!parsed.amount) {
+          wx.showToast({ title: '没识别到金额，可手动填写', icon: 'none' });
+        }
+      })
+      .catch(() => {
+        const parsed = parseText(text);
+        this.applyParsed(parsed);
+        if (parsed.amount) {
+          wx.showToast({ title: 'AI 服务不可用，已用本地识别', icon: 'none' });
+        } else {
+          wx.showToast({ title: '没识别到金额，可手动填写', icon: 'none' });
+        }
+      })
+      .then(() => {
+        this.setData({ parsing: false });
+      });
+  },
+
+  applyParsed(parsed) {
     this.setData({
       parsed,
       parsedShown: true,

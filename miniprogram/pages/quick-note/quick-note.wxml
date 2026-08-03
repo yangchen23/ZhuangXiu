@@ -14,7 +14,7 @@
       bindinput="onTextInput"
       maxlength="200"
     ></textarea>
-    <view class="btn-primary" style="margin-top:24rpx" bindtap="parseNote">智能识别归类</view>
+    <view class="btn-primary {{parsing ? 'disabled' : ''}}" style="margin-top:24rpx" bindtap="parseNote">{{parsing ? '🤖 AI 识别中…' : '智能识别归类'}}</view>
 
     <view wx:if="{{parsedShown}}" class="ai-parse-result">
       <view class="ap-title">🤖 AI 识别结果</view>

@@ -1,4 +1,5 @@
 const seed = require('../../data/seed');
+const ai = require('../../utils/ai');
 
 function mockReply(text) {
   if (text.indexOf('瓷砖') !== -1) {
@@ -29,7 +30,8 @@ Page({
     ],
     input: '',
     quick: seed.aiChatQuick,
-    sending: false
+    sending: false,
+    scrollInto: ''
   },
 
   onInput(e) {
@@ -39,22 +41,25 @@ Page({
   send() {
     const text = this.data.input.trim();
     if (!text || this.data.sending) return;
-    this.pushMessage('user', text);
-    this.setData({ input: '', sending: true });
-    setTimeout(() => {
-      this.pushMessage('ai', mockReply(text));
-      this.setData({ sending: false });
-    }, 700);
+    const messages = this.data.messages.concat([{ role: 'user', text }]);
+    this.setData({ messages, input: '', sending: true, scrollInto: 'bottom' });
+    ai.chat(messages)
+      .then(reply => {
+        this.pushMessage('ai', reply);
+      })
+      .catch(() => {
+        this.pushMessage('ai', mockReply(text) + '\n\n（AI 服务暂时不可用，以上为本地回答）');
+        wx.showToast({ title: 'AI 服务不可用，已用本地回答', icon: 'none' });
+      })
+      .then(() => {
+        this.setData({ sending: false, scrollInto: 'bottom' });
+      });
   },
 
   tapQuick(e) {
     const q = e.currentTarget.dataset.q;
-    this.pushMessage('user', q);
-    this.setData({ sending: true });
-    setTimeout(() => {
-      this.pushMessage('ai', mockReply(q));
-      this.setData({ sending: false });
-    }, 700);
+    this.setData({ input: q });
+    this.send();
   },
 
   choosePhoto() {
@@ -64,10 +69,11 @@ Page({
       sourceType: ['camera', 'album'],
       success: res => {
         this.pushMessage('user', '📷 [发了一张现场照片]');
-        this.setData({ sending: true });
+        this.setData({ sending: true, scrollInto: 'bottom' });
         setTimeout(() => {
-          this.pushMessage('ai', '我看到照片了（当前为本地演示，未接入视觉模型）。\n\n从画面判断，这应该是施工阶段。建议对照「泥瓦验收清单」检查：平整度、留缝宽度、空鼓率、阴阳角方正。拍照存到「拍照留档」里方便后期对比。');
-          this.setData({ sending: false });
+          const reply = '我看到照片了（当前为本地演示，未接入视觉模型）。\n\n从画面判断，这应该是施工阶段。建议对照「泥瓦验收清单」检查：平整度、留缝宽度、空鼓率、阴阳角方正。拍照存到「拍照留档」里方便后期对比。';
+          this.pushMessage('ai', reply);
+          this.setData({ sending: false, scrollInto: 'bottom' });
         }, 900);
       }
     });
@@ -75,11 +81,6 @@ Page({
 
   pushMessage(role, text) {
     const messages = this.data.messages.concat([{ role, text }]);
-    this.setData({ messages });
-    wx.pageScrollTo({ scrollTop: 99999, duration: 300 });
-  },
-
-  scrollToBottom() {
-    wx.pageScrollTo({ scrollTop: 99999, duration: 300 });
+    this.setData({ messages, scrollInto: 'bottom' });
   }
 });

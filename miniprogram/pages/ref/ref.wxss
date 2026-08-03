@@ -311,6 +311,11 @@
 }
 
 .import-btn { margin-top: 24rpx; }
+
+.btn-primary.disabled {
+  opacity: 0.6;
+}
+
 .import-tip {
   margin-top: 20rpx;
   font-size: 22rpx;

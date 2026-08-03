@@ -1,11 +1,20 @@
-<view class="chat-wrap">
+<scroll-view class="chat-scroll" scroll-y scroll-into-view="{{scrollInto}}" scroll-with-animation>
   <view class="chat-list">
     <view wx:for="{{messages}}" wx:key="index" class="msg-row {{item.role === 'user' ? 'user' : 'ai'}}">
       <view wx:if="{{item.role === 'ai'}}" class="msg-avatar">🤖</view>
       <view class="msg-bubble">{{item.text}}</view>
     </view>
+    <view wx:if="{{sending}}" class="msg-row ai">
+      <view class="msg-avatar">🤖</view>
+      <view class="msg-bubble typing">
+        <text class="tdot">●</text>
+        <text class="tdot">●</text>
+        <text class="tdot">●</text>
+      </view>
+    </view>
+    <view id="bottom" class="scroll-bottom"></view>
   </view>
-</view>
+</scroll-view>
 
 <view class="quick-row">
   <scroll-view scroll-x class="quick-scroll" enhanced show-scrollbar="{{false}}">

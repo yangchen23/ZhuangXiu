@@ -127,7 +127,7 @@
         value="{{importText}}"
         bindinput="onImportInput"
       />
-      <view class="btn-primary import-btn" bindtap="aiAnalyze">AI 分析提取</view>
+      <view class="btn-primary import-btn {{analyzing ? 'disabled' : ''}}" bindtap="aiAnalyze">{{analyzing ? '🤖 AI 分析中…' : 'AI 分析提取'}}</view>
       <view class="import-tip">💡 AI 会提炼要点/避坑项，并自动归档到知识库和材料清单</view>
     </view>
   </view>

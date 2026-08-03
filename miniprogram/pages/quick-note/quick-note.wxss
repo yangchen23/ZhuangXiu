@@ -37,6 +37,10 @@
   box-sizing: border-box;
 }
 
+.btn-primary.disabled {
+  opacity: 0.6;
+}
+
 /* AI 解析结果 */
 .ai-parse-result {
   background: #f0fdf4;

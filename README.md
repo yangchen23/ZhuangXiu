@@ -127,9 +127,31 @@ D:\Project\ZhuangXiu\
 - 接入云端：在 `miniprogram/config.js` 填入 `CLOUD_ENV` 云环境 ID 即可开启云开发，
   后续把 `utils/store.js` 的读写换成云数据库调用即可（数据结构已按集合划分）
 
+### AI 接入（DeepSeek）
+
+已接入 DeepSeek 的能力：
+
+- **问AI**：对话问答（带装修顾问系统提示词 + 上下文记忆）
+- **随手记 → 智能识别归类**：AI 提取金额/品类/空间/规格（失败自动回退本地正则）
+- **参考 → 收藏外部内容 → AI 分析提取**：AI 提炼标题/要点数/建议
+
+模型默认 `deepseek-v4-flash`，接口返回模型不存在时自动兜底 `deepseek-chat`（均在 `miniprogram/config.js` 的 `DEEPSEEK` 配置里可改）。
+
+密钥配置（二选一）：
+
+1. **开发调试（推荐先用这个）**：创建 `miniprogram/config.local.js`（已被 .gitignore 忽略，不会提交）：
+   ```js
+   module.exports = { DEEPSEEK_API_KEY: 'sk-xxx' };
+   ```
+2. **生产（推荐）**：部署 `cloudfunctions/aiChat` 云函数，在云函数环境变量里配置 `DEEPSEEK_API_KEY`；
+   同时把 `miniprogram/config.js` 填上 `CLOUD_ENV`，客户端会自动优先走云函数（密钥不出现在小程序包里）。
+
+注意：直连模式需要在微信公众平台把 `api.deepseek.com` 加入 request 合法域名（开发工具已关闭域名校验可直接调试）；
+直连会把密钥打包进小程序，仅限自用调试，正式发布务必改用云函数。
+
 ### 已知演示占位
 
-- AI 对话/风格分析/拍照识别为本地模拟，未接 DeepSeek / 视觉模型
+- 风格分析/拍照识别仍为占位（待接多模态视觉模型）
 - 风格图库、知识库文章为入口占位（待 Phase 2 填充内容）
 - 家庭成员、验收清单详情、设置等子页面为 Toast 占位
 

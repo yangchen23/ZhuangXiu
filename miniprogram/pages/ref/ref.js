@@ -1,5 +1,6 @@
 const store = require('../../utils/store');
 const seed = require('../../data/seed');
+const ai = require('../../utils/ai');
 
 Page({
   data: {
@@ -11,7 +12,8 @@ Page({
     keyword: '',
     importOpen: false,
     importTab: 'link',
-    importText: ''
+    importText: '',
+    analyzing: false
   },
 
   onShow() {
@@ -60,13 +62,30 @@ Page({
       wx.showToast({ title: '请先粘贴链接/文本', icon: 'none' });
       return;
     }
-    const title = text.length > 16 ? text.slice(0, 16) + '…' : text;
-    const bms = store.addBookmark({
-      title,
-      source: 'AI 已提炼 3 个要点 · 刚刚收藏'
-    });
-    this.setData({ importOpen: false, importText: '', bookmarks: bms });
-    wx.showToast({ title: 'AI 分析完成，已收藏', icon: 'success' });
+    this.setData({ analyzing: true });
+    ai.summarize(text)
+      .then(obj => {
+        const title = (obj && obj.title) || (text.length > 16 ? text.slice(0, 16) + '…' : text);
+        const points = (obj && Number(obj.points)) || 3;
+        const bms = store.addBookmark({
+          title,
+          source: 'AI 已提炼 ' + points + ' 个要点 · 刚刚收藏' + (obj && obj.tip ? ' · 💡' + obj.tip : '')
+        });
+        this.setData({ importOpen: false, importText: '', bookmarks: bms });
+        wx.showToast({ title: 'AI 分析完成，已收藏', icon: 'success' });
+      })
+      .catch(() => {
+        const title = text.length > 16 ? text.slice(0, 16) + '…' : text;
+        const bms = store.addBookmark({
+          title,
+          source: 'AI 已提炼 3 个要点 · 刚刚收藏'
+        });
+        this.setData({ importOpen: false, importText: '', bookmarks: bms });
+        wx.showToast({ title: 'AI 服务不可用，已本地收藏', icon: 'none' });
+      })
+      .then(() => {
+        this.setData({ analyzing: false });
+      });
   },
 
   showBookmark() {
