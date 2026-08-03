@@ -1,0 +1,87 @@
+<view class="page-wrap">
+  <view class="note-tabs">
+    <view class="note-tab {{noteTab === 'text' ? 'active' : ''}}" data-tab="text" bindtap="switchNoteTab">📝 文字</view>
+    <view class="note-tab {{noteTab === 'voice' ? 'active' : ''}}" data-tab="voice" bindtap="switchNoteTab">🎤 语音</view>
+    <view class="note-tab {{noteTab === 'photo' ? 'active' : ''}}" data-tab="photo" bindtap="switchNoteTab">📷 拍照</view>
+  </view>
+
+  <!-- 文字 -->
+  <view wx:if="{{noteTab === 'text'}}" class="note-panel">
+    <textarea
+      class="form-textarea"
+      placeholder="例：买了瓷砖 800×800 68元/片 × 52片"
+      value="{{text}}"
+      bindinput="onTextInput"
+      maxlength="200"
+    ></textarea>
+    <view class="btn-primary" style="margin-top:24rpx" bindtap="parseNote">智能识别归类</view>
+
+    <view wx:if="{{parsedShown}}" class="ai-parse-result">
+      <view class="ap-title">🤖 AI 识别结果</view>
+      <view class="ap-row"><text>金额</text><text class="ap-strong">¥{{amount || '未识别'}}</text></view>
+      <view class="ap-row"><text>品类</text><text class="ap-strong">{{categoryLabel}} > 明细</text></view>
+      <view class="ap-row"><text>空间</text><text class="ap-strong">{{space}}</text></view>
+      <view wx:if="{{parsed.spec}}" class="ap-row"><text>规格</text><text class="ap-strong">{{parsed.spec}}</text></view>
+      <view class="ap-tip">💡 你可以修改下面的分类/金额后保存</view>
+    </view>
+  </view>
+
+  <!-- 语音 -->
+  <view wx:if="{{noteTab === 'voice'}}" class="note-panel">
+    <view class="voice-btn {{voiceRecording ? 'recording' : ''}}" bindtap="toggleVoice">{{voiceRecording ? '⏺️' : '🎤'}}</view>
+    <view class="voice-hint">{{voiceRecording ? '正在录音…松手结束' : '点击开始，自动转文字'}}</view>
+    <view wx:if="{{voiceShown}}" class="voice-result">
+      <view class="vr-label">语音转文字：</view>
+      <view>{{voiceText}}</view>
+    </view>
+  </view>
+
+  <!-- 拍照 -->
+  <view wx:if="{{noteTab === 'photo'}}" class="note-panel">
+    <view class="photo-upload-area" bindtap="choosePhoto">
+      <image wx:if="{{photoPath}}" src="{{photoPath}}" mode="aspectFill" class="photo-preview" />
+      <block wx:else>
+        <view class="pu-icon">📸</view>
+        <view class="pu-title">点击拍照或选择照片</view>
+        <view class="pu-sub">建议拍购物小票或商品包装</view>
+      </block>
+    </view>
+    <view class="btn-primary" style="margin-top:24rpx" bindtap="mockAIPhoto">AI 识别商品</view>
+    <view wx:if="{{parsedShown && noteTab === 'photo'}}" class="ai-parse-result">
+      <view class="ap-title">🤖 AI 识别结果</view>
+      <view class="ap-row"><text>金额</text><text class="ap-strong">¥{{amount}}</text></view>
+      <view class="ap-row"><text>品类</text><text class="ap-strong">{{categoryLabel}} > 瓷砖</text></view>
+      <view class="ap-row"><text>空间</text><text class="ap-strong">{{space}}</text></view>
+    </view>
+  </view>
+
+  <!-- 可修改分类/空间/金额 -->
+  <view class="edit-section">
+    <view class="es-label">💰 金额（元）</view>
+    <input class="es-input" type="number" placeholder="0" value="{{amount}}" bindinput="onAmountInput" />
+
+    <view class="es-label">🏷️ 分类</view>
+    <view class="chip-row">
+      <view
+        wx:for="{{categories}}"
+        wx:key="key"
+        class="chip {{category === item.key ? 'selected' : ''}}"
+        data-key="{{item.key}}"
+        bindtap="selectCategory"
+      >{{item.icon}} {{item.label}}</view>
+    </view>
+
+    <view class="es-label">📍 空间</view>
+    <view class="chip-row">
+      <view
+        wx:for="{{spaces}}"
+        wx:key="*this"
+        class="chip {{space === item ? 'selected' : ''}}"
+        data-space="{{item}}"
+        bindtap="selectSpace"
+      >{{item}}</view>
+    </view>
+  </view>
+
+  <view class="btn-primary save-btn" bindtap="saveExpense">保存到预算</view>
+</view>

@@ -1,0 +1,27 @@
+<view class="chat-wrap">
+  <view class="chat-list">
+    <view wx:for="{{messages}}" wx:key="index" class="msg-row {{item.role === 'user' ? 'user' : 'ai'}}">
+      <view wx:if="{{item.role === 'ai'}}" class="msg-avatar">🤖</view>
+      <view class="msg-bubble">{{item.text}}</view>
+    </view>
+  </view>
+</view>
+
+<view class="quick-row">
+  <scroll-view scroll-x class="quick-scroll" enhanced show-scrollbar="{{false}}">
+    <view wx:for="{{quick}}" wx:key="*this" class="quick-chip" data-q="{{item}}" bindtap="tapQuick">{{item}}</view>
+  </scroll-view>
+</view>
+
+<view class="input-bar">
+  <view class="photo-btn" bindtap="choosePhoto">📷</view>
+  <input
+    class="chat-input"
+    placeholder="问点装修的事…"
+    value="{{input}}"
+    bindinput="onInput"
+    bindconfirm="send"
+    confirm-type="send"
+  />
+  <view class="send-btn {{input ? 'active' : ''}}" bindtap="send">发送</view>
+</view>

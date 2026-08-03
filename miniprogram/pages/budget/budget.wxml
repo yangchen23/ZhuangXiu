@@ -1,0 +1,69 @@
+<view class="page-wrap">
+  <!-- 段1：核心数据卡 -->
+  <view class="budget-hero">
+    <view class="bh-label">💰 整体预算</view>
+    <view class="bh-sub">已花费 ¥{{spent}} · 还有 ¥{{remain}} 可用</view>
+    <view class="bh-cards">
+      <view class="bh-card">
+        <view class="bh-num" style="color:#d97706">¥{{spent}}</view>
+        <view class="bh-name">已花费</view>
+      </view>
+      <view class="bh-card">
+        <view class="bh-num">¥{{total}}</view>
+        <view class="bh-name">总预算</view>
+      </view>
+      <view class="bh-card">
+        <view class="bh-num" style="color:#16a34a">¥{{remain}}</view>
+        <view class="bh-name">剩余</view>
+      </view>
+    </view>
+    <view class="bh-bar-track">
+      <view class="bh-bar-fill {{pct >= 90 ? 'warn' : ''}}" style="width:{{pct}}%"></view>
+    </view>
+  </view>
+
+  <!-- 段2：预算分配 -->
+  <view class="section-header"><text>📊 预算分配</text></view>
+  <view class="cat-list">
+    <view wx:for="{{cats}}" wx:key="key" class="budget-cat-card">
+      <view class="bc-header">
+        <text class="bc-icon">{{item.icon}}</text>
+        <view class="bc-info">
+          <view class="bc-name">{{item.name}}</view>
+          <view class="bc-sub">{{item.sub}}</view>
+        </view>
+        <view class="bc-amount" style="color:{{item.color}}">
+          ¥{{item.spentText}}<text class="bc-limit">/{{item.limitText}}</text>
+        </view>
+      </view>
+      <view class="bc-bar-track">
+        <view class="bc-bar-fill {{item.warn ? 'warn' : ''}}" style="width:{{item.pct}}%;background:{{item.bar}}"></view>
+      </view>
+      <view wx:if="{{item.warn}}" class="bc-warn">⚠️ 已超预算 90%，注意控制</view>
+    </view>
+  </view>
+
+  <!-- 段3：近期流水 -->
+  <view class="section-header">
+    <text>💰 近期流水</text>
+    <text class="more" bindtap="showAll">全部</text>
+  </view>
+
+  <view wx:if="{{flowEmpty}}" class="empty-box">
+    <view class="eb-icon">📭</view>
+    <view class="eb-title">暂无记录</view>
+    <view class="eb-desc">点下方「✏️ 随手记」记录每一笔\n自动归类到这里</view>
+  </view>
+
+  <view wx:for="{{flow}}" wx:key="id" class="budget-flow-item">
+    <view class="bfi-icon">{{item.icon}}</view>
+    <view class="bfi-info">
+      <view class="bfi-title">{{item.title}}</view>
+      <view class="bfi-meta">{{item.meta}}</view>
+      <view class="bfi-type">{{item.typeLabel}}</view>
+    </view>
+    <view class="bfi-amount">¥{{item.amountText}}</view>
+  </view>
+
+  <view class="budget-footer" bindtap="goQuickNote">＋ 记一笔（随手记）</view>
+</view>

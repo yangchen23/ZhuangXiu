@@ -1,0 +1,78 @@
+.photo-banner {
+  margin: 28rpx 32rpx;
+  padding: 28rpx;
+  background: linear-gradient(135deg, #dbeafe, #eff6ff);
+  border-radius: 28rpx;
+  display: flex;
+  align-items: center;
+  gap: 20rpx;
+  border: 2rpx solid #bfdbfe;
+}
+
+.pb-icon { font-size: 56rpx; }
+.pb-text { flex: 1; }
+.pb-title { font-size: 30rpx; font-weight: 700; color: #1e40af; }
+.pb-sub { font-size: 24rpx; color: #3b82f6; margin-top: 4rpx; }
+
+.photo-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12rpx;
+  padding: 0 32rpx;
+}
+
+.photo-tile {
+  position: relative;
+  height: 200rpx;
+  border-radius: 16rpx;
+  overflow: hidden;
+  background: #f5f5f5;
+}
+
+.photo-img { width: 100%; height: 100%; }
+
+.ph-date {
+  position: absolute;
+  bottom: 4rpx;
+  left: 4rpx;
+  font-size: 16rpx;
+  color: #fff;
+  background: rgba(0, 0, 0, 0.4);
+  padding: 2rpx 8rpx;
+  border-radius: 8rpx;
+}
+
+.ph-del {
+  position: absolute;
+  top: 6rpx;
+  right: 6rpx;
+  background: rgba(0, 0, 0, 0.6);
+  color: #fff;
+  width: 34rpx;
+  height: 34rpx;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22rpx;
+}
+
+.photo-add {
+  height: 200rpx;
+  background: #fafafa;
+  border: 4rpx dashed #d1d5db;
+  color: #9ca3af;
+  border-radius: 16rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: 22rpx;
+}
+
+.add-plus { font-size: 44rpx; margin-bottom: 6rpx; }
+
+.take-btn {
+  margin: 40rpx 32rpx;
+  width: auto;
+}

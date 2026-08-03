@@ -1,0 +1,39 @@
+<view class="tab-bar-wrap">
+  <view class="tab-bar">
+    <view
+      wx:for="{{list}}"
+      wx:key="pagePath"
+      class="tab-item {{selected === index ? 'active' : ''}}"
+      data-path="{{item.pagePath}}"
+      bindtap="switchTab"
+    >
+      <text class="tab-icon">{{item.icon}}</text>
+      <text class="tab-label">{{item.text}}</text>
+    </view>
+    <view class="fab-btn {{fabOpen ? 'open' : ''}}" bindtap="toggleFab">
+      <text class="fab-plus">+</text>
+    </view>
+  </view>
+
+  <view wx:if="{{fabOpen}}" class="fab-backdrop" bindtap="toggleFab"></view>
+  <view wx:if="{{fabOpen}}" class="fab-menu">
+    <view class="fab-grid">
+      <view class="fab-item" data-url="/pages/quick-note/quick-note" bindtap="goAction">
+        <text class="f-icon">✏️</text>
+        <text>随手记</text>
+      </view>
+      <view class="fab-item" data-url="/pages/photo/photo" bindtap="goAction">
+        <text class="f-icon">📷</text>
+        <text>拍照留档</text>
+      </view>
+      <view class="fab-item" data-url="/pages/ai-chat/ai-chat" bindtap="goAction">
+        <text class="f-icon">🤖</text>
+        <text>问AI</text>
+      </view>
+      <view class="fab-item" data-url="/pages/diary-edit/diary-edit" bindtap="goAction">
+        <text class="f-icon">📝</text>
+        <text>写日记</text>
+      </view>
+    </view>
+  </view>
+</view>

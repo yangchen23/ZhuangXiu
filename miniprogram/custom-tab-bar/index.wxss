@@ -1,0 +1,127 @@
+.tab-bar-wrap {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 999;
+}
+
+.tab-bar {
+  height: 110rpx;
+  padding-bottom: env(safe-area-inset-bottom);
+  background: #fff;
+  display: flex;
+  align-items: center;
+  border-top: 1rpx solid #e5e5e5;
+  position: relative;
+}
+
+.tab-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4rpx;
+  color: #999;
+  padding: 8rpx 0;
+  position: relative;
+  z-index: 2;
+}
+
+.tab-item.active {
+  color: #f59e0b;
+}
+
+.tab-item .tab-icon {
+  font-size: 40rpx;
+  line-height: 1;
+}
+
+.tab-item .tab-label {
+  font-size: 20rpx;
+  line-height: 1;
+}
+
+/* 中央 FAB */
+.fab-btn {
+  position: absolute;
+  left: 50%;
+  top: -44rpx;
+  transform: translateX(-50%);
+  width: 88rpx;
+  height: 88rpx;
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 56rpx;
+  z-index: 5;
+  box-shadow: 0 8rpx 24rpx rgba(245, 158, 11, 0.4);
+  transition: transform 0.2s;
+}
+
+.fab-btn.open {
+  transform: translateX(-50%) rotate(45deg);
+}
+
+.fab-plus {
+  line-height: 1;
+  margin-top: -6rpx;
+}
+
+/* FAB 菜单 */
+.fab-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.35);
+  z-index: 4;
+}
+
+.fab-menu {
+  position: fixed;
+  bottom: 170rpx;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+  animation: fabPop 0.2s ease;
+}
+
+@keyframes fabPop {
+  from { opacity: 0; transform: translateX(-50%) scale(0.85); }
+  to { opacity: 1; transform: translateX(-50%) scale(1); }
+}
+
+.fab-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24rpx;
+  width: 400rpx;
+}
+
+.fab-item {
+  background: #fff;
+  border-radius: 28rpx;
+  padding: 28rpx 20rpx;
+  box-shadow: 0 8rpx 28rpx rgba(0, 0, 0, 0.12);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10rpx;
+  font-size: 26rpx;
+  color: #1a1a1a;
+  font-weight: 500;
+}
+
+.fab-item:active {
+  transform: scale(0.95);
+}
+
+.fab-item .f-icon {
+  font-size: 48rpx;
+}

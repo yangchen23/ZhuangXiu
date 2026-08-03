@@ -1,0 +1,247 @@
+<view class="page-wrap">
+  <!-- 子 Tab -->
+  <view class="diary-tab-bar">
+    <view class="diary-tab {{diaryTab === 'overview' ? 'active' : ''}}" data-tab="overview" bindtap="switchTab">📊 总览</view>
+    <view class="diary-tab {{diaryTab === 'plan' ? 'active' : ''}}" data-tab="plan" bindtap="switchTab">📅 计划</view>
+    <view class="diary-tab {{diaryTab === 'record' ? 'active' : ''}}" data-tab="record" bindtap="switchTab">📝 记录</view>
+  </view>
+
+  <!-- ===== 总览 ===== -->
+  <view wx:if="{{diaryTab === 'overview'}}">
+    <view class="diary-focus">
+      <view class="df-title">🏗️ 泥瓦阶段 <text class="df-badge">第38天</text></view>
+      <view class="df-meta">预计还需 12 天 · 整体进度 70%</view>
+      <scroll-view scroll-x class="df-flow" enable-flex>
+        <view class="df-flow-row">
+          <block wx:for="{{flow}}" wx:key="label">
+            <view class="df-step">
+              <view class="dot {{item.state}}">{{item.state === 'done' ? '✓' : (item.state === 'current' ? '●' : '○')}}</view>
+              <view class="lbl {{item.state}}">{{item.label}}</view>
+            </view>
+            <view wx:if="{{index < flow.length - 1}}" class="df-line {{item.state === 'done' ? 'done' : ''}}"></view>
+          </block>
+        </view>
+      </scroll-view>
+    </view>
+
+    <view class="section-header" style="padding:24rpx 32rpx 16rpx"><text>🎯 今天要做什么</text></view>
+    <view class="diary-key-3">
+      <view class="key-card" bindtap="toggleTasks">
+        <text class="kc-arr">{{tasksOpen ? '▼' : '▲'}}</text>
+        <view class="kc-num">{{taskDone}}/{{taskTotal}}</view>
+        <view class="kc-lbl">今日任务</view>
+      </view>
+      <view class="key-card" bindtap="toggleChecks">
+        <text class="kc-arr">{{checksOpen ? '▼' : '▲'}}</text>
+        <view class="kc-num">{{checkDone}}/{{checkTotal}}</view>
+        <view class="kc-lbl">验收清单</view>
+      </view>
+      <view class="key-card" data-tip="下一阶段：木工准备" bindtap="showTip">
+        <text class="kc-arr">→</text>
+        <view class="kc-num" style="font-size:28rpx;color:#3b82f6">木工</view>
+        <view class="kc-lbl">下一阶段</view>
+      </view>
+    </view>
+
+    <!-- 今日任务 -->
+    <view class="diary-detail">
+      <view class="dd-header" bindtap="toggleTasks">
+        <text class="dd-title">✅ 今日任务 <text class="dd-progress">({{taskDone}}/{{taskTotal}})</text></text>
+        <text class="dd-toggle {{tasksOpen ? 'open' : ''}}">▼</text>
+      </view>
+      <view wx:if="{{tasksOpen}}" class="dd-body">
+        <view
+          wx:for="{{tasks}}"
+          wx:key="text"
+          class="task-item"
+          data-index="{{index}}"
+          bindtap="toggleTask"
+        >
+          <view class="task-check {{item.done ? 'done' : ''}}">{{item.done ? '✓' : ''}}</view>
+          <text class="task-text {{item.done ? 'done' : ''}}">{{item.text}}</text>
+        </view>
+        <view class="task-add" data-tip="添加任务" bindtap="showTip">＋ 添加任务</view>
+      </view>
+    </view>
+
+    <!-- 验收清单 -->
+    <view class="diary-detail">
+      <view class="dd-header" bindtap="toggleChecks">
+        <text class="dd-title">🎯 泥瓦验收清单 <text class="dd-progress">({{checkDone}}/{{checkTotal}})</text></text>
+        <text class="dd-toggle {{checksOpen ? 'open' : ''}}">▼</text>
+      </view>
+      <view wx:if="{{checksOpen}}" class="dd-body">
+        <view
+          wx:for="{{checks}}"
+          wx:key="text"
+          class="check-item"
+          data-index="{{index}}"
+          bindtap="toggleCheck"
+        >
+          <text class="check-mark">{{item.done ? '✓' : '☐'}}</text>
+          <text class="check-text {{item.done ? 'done' : ''}}">{{item.text}}</text>
+        </view>
+      </view>
+    </view>
+
+    <view class="section-header" style="padding:24rpx 32rpx 16rpx"><text>📦 资料</text></view>
+    <view class="diary-resources">
+      <view class="res-card" data-tip="阶段预算" bindtap="showTip">
+        <view class="rc-head"><text class="rc-title">💰 阶段预算</text><text class="rc-arr">›</text></view>
+        <view class="rc-content">¥28,500 <text class="rc-sub">/ ¥30,000</text></view>
+        <view class="budget-bar-track"><view class="budget-bar-fill" style="width:95%;background:linear-gradient(90deg,#f59e0b,#d97706)"></view></view>
+        <view class="rc-mini" style="color:#dc2626">仅剩 ¥1,500</view>
+      </view>
+      <view class="res-card" data-tip="现场照片" bindtap="showTip">
+        <view class="rc-head"><text class="rc-title">📷 现场照片</text><text class="rc-arr">›</text></view>
+        <view class="rc-content">24 张</view>
+        <view class="rc-mini">最近 7.30</view>
+      </view>
+      <view class="res-card" data-tip="避坑提醒" bindtap="showTip">
+        <view class="rc-head"><text class="rc-title">⚠️ 避坑提醒</text><text class="rc-arr">›</text></view>
+        <view class="rc-content">4 条</view>
+        <view class="rc-mini">必看必看</view>
+      </view>
+      <view class="res-card" data-tip="工人详情" bindtap="showTip">
+        <view class="rc-head"><text class="rc-title">👷 今日工人</text><text class="rc-arr">›</text></view>
+        <view class="wc-row"><text class="wc-av">👨‍🔧</text><text class="wc-name">张师傅</text><text class="wc-status">在场</text></view>
+        <view class="wc-row"><text class="wc-av">🧑‍💼</text><text class="wc-name">王工长</text><text class="wc-status off">已离</text></view>
+      </view>
+    </view>
+
+    <view class="next-stage-card">
+      <view class="ns-title">➡️ 下一阶段：木工</view>
+      <view class="ns-desc">木工进场前需准备：吊顶方案图、定制柜体设计、筒灯开孔位置</view>
+      <view class="ns-btn" data-tip="联系木工" bindtap="showTip">立即预约木工</view>
+    </view>
+  </view>
+
+  <!-- ===== 计划 ===== -->
+  <view wx:if="{{diaryTab === 'plan'}}">
+    <view class="cal-header">
+      <text class="cal-nav">‹ 上月</text>
+      <text class="cal-month">📅 {{calMonth}}</text>
+      <text class="cal-nav">下月 ›</text>
+    </view>
+    <view class="cal-grid">
+      <view class="cal-weekdays">
+        <text>日</text><text>一</text><text>二</text><text>三</text><text>四</text><text>五</text><text>六</text>
+      </view>
+      <view class="cal-days">
+        <view
+          wx:for="{{calCells}}"
+          wx:key="id"
+          class="cal-day {{item.other ? 'other-month' : ''}} {{item.today ? 'today' : ''}}"
+        >
+          <text>{{item.day}}</text>
+          <view wx:if="{{item.day && item.dot}}" class="day-dot dot-{{item.dot}}"></view>
+        </view>
+      </view>
+    </view>
+    <view class="cal-legend">
+      <view class="legend-item"><view class="dot" style="background:#22c55e"></view><text>已完成</text></view>
+      <view class="legend-item"><view class="dot" style="background:#f59e0b"></view><text>进行中</text></view>
+      <view class="legend-item"><view class="dot" style="background:#d1d5db"></view><text>未开始</text></view>
+    </view>
+    <view class="cal-detail">
+      <view class="cd-title">📅 {{todayLabel}}</view>
+      <view wx:for="{{events}}" wx:key="text" class="cal-event">
+        <view class="ce-dot {{item.color}}"></view>
+        <text class="ce-text">{{item.text}}</text>
+        <text class="ce-time">{{item.time}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- ===== 记录 ===== -->
+  <view wx:if="{{diaryTab === 'record'}}">
+    <view class="search-bar">
+      <text class="search-icon">🔍</text>
+      <input placeholder="搜「闭水试验」…" value="{{keyword}}" bindinput="onSearch" />
+      <text class="ai-tag">AI 智能</text>
+    </view>
+    <scroll-view scroll-x class="tag-chips" enhanced show-scrollbar="{{false}}">
+      <view
+        wx:for="{{tags}}"
+        wx:key="*this"
+        class="tag-chip {{activeTag === item ? 'active' : ''}}"
+        data-tag="{{item}}"
+        bindtap="filterTag"
+      >{{item === '全部' ? item : '#' + item}}</view>
+    </scroll-view>
+
+    <view class="section-header" style="padding:16rpx 32rpx"><text>📍 按空间浏览</text></view>
+    <view class="space-browse-grid">
+      <view
+        wx:for="{{spaces}}"
+        wx:key="name"
+        class="space-browse-card {{item.active ? 'active' : ''}}"
+        data-space="{{item.name}}"
+        bindtap="filterBySpace"
+      >
+        <view class="space-browse-icon" style="background:{{item.bg}}">{{item.emoji}}</view>
+        <view class="space-browse-name">{{item.name}}</view>
+        <view class="space-browse-count">{{item.count}} 条</view>
+      </view>
+      <view class="space-browse-add" bindtap="openAddSpace">
+        <view class="add-icon">+</view>
+        <text>添加空间</text>
+      </view>
+    </view>
+
+    <view wx:if="{{spaceFilterBanner}}" class="space-filter-banner">
+      <text>🏷️ 仅显示 <text style="font-weight:600">{{spaceFilterName}}</text> 的记录</text>
+      <text class="sf-clear" bindtap="clearSpaceFilter">查看全部 ›</text>
+    </view>
+
+    <view class="record-hint">🕐 最新记录 · 按时间倒序</view>
+    <view wx:if="{{shownRecords.length === 0}}" class="empty-box">
+      <view class="eb-icon">📭</view>
+      <view class="eb-title">没有找到记录</view>
+      <view class="eb-desc">换个关键词，或点下方「+」随手记一笔</view>
+    </view>
+    <view wx:for="{{shownRecords}}" wx:key="id" class="record-item">
+      <view class="record-icon">{{item.icon}}</view>
+      <view class="record-info">
+        <view class="ri-title">{{item.title}}</view>
+        <view class="ri-meta">{{item.meta}}</view>
+        <view class="ri-desc">{{item.desc}}</view>
+        <view class="ri-tags">
+          <text wx:for="{{item.tags}}" wx:key="*this" class="tag tag-{{item === '验收' ? 'green' : (item === '水电' || item === '防水' ? 'blue' : 'orange')}}">#{{item}}</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- ===== 添加空间弹窗 ===== -->
+  <view wx:if="{{spaceModalOpen}}" class="modal-overlay" catchtap="closeAddSpace">
+    <view class="modal-sheet" catchtap="noop">
+      <view class="modal-handle"></view>
+      <view class="modal-title">➕ 添加自定义空间</view>
+      <view class="modal-sub">预设没有的空间，可以自定义添加</view>
+
+      <view class="form-group">
+        <view class="form-label">空间名称</view>
+        <input class="form-input" placeholder="如：衣帽间 / 储物间 / 洗衣房" value="{{spaceName}}" bindinput="onSpaceName" />
+      </view>
+
+      <view class="form-group">
+        <view class="form-label">选一个图标</view>
+        <view class="emoji-grid">
+          <view
+            wx:for="{{emojiList}}"
+            wx:key="*this"
+            class="emoji-opt {{spaceEmoji === item ? 'selected' : ''}}"
+            data-emoji="{{item}}"
+            bindtap="selectEmoji"
+          >{{item}}</view>
+        </view>
+      </view>
+
+      <view class="modal-btns">
+        <view class="btn-secondary" bindtap="closeAddSpace">取消</view>
+        <view class="btn-primary" style="flex:2" bindtap="confirmAddSpace">添加</view>
+      </view>
+    </view>
+  </view>
+</view>

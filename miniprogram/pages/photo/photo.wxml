@@ -1,0 +1,29 @@
+<view class="page-wrap">
+  <view class="photo-banner">
+    <view class="pb-icon">📷</view>
+    <view class="pb-text">
+      <view class="pb-title">拍照留档</view>
+      <view class="pb-sub">拍现场、拍小票、拍材料，按时间存档</view>
+    </view>
+  </view>
+
+  <view wx:if="{{photos.length === 0}}" class="empty-box">
+    <view class="eb-icon">🖼️</view>
+    <view class="eb-title">还没有照片</view>
+    <view class="eb-desc">点下方按钮拍下第一张施工/材料照片</view>
+  </view>
+
+  <view class="photo-grid">
+    <view wx:for="{{photos}}" wx:key="id" class="photo-tile">
+      <image src="{{item.path}}" mode="aspectFill" class="photo-img" data-url="{{item.path}}" bindtap="preview" />
+      <view class="ph-date">{{item.date}}</view>
+      <view class="ph-del" data-id="{{item.id}}" catchtap="remove">×</view>
+    </view>
+    <view class="photo-add" bindtap="takePhoto">
+      <text class="add-plus">＋</text>
+      <text>拍照/相册</text>
+    </view>
+  </view>
+
+  <view class="btn-primary take-btn" bindtap="takePhoto">📷 拍一张</view>
+</view>

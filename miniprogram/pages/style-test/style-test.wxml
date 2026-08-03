@@ -1,0 +1,46 @@
+<view class="page-wrap">
+  <block wx:if="{{!finished}}">
+    <view class="st-progress">
+      <text>第 {{idx + 1}} / {{total}} 题</text>
+      <view class="st-bar-track">
+        <view class="st-bar-fill" style="width:{{(idx / total) * 100}}%"></view>
+      </view>
+    </view>
+
+    <view class="st-question">
+      <view class="st-q">{{questions[idx].q}}</view>
+      <view class="st-option" data-opt="a" bindtap="select">
+        <text class="st-opt-icon">A</text>
+        <text>{{questions[idx].a.text}}</text>
+      </view>
+      <view class="st-option" data-opt="b" bindtap="select">
+        <text class="st-opt-icon">B</text>
+        <text>{{questions[idx].b.text}}</text>
+      </view>
+    </view>
+  </block>
+
+  <block wx:else>
+    <view class="st-result">
+      <view class="sr-hero">🎉</view>
+      <view class="sr-title">你的风格画像</view>
+      <view class="sr-primary">{{result.primary}}</view>
+      <view class="sr-desc">主风格 · 建议以此为核心做全屋基调</view>
+
+      <view class="sr-card">
+        <view class="sr-card-title">🎨 辅助风格</view>
+        <view class="sr-tags">
+          <text class="sr-tag">{{result.secondary}}</text>
+          <text class="sr-tag">{{result.primary === '北欧' ? '日式' : '北欧'}}</text>
+        </view>
+      </view>
+      <view class="sr-card warn">
+        <view class="sr-card-title">⚠️ 避坑风格</view>
+        <view class="sr-desc2">{{result.avoid}} 与你气质差距较大，别硬凑</view>
+      </view>
+
+      <view class="sr-tip">💡 下一步：到「参考 → 风格图库」看对应风格案例，收藏喜欢的图</view>
+      <view class="btn-primary sr-restart" bindtap="restart">重新测试</view>
+    </view>
+  </block>
+</view>

@@ -1,0 +1,103 @@
+<view class="page-wrap">
+  <!-- 顶部元信息 -->
+  <view class="home-meta">
+    <text>📅 {{todayStr}} · 准备中</text>
+    <text>距开工 31 天</text>
+  </view>
+
+  <!-- Hero 天气主题 -->
+  <view class="hero {{weather.cls}}">
+    <view class="hg-weather-switch" bindtap="cycleWeather">🌦️ 切换</view>
+    <view wx:if="{{weather.rain}}" class="rain-drops">
+      <view
+        wx:for="{{rainDrops}}"
+        wx:key="left"
+        class="rain-drop"
+        style="left:{{item.left}};animation-delay:{{item.delay}}"
+      ></view>
+    </view>
+    <text class="hg-emoji">{{weather.emoji}}</text>
+    <view class="hg-title">{{weather.title}}</view>
+    <view class="hg-stage">📍 准备期 · 北欧风格</view>
+    <view class="hg-quote">{{weather.quote}}</view>
+  </view>
+
+  <!-- 天气卡 -->
+  <view class="weather-card">
+    <text class="wc-icon">{{weather.icon}}</text>
+    <view class="wc-text">
+      <view class="wc-temp">{{weather.temp}} <text class="wc-desc">{{weather.desc}}</text></view>
+      <view class="wc-air">{{weather.air}}</view>
+    </view>
+    <view class="wc-tip">{{weather.tip}}</view>
+  </view>
+
+  <!-- 昨日未完成 -->
+  <view class="pending-card">
+    <view class="pending-title">📌 昨天有 2 件事没做完</view>
+    <view class="pending-item">
+      <text>· 选购客厅筒灯（拖了 2 天）</text>
+      <text class="pi-tag">建议今天补</text>
+    </view>
+    <view class="pending-item">
+      <text>· 预约木工师傅（已约到明早9点）</text>
+      <text class="pi-tag done">已完成</text>
+    </view>
+  </view>
+
+  <!-- Dashboard 三卡 -->
+  <view class="dash-stats">
+    <view class="dash-stat" bindtap="goRef">
+      <text class="s-icon">🎨</text>
+      <text class="s-num">北欧</text>
+      <text class="s-label">我的风格</text>
+    </view>
+    <view class="dash-stat" bindtap="goKnowledge">
+      <text class="s-icon">📚</text>
+      <text class="s-num">{{knowledgeCount}}</text>
+      <text class="s-label">知识库</text>
+    </view>
+    <view class="dash-stat" bindtap="goBudget">
+      <text class="s-icon">💰</text>
+      <text class="s-num">¥{{spentText}}</text>
+      <text class="s-label">已花费</text>
+    </view>
+  </view>
+
+  <!-- 开工准备 -->
+  <view class="card prep-card">
+    <view class="prep-header">
+      <text class="prep-title">📋 开工准备</text>
+      <text class="prep-progress">{{prepDone}}/{{prepTotal}} 完成</text>
+    </view>
+    <view class="prep-bar-track">
+      <view class="prep-bar-fill" style="width:{{prepPct}}%"></view>
+    </view>
+    <view class="prep-items">
+      <view
+        wx:for="{{prep}}"
+        wx:key="name"
+        class="prep-tag {{item.done ? 'done' : ''}} {{item.next ? 'next' : ''}}"
+        data-name="{{item.name}}"
+        bindtap="togglePrep"
+      >{{item.name}}</view>
+    </view>
+    <view class="prep-cta">
+      <text class="prep-cta-text">🎯 下一步：找施工方</text>
+      <text class="prep-cta-btn" data-tip="打开施工方推荐" bindtap="showTip">去看看</text>
+    </view>
+  </view>
+
+  <!-- 下一阶段 -->
+  <view class="next-stage-card">
+    <view class="ns-title">➡️ 下一阶段预告：泥瓦</view>
+    <view class="ns-desc">开工后第一件大事：贴瓷砖。需要提前准备：瓷砖选型、瓦工预约、卫生间防水高度确认</view>
+    <view class="ns-btn" data-tip="查看泥瓦阶段攻略" bindtap="showTip">看攻略</view>
+  </view>
+
+  <!-- 今日贴士 -->
+  <view class="tip-card">
+    <view class="tip-title">💡 今日贴士</view>
+    <view class="tip-desc">正在下{{weather.desc}}，不建议去建材城。趁{{weather.rain ? '雨' : '空'}}天在家做点功课：搜"水电改造避坑"，看 2-3 篇就够了</view>
+  </view>
+</view>

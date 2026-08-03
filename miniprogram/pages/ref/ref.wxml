@@ -1,0 +1,134 @@
+<view class="page-wrap">
+  <!-- 子 Tab -->
+  <view class="ref-tabs">
+    <view class="ref-tab {{refTab === 'insp' ? 'active' : ''}}" data-tab="insp" bindtap="switchTab">💡 灵感</view>
+    <view class="ref-tab {{refTab === 'know' ? 'active' : ''}}" data-tab="know" bindtap="switchTab">📚 知识</view>
+  </view>
+
+  <!-- ===== 灵感 ===== -->
+  <view wx:if="{{refTab === 'insp'}}">
+    <view class="bookmark-entry" bindtap="openImport">
+      <view class="be-icon">📥</view>
+      <view class="be-text">
+        <view class="be-title">收藏外部内容</view>
+        <view class="be-sub">小红书/抖音/公众号 · 复制链接即收藏</view>
+      </view>
+      <text class="be-arrow">›</text>
+    </view>
+
+    <view class="style-banner" bindtap="goStyleTest">
+      <text class="sb-icon">🚀</text>
+      <view class="sb-text">
+        <view class="sb-title">3分钟风格速测</view>
+        <view class="sb-sub">5道题，测测你最爱的装修风格</view>
+      </view>
+      <text class="sb-arrow">›</text>
+    </view>
+
+    <view class="saved-bookmarks">
+      <view class="sb-header">
+        <text>📥 已收藏 <text class="sb-count">{{bookmarks.length}} 条</text></text>
+        <text class="sb-all" data-tab="know" bindtap="switchTab">全部 ›</text>
+      </view>
+      <view wx:for="{{bookmarks}}" wx:key="id" class="sb-item" bindtap="showBookmark">
+        <view class="sb-thumb" style="background:{{item.bg}}">{{item.thumb}}</view>
+        <view class="sb-info">
+          <view class="sb-title">{{item.title}}</view>
+          <view class="sb-sub">{{item.source}}</view>
+        </view>
+      </view>
+      <view wx:if="{{bookmarks.length === 0}}" class="sb-empty">还没有收藏，点上方「收藏外部内容」试试</view>
+    </view>
+
+    <view class="section-header">
+      <text>✨ 装修风格</text>
+      <text class="more">8大风格</text>
+    </view>
+    <view class="style-grid">
+      <view
+        wx:for="{{styles}}"
+        wx:key="name"
+        class="style-card"
+        data-name="{{item.name}}"
+        bindtap="showStyle"
+      >
+        <view class="sc-img" style="background:{{item.bg}}">{{item.emoji}}</view>
+        <view class="sc-name">{{item.name}}</view>
+      </view>
+    </view>
+
+    <view class="tools-row">
+      <view class="tool" data-tip="AI风格分析（开发中）" bindtap="showTool">
+        <text class="t-icon">🤖</text>
+        <text class="t-label">AI风格分析</text>
+      </view>
+      <view class="tool" data-tip="户型方案（开发中）" bindtap="showTool">
+        <text class="t-icon">📐</text>
+        <text class="t-label">户型方案</text>
+      </view>
+      <view class="tool" data-tip="预算估算（开发中）" bindtap="showTool">
+        <text class="t-icon">💰</text>
+        <text class="t-label">预算估算</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- ===== 知识 ===== -->
+  <view wx:if="{{refTab === 'know'}}">
+    <view class="search-bar">
+      <text class="search-icon">🔍</text>
+      <input placeholder="搜「瓷砖」「防水」「水电」…" value="{{keyword}}" bindinput="onSearch" />
+      <text class="ai-tag">AI 智能</text>
+    </view>
+
+    <view class="section-header"><text>📚 知识分类</text></view>
+    <view class="kg-grid">
+      <view
+        wx:for="{{categories}}"
+        wx:key="name"
+        class="kg-item"
+        data-name="{{item.name}}"
+        bindtap="showCat"
+      >
+        <view class="kg-icon">{{item.emoji}}</view>
+        <view class="kg-label">{{item.name}}</view>
+      </view>
+    </view>
+
+    <view class="section-header">
+      <text>🔥 热门问答</text>
+      <text class="more">50+</text>
+    </view>
+    <view class="faq-list">
+      <view wx:for="{{faqs}}" wx:key="q" class="faq-item" data-index="{{index}}" bindtap="toggleFaq">
+        <view class="faq-q">
+          <text class="faq-num">Q{{index + 1}}</text>
+          <text class="faq-text">{{item.q}}</text>
+          <text wx:if="{{item.hot}}" class="faq-hot">HOT</text>
+        </view>
+        <view wx:if="{{item.open}}" class="faq-a">{{item.a}}</view>
+      </view>
+    </view>
+  </view>
+
+  <!-- ===== 收藏外部内容弹窗 ===== -->
+  <view wx:if="{{importOpen}}" class="modal-overlay" catchtap="closeImport">
+    <view class="modal-sheet" catchtap="noop">
+      <view class="modal-handle"></view>
+      <view class="modal-title">📥 收藏外部内容</view>
+      <view class="import-tabs">
+        <view class="import-tab {{importTab === 'link' ? 'active' : ''}}" data-tab="link" bindtap="switchImportTab">🔗 链接</view>
+        <view class="import-tab {{importTab === 'photo' ? 'active' : ''}}" data-tab="photo" bindtap="switchImportTab">📸 截图</view>
+        <view class="import-tab {{importTab === 'text' ? 'active' : ''}}" data-tab="text" bindtap="switchImportTab">📋 文本</view>
+      </view>
+      <input
+        class="form-input"
+        placeholder="{{importTab === 'link' ? '粘贴小红书/抖音/公众号链接…' : (importTab === 'text' ? '粘贴一段文字…' : '截图功能开发中，先粘贴链接试试')}}"
+        value="{{importText}}"
+        bindinput="onImportInput"
+      />
+      <view class="btn-primary import-btn" bindtap="aiAnalyze">AI 分析提取</view>
+      <view class="import-tip">💡 AI 会提炼要点/避坑项，并自动归档到知识库和材料清单</view>
+    </view>
+  </view>
+</view>

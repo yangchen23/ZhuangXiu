@@ -1,0 +1,121 @@
+.st-progress {
+  padding: 32rpx;
+  font-size: 26rpx;
+  color: #6b7280;
+}
+
+.st-bar-track {
+  height: 14rpx;
+  background: #e5e5e5;
+  border-radius: 7rpx;
+  overflow: hidden;
+  margin-top: 16rpx;
+}
+
+.st-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #f59e0b, #d97706);
+  border-radius: 7rpx;
+  transition: width 0.3s;
+}
+
+.st-question {
+  padding: 0 32rpx;
+}
+
+.st-q {
+  font-size: 36rpx;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin-bottom: 32rpx;
+  line-height: 1.5;
+}
+
+.st-option {
+  display: flex;
+  align-items: center;
+  gap: 20rpx;
+  background: #fff;
+  border-radius: 24rpx;
+  padding: 28rpx;
+  margin-bottom: 20rpx;
+  box-shadow: 0 2rpx 6rpx rgba(0, 0, 0, 0.04);
+  font-size: 28rpx;
+  color: #1a1a1a;
+}
+
+.st-option:active { border: 2rpx solid #f59e0b; padding: 26rpx; }
+
+.st-opt-icon {
+  width: 56rpx;
+  height: 56rpx;
+  border-radius: 50%;
+  background: #fef3c7;
+  color: #d97706;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24rpx;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.st-result {
+  padding: 48rpx 32rpx;
+  text-align: center;
+}
+
+.sr-hero { font-size: 96rpx; }
+.sr-title { font-size: 28rpx; color: #6b7280; margin-top: 8rpx; }
+.sr-primary { font-size: 64rpx; font-weight: 700; color: #f59e0b; margin-top: 12rpx; }
+.sr-desc { font-size: 24rpx; color: #9ca3af; margin-top: 6rpx; }
+
+.sr-card {
+  background: #fff;
+  border-radius: 24rpx;
+  padding: 28rpx;
+  margin-top: 28rpx;
+  text-align: left;
+  box-shadow: 0 2rpx 6rpx rgba(0, 0, 0, 0.04);
+}
+
+.sr-card.warn {
+  background: #fef2f2;
+  border: 2rpx solid #fecaca;
+}
+
+.sr-card-title {
+  font-size: 26rpx;
+  font-weight: 600;
+  color: #4b5563;
+  margin-bottom: 16rpx;
+}
+
+.sr-tags {
+  display: flex;
+  gap: 14rpx;
+}
+
+.sr-tag {
+  padding: 12rpx 28rpx;
+  background: #fef3c7;
+  color: #d97706;
+  border-radius: 28rpx;
+  font-size: 26rpx;
+  font-weight: 600;
+}
+
+.sr-desc2 { font-size: 26rpx; color: #7c2d12; }
+
+.sr-tip {
+  margin-top: 28rpx;
+  padding: 20rpx;
+  background: #fffbeb;
+  border-radius: 20rpx;
+  font-size: 24rpx;
+  color: #92400e;
+  line-height: 1.6;
+  text-align: left;
+}
+
+.sr-restart { margin-top: 32rpx; }

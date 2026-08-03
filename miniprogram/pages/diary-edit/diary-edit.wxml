@@ -1,0 +1,79 @@
+<view class="page-wrap">
+  <view class="de-context">
+    <text>📅 {{todayStr}}</text>
+    <text>🏗️ 当前：泥瓦阶段</text>
+  </view>
+
+  <view class="de-form">
+    <view class="de-section">
+      <view class="de-section-title">📍 所属空间 <text class="req">必选</text></view>
+      <view class="space-picker">
+        <view
+          wx:for="{{spaces}}"
+          wx:key="*this"
+          class="space-chip {{selectedSpace === item ? 'selected' : ''}}"
+          data-space="{{item}}"
+          bindtap="selectSpace"
+        >{{item}}</view>
+      </view>
+    </view>
+
+    <view class="de-section">
+      <view class="de-section-title">🔨 施工类型</view>
+      <view class="space-picker">
+        <view
+          wx:for="{{types}}"
+          wx:key="*this"
+          class="space-chip {{selectedType === item ? 'selected' : ''}}"
+          data-type="{{item}}"
+          bindtap="selectType"
+        >{{item}}</view>
+      </view>
+    </view>
+
+    <view class="de-section">
+      <view class="de-section-title">📷 现场照片 <text class="de-sub">({{photos.length}}/9)</text></view>
+      <view class="photo-grid-upload">
+        <view wx:for="{{photos}}" wx:key="*this" class="photo-slot has-image">
+          <image src="{{item}}" mode="aspectFill" class="photo-thumb" data-url="{{item}}" bindtap="previewPhoto" />
+          <view class="ps-del" data-index="{{index}}" catchtap="removePhoto">×</view>
+        </view>
+        <view wx:if="{{photos.length < 9}}" class="photo-slot" bindtap="chooseImages">
+          <text>+</text>
+          <text class="ps-tip">点击拍照</text>
+        </view>
+      </view>
+      <view class="photo-tip">💡 建议拍施工细节、管线位置、隐蔽工程</view>
+    </view>
+
+    <view class="de-section">
+      <view class="de-section-title">✍️ 今天做了什么</view>
+      <textarea
+        class="de-input"
+        placeholder="例：客厅地砖铺完了，800×800浅灰色通体大理石，留缝2mm。师傅手艺不错..."
+        value="{{content}}"
+        bindinput="onContent"
+        maxlength="500"
+      ></textarea>
+    </view>
+
+    <view class="de-section">
+      <view class="de-section-title">🏷️ 标签 <text class="de-sub">(方便日后搜索)</text></view>
+      <view class="de-tag-area">
+        <view wx:for="{{tags}}" wx:key="*this" class="de-tag">
+          {{item}}<text class="dt-del" data-index="{{index}}" bindtap="removeTag">×</text>
+        </view>
+        <input
+          placeholder="输入标签后点添加"
+          value="{{tagInput}}"
+          bindinput="onTagInput"
+          bindconfirm="addTag"
+          confirm-type="done"
+        />
+      </view>
+      <view class="tag-add-btn" bindtap="addTag">＋ 添加标签</view>
+    </view>
+
+    <view class="de-tip">💡 提示：填好后点右上角「保存」即可</view>
+  </view>
+</view>
