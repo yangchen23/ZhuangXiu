@@ -13,6 +13,9 @@ Page({
     importOpen: false,
     importTab: 'link',
     importText: '',
+    importImage: '',
+    importStep: 'input', // input | result
+    importResult: null,
     analyzing: false
   },
 
@@ -39,27 +42,121 @@ Page({
 
   // ===== 收藏外部内容 =====
   openImport() {
-    this.setData({ importOpen: true, importText: '' });
+    this.setData({
+      importOpen: true,
+      importText: '',
+      importImage: '',
+      importStep: 'input',
+      importResult: null,
+      importTab: 'link'
+    });
+    // 自动读取剪贴板：只读取像链接的内容，避免误填
+    wx.getClipboardData({
+      success: res => {
+        const t = (res.data || '').trim();
+        if (t && /^(https?:\/\/|www\.)/i.test(t)) {
+          this.setData({ importText: t });
+          wx.showToast({ title: '已自动读取剪贴板链接', icon: 'none' });
+        }
+      },
+      fail: () => {}
+    });
   },
 
   closeImport() {
-    this.setData({ importOpen: false });
+    this.setData({
+      importOpen: false,
+      importStep: 'input',
+      importResult: null,
+      importText: '',
+      importImage: ''
+    });
   },
 
   noop() {},
 
   switchImportTab(e) {
-    this.setData({ importTab: e.currentTarget.dataset.tab });
+    this.setData({
+      importTab: e.currentTarget.dataset.tab,
+      importStep: 'input',
+      importResult: null
+    });
   },
 
   onImportInput(e) {
     this.setData({ importText: e.detail.value });
   },
 
+  readClipboard() {
+    wx.getClipboardData({
+      success: res => {
+        const t = (res.data || '').trim();
+        if (!t) {
+          wx.showToast({ title: '剪贴板是空的', icon: 'none' });
+          return;
+        }
+        this.setData({ importText: t, importStep: 'input' });
+        wx.showToast({ title: '已读取剪贴板', icon: 'success' });
+      },
+      fail: () => {
+        wx.showToast({ title: '读取失败，请长按输入框粘贴', icon: 'none' });
+      }
+    });
+  },
+
+  clearImport() {
+    this.setData({ importText: '' });
+  },
+
+  chooseImportImage() {
+    wx.chooseMedia({
+      count: 1,
+      mediaType: ['image'],
+      sourceType: ['album', 'camera'],
+      success: res => {
+        this.setData({ importImage: res.tempFiles[0].tempFilePath });
+      },
+      fail: () => {}
+    });
+  },
+
+  fillSample() {
+    this.setData({
+      importTab: 'text',
+      importText: '日式厨房必装这5个神器：推拉式调味篮、转角拉篮、下拉式吊柜、抽屉分隔、壁挂调料架',
+      importStep: 'input'
+    });
+  },
+
   aiAnalyze() {
+    if (this.data.analyzing) return;
+
+    // 截图：当前先按图片收藏（内容识别待接视觉模型）
+    if (this.data.importTab === 'photo') {
+      if (!this.data.importImage) {
+        wx.showToast({ title: '请先选一张截图/照片', icon: 'none' });
+        return;
+      }
+      const bms = store.addBookmark({
+        thumb: '📸',
+        title: '现场截图收藏',
+        source: '图片收藏 · 内容识别待接视觉模型'
+      });
+      this.setData({
+        bookmarks: bms,
+        importResult: {
+          title: '现场截图收藏',
+          source: '图片收藏 · 内容识别待接视觉模型',
+          tip: '后续接入视觉模型后，可识别图片里的风格、材料与避坑点'
+        },
+        importStep: 'result'
+      });
+      return;
+    }
+
     const text = (this.data.importText || '').trim();
     if (!text) {
-      wx.showToast({ title: '请先粘贴链接/文本', icon: 'none' });
+      wx.showToast({ title: '请先粘贴内容或点「读取剪贴板」', icon: 'none' });
       return;
     }
     this.setData({ analyzing: true });
@@ -69,10 +166,17 @@ Page({
         const points = (obj && Number(obj.points)) || 3;
         const bms = store.addBookmark({
           title,
-          source: 'AI 已提炼 ' + points + ' 个要点 · 刚刚收藏' + (obj && obj.tip ? ' · 💡' + obj.tip : '')
+          source: 'AI 已提炼 ' + points + ' 个要点 · 刚刚收藏'
         });
-        this.setData({ importOpen: false, importText: '', bookmarks: bms });
-        wx.showToast({ title: 'AI 分析完成，已收藏', icon: 'success' });
+        this.setData({
+          bookmarks: bms,
+          importResult: {
+            title,
+            source: 'AI 已提炼 ' + points + ' 个要点 · 刚刚收藏',
+            tip: (obj && obj.tip) || ''
+          },
+          importStep: 'result'
+        });
       })
       .catch(() => {
         const title = text.length > 16 ? text.slice(0, 16) + '…' : text;
@@ -80,12 +184,28 @@ Page({
           title,
           source: 'AI 已提炼 3 个要点 · 刚刚收藏'
         });
-        this.setData({ importOpen: false, importText: '', bookmarks: bms });
-        wx.showToast({ title: 'AI 服务不可用，已本地收藏', icon: 'none' });
+        this.setData({
+          bookmarks: bms,
+          importResult: {
+            title,
+            source: 'AI 已提炼 3 个要点 · 刚刚收藏',
+            tip: 'AI 服务暂时不可用，已按本地规则收藏'
+          },
+          importStep: 'result'
+        });
       })
       .then(() => {
         this.setData({ analyzing: false });
       });
+  },
+
+  continueCollect() {
+    this.setData({
+      importStep: 'input',
+      importResult: null,
+      importText: '',
+      importImage: ''
+    });
   },
 
   showBookmark() {

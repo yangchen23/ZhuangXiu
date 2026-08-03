@@ -115,20 +115,79 @@
   <view wx:if="{{importOpen}}" class="modal-overlay" catchtap="closeImport">
     <view class="modal-sheet" catchtap="noop">
       <view class="modal-handle"></view>
-      <view class="modal-title">📥 收藏外部内容</view>
-      <view class="import-tabs">
-        <view class="import-tab {{importTab === 'link' ? 'active' : ''}}" data-tab="link" bindtap="switchImportTab">🔗 链接</view>
-        <view class="import-tab {{importTab === 'photo' ? 'active' : ''}}" data-tab="photo" bindtap="switchImportTab">📸 截图</view>
-        <view class="import-tab {{importTab === 'text' ? 'active' : ''}}" data-tab="text" bindtap="switchImportTab">📋 文本</view>
-      </view>
-      <input
-        class="form-input"
-        placeholder="{{importTab === 'link' ? '粘贴小红书/抖音/公众号链接…' : (importTab === 'text' ? '粘贴一段文字…' : '截图功能开发中，先粘贴链接试试')}}"
-        value="{{importText}}"
-        bindinput="onImportInput"
-      />
-      <view class="btn-primary import-btn {{analyzing ? 'disabled' : ''}}" bindtap="aiAnalyze">{{analyzing ? '🤖 AI 分析中…' : 'AI 分析提取'}}</view>
-      <view class="import-tip">💡 AI 会提炼要点/避坑项，并自动归档到知识库和材料清单</view>
+
+      <!-- 步骤1：输入 -->
+      <block wx:if="{{importStep === 'input'}}">
+        <view class="modal-title">📥 收藏外部内容</view>
+        <view class="import-tabs">
+          <view class="import-tab {{importTab === 'link' ? 'active' : ''}}" data-tab="link" bindtap="switchImportTab">🔗 链接</view>
+          <view class="import-tab {{importTab === 'photo' ? 'active' : ''}}" data-tab="photo" bindtap="switchImportTab">📸 截图</view>
+          <view class="import-tab {{importTab === 'text' ? 'active' : ''}}" data-tab="text" bindtap="switchImportTab">📋 文本</view>
+        </view>
+
+        <!-- 链接 -->
+        <block wx:if="{{importTab === 'link'}}">
+          <view class="clip-row">
+            <view class="clip-btn" bindtap="readClipboard">📋 读取剪贴板</view>
+            <view wx:if="{{importText}}" class="clip-btn ghost" bindtap="clearImport">清空</view>
+          </view>
+          <input
+            class="form-input"
+            placeholder="小红书 / 抖音 / 公众号链接"
+            value="{{importText}}"
+            bindinput="onImportInput"
+          />
+        </block>
+
+        <!-- 文本 -->
+        <block wx:elif="{{importTab === 'text'}}">
+          <textarea
+            class="form-textarea"
+            placeholder="粘贴一段装修干货文字…"
+            value="{{importText}}"
+            bindinput="onImportInput"
+            maxlength="1000"
+          ></textarea>
+        </block>
+
+        <!-- 截图 -->
+        <block wx:else>
+          <view class="photo-pick" bindtap="chooseImportImage">
+            <image wx:if="{{importImage}}" src="{{importImage}}" mode="aspectFill" class="photo-pick-img" />
+            <block wx:else>
+              <view class="pp-icon">📸</view>
+              <view class="pp-text">点击拍照 / 从相册选一张截图</view>
+            </block>
+          </view>
+          <view class="photo-note">💡 内容识别将接入视觉模型，当前先按图片收藏</view>
+        </block>
+
+        <view class="sample-row">
+          <text class="sample-label">没内容？</text>
+          <text class="sample-link" bindtap="fillSample">试试示例：日式厨房收纳</text>
+        </view>
+
+        <view class="btn-primary import-btn {{analyzing ? 'disabled' : ''}}" bindtap="aiAnalyze">
+          {{analyzing ? '🤖 AI 分析中…' : 'AI 分析提取'}}
+        </view>
+        <view class="btn-secondary cancel-btn" bindtap="closeImport">取消</view>
+        <view class="import-tip">💡 AI 会提炼要点/避坑项，收藏前可先预览结果</view>
+      </block>
+
+      <!-- 步骤2：AI 分析结果预览 -->
+      <block wx:else>
+        <view class="result-ok">✅</view>
+        <view class="modal-title">已收藏到灵感库</view>
+        <view class="result-card">
+          <view class="rc2-title">{{importResult.title}}</view>
+          <view class="rc2-meta">{{importResult.source}}</view>
+          <view wx:if="{{importResult.tip}}" class="rc2-tip">💡 {{importResult.tip}}</view>
+        </view>
+        <view class="modal-btns">
+          <view class="btn-secondary" bindtap="continueCollect">继续收藏</view>
+          <view class="btn-primary" style="flex:2" bindtap="closeImport">完成</view>
+        </view>
+      </block>
     </view>
   </view>
 </view>
