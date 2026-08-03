@@ -5,6 +5,13 @@
 const config = require('../config');
 const CITIES = require('../data/cities');
 
+let local = {};
+try {
+  local = require('../config.local');
+} catch (e) {
+  // 未配置本地私有文件时忽略
+}
+
 // 球面距离（km）
 function haversine(lat1, lon1, lat2, lon2) {
   const R = 6371;
@@ -141,7 +148,7 @@ function fetch(lat, lon) {
 
 // 逆地理编码：配置腾讯 key 返回街道级地址；否则就近匹配城市名
 function geocode(lat, lon) {
-  const key = config.WEATHER && config.WEATHER.TENCENT_MAP_KEY;
+  const key = (config.WEATHER && config.WEATHER.TENCENT_MAP_KEY) || local.TENCENT_MAP_KEY || '';
   if (!key) return Promise.resolve(nearestCity(lat, lon));
   const url = 'https://apis.map.qq.com/ws/geocoder/v1/?location=' + lat + ',' + lon + '&key=' + key;
   return requestJson(url)

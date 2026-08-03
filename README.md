@@ -156,7 +156,8 @@ D:\Project\ZhuangXiu\
 - 定位被拒绝/失败时自动回退到 `config.js` 中 `WEATHER.DEFAULT_LOCATION`（默认深圳）
 - 定位后**自动显示所在城市**（内置全国 300+ 主要城市坐标表就近匹配，免 key、离线可用）
 - 想要显示街道级地址：到 [腾讯位置服务](https://lbs.qq.com) 注册小程序 key（勾选 WebServiceAPI），
-  填入 `config.js` 的 `WEATHER.TENCENT_MAP_KEY`，会自动升级为「城市 · 区 街道」格式
+  把 key 填进本地 `miniprogram/config.local.js` 的 `TENCENT_MAP_KEY`（已被 gitignore，不会公开），
+  会自动升级为「城市 · 区 街道」格式
 - 生产环境需在公众平台把 `api.open-meteo.com`、`air-quality-api.open-meteo.com` 加入 request 合法域名
   （如配置了腾讯 key，还需加入 `apis.map.qq.com`）
 

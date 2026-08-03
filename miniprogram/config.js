@@ -25,7 +25,8 @@ module.exports = {
     },
     // 腾讯位置服务 WebService key（可选）：
     // 到 https://lbs.qq.com 注册小程序 key（勾选 WebServiceAPI），
-    // 填入后天气卡片会显示具体街道地址；留空则显示「当前定位」
+    // 把 key 填到本地 config.local.js 的 TENCENT_MAP_KEY（避免公开仓库泄露），
+    // 填入后天气卡片会显示「城市 · 区 街道」；留空则用内置城市表就近匹配城市名
     TENCENT_MAP_KEY: ''
   }
 };
