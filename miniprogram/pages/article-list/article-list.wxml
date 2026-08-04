@@ -1,0 +1,15 @@
+<view class="page-wrap">
+  <view class="list-tip">共 {{articles.length}} 篇 · 内容持续更新</view>
+  <view wx:for="{{articles}}" wx:key="id" class="al-item" data-id="{{item.id}}" bindtap="goArticle">
+    <view class="al-icon">{{item.icon}}</view>
+    <view class="al-info">
+      <view class="al-title">{{item.title}}</view>
+      <view class="al-summary">{{item.summary}}</view>
+      <view class="al-meta"><text class="tag tag-orange">{{item.cat}}</text><text class="al-read">阅读 ›</text></view>
+    </view>
+  </view>
+  <view wx:if="{{articles.length === 0}}" class="empty-box">
+    <view class="eb-icon">📭</view>
+    <view class="eb-title">这个分类还没有文章</view>
+  </view>
+</view>

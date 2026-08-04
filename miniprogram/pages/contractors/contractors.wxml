@@ -1,0 +1,22 @@
+<view class="page-wrap">
+  <view class="co-tip">以下为示例数据 · 建议对比 3 家、实地看工地</view>
+  <view wx:for="{{list}}" wx:key="id" class="co-card">
+    <view class="co-head">
+      <view class="co-avatar">{{item.emoji}}</view>
+      <view class="co-info">
+        <view class="co-name">{{item.name}}</view>
+        <view class="co-type">{{item.type}}</view>
+      </view>
+      <view class="co-rating">⭐ {{item.rating}}</view>
+    </view>
+    <view class="co-desc">{{item.desc}}</view>
+    <view class="co-tags">
+      <text wx:for="{{item.tags}}" wx:key="*this" class="tag tag-blue">{{item}}</text>
+    </view>
+    <view class="co-bottom">
+      <view class="co-price">参考价 {{item.price}}</view>
+      <view class="co-orders">已服务 {{item.orders}} 户</view>
+      <view class="co-btn" data-name="{{item.name}}" bindtap="contact">联系</view>
+    </view>
+  </view>
+</view>

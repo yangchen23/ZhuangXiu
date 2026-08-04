@@ -1,0 +1,51 @@
+<view class="page-wrap">
+  <view class="es2-hero">
+    <view class="es2-title">💰 装修预算估算</view>
+    <view class="es2-sub">按城市/面积/风格/档次估算全包总价</view>
+  </view>
+
+  <view class="card es2-form">
+    <view class="es2-row">
+      <text class="es2-label">城市</text>
+      <picker range="{{cities}}" range-key="name" value="{{cityIndex}}" bindchange="onCity">
+        <view class="es2-picker">{{cities[cityIndex].name}} ›</view>
+      </picker>
+    </view>
+    <view class="es2-row">
+      <text class="es2-label">建筑面积（㎡）</text>
+      <input class="es2-input" type="number" value="{{area}}" bindinput="onArea" />
+    </view>
+    <view class="es2-row">
+      <text class="es2-label">装修风格</text>
+      <picker range="{{styles}}" value="{{styleIndex}}" bindchange="onStyle">
+        <view class="es2-picker">{{styles[styleIndex]}} ›</view>
+      </picker>
+    </view>
+    <view class="es2-row">
+      <text class="es2-label">装修档次</text>
+      <picker range="{{levels}}" range-key="label" value="{{levelIndex}}" bindchange="onLevel">
+        <view class="es2-picker">{{levels[levelIndex].label}} ›</view>
+      </picker>
+    </view>
+    <view class="btn-primary" style="margin-top:24rpx" bindtap="calculate">开始估算</view>
+  </view>
+
+  <block wx:if="{{result}}">
+    <view class="section-header"><text>📊 估算结果</text></view>
+    <view class="card es2-result">
+      <view class="er-range">¥{{result.lowText}} - ¥{{result.highText}}</view>
+      <view class="er-sub">参考总价 ¥{{result.totalText}} · 折合 {{result.perSqm}} 元/㎡</view>
+      <view class="er-note">* 按全包口径估算（含主材/人工/家具/家电），仅供参考</view>
+      <view class="er-items">
+        <view wx:for="{{result.items}}" wx:key="name" class="er-item">
+          <view class="er-item-head">
+            <text>{{item.name}}</text>
+            <text class="er-item-amount">¥{{item.text}}</text>
+          </view>
+          <view class="er-bar-track"><view class="er-bar-fill" style="width:{{item.pct * 2.5}}%"></view></view>
+        </view>
+      </view>
+      <view class="btn-primary er-save" bindtap="saveAsBudget">设为我的总预算</view>
+    </view>
+  </block>
+</view>

@@ -1,0 +1,44 @@
+<view class="page-wrap">
+  <view class="sa-hero">
+    <view class="sa-title">🤖 拍照识风格</view>
+    <view class="sa-sub">拍你喜欢的家 / 画册 / 家具，AI 帮你判断风格倾向</view>
+  </view>
+
+  <view class="sa-photo" bindtap="choosePhoto">
+    <image wx:if="{{photo}}" src="{{photo}}" mode="aspectFill" class="sa-img" />
+    <block wx:else>
+      <view class="sa-photo-icon">📸</view>
+      <view class="sa-photo-text">拍照 / 从相册选一张参考图</view>
+    </block>
+  </view>
+
+  <view class="btn-primary sa-btn {{!photo ? 'disabled' : ''}}" bindtap="analyze">
+    {{analyzing ? '🤖 分析中…' : 'AI 分析风格'}}
+  </view>
+
+  <block wx:if="{{result}}">
+    <view class="section-header"><text>📊 风格倾向</text></view>
+    <view class="card sa-result">
+      <view wx:for="{{resultItems}}" wx:key="name" class="sa-item">
+        <view class="sa-item-head">
+          <text>{{item.name}}</text>
+          <text class="sa-pct" style="color:{{item.color}}">{{item.pct}}%</text>
+        </view>
+        <view class="sa-bar-track">
+          <view class="sa-bar-fill" style="width:{{item.pct}}%;background:{{item.color}}"></view>
+        </view>
+        <view class="sa-desc">{{item.desc}}</view>
+      </view>
+    </view>
+
+    <view class="card sa-tips">
+      <view class="sa-tips-title">💡 搭配建议</view>
+      <view wx:for="{{tips}}" wx:key="*this" class="sa-tip">· {{item}}</view>
+    </view>
+
+    <view class="sa-gallery-row">
+      <view class="sa-gallery-btn" data-style="北欧" bindtap="goGallery">🪵 看北欧图库</view>
+      <view class="sa-gallery-btn" data-style="日式" bindtap="goGallery">🎋 看日式图库</view>
+    </view>
+  </block>
+</view>

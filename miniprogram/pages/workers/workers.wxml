@@ -1,0 +1,15 @@
+<view class="page-wrap">
+  <view class="wk-tip">当前阶段 · 泥瓦 · 在场工人 1 人</view>
+  <view wx:for="{{workers}}" wx:key="name" class="wk-card">
+    <view class="wk-head">
+      <view class="wk-avatar">{{item.emoji}}</view>
+      <view class="wk-info">
+        <view class="wk-name">{{item.name}} <text class="wk-trade">{{item.trade}}</text></view>
+        <view class="wk-meta">累计施工 {{item.days}} 天 · {{item.phone}}</view>
+      </view>
+      <view class="wk-status {{item.statusCls}}">{{item.status}}</view>
+    </view>
+    <view class="wk-note">{{item.note}}</view>
+    <view class="wk-btn" data-phone="{{item.phone}}" bindtap="call">📞 联系</view>
+  </view>
+</view>

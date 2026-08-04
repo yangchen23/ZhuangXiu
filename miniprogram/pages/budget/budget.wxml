@@ -46,7 +46,16 @@
   <!-- 段3：近期流水 -->
   <view class="section-header">
     <text>💰 近期流水</text>
-    <text class="more" bindtap="showAll">全部</text>
+    <text class="more" bindtap="showAll">刷新</text>
+  </view>
+  <view class="flow-tags">
+    <view
+      wx:for="{{flowTags}}"
+      wx:key="*this"
+      class="flow-tag {{activeFlowTag === item ? 'active' : ''}}"
+      data-tag="{{item}}"
+      bindtap="filterFlow"
+    >{{item}}</view>
   </view>
 
   <view wx:if="{{flowEmpty}}" class="empty-box">
@@ -55,7 +64,7 @@
     <view class="eb-desc">点下方「✏️ 随手记」记录每一笔\n自动归类到这里</view>
   </view>
 
-  <view wx:for="{{flow}}" wx:key="id" class="budget-flow-item">
+  <view wx:for="{{filteredFlow}}" wx:key="id" class="budget-flow-item">
     <view class="bfi-icon">{{item.icon}}</view>
     <view class="bfi-info">
       <view class="bfi-title">{{item.title}}</view>

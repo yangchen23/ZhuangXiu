@@ -36,7 +36,7 @@
         <view class="kc-num">{{checkDone}}/{{checkTotal}}</view>
         <view class="kc-lbl">验收清单</view>
       </view>
-      <view class="key-card" data-tip="下一阶段：木工准备" bindtap="showTip">
+      <view class="key-card" data-url="/pages/article/article?id=gonglue-2" bindtap="goUrl">
         <text class="kc-arr">→</text>
         <view class="kc-num" style="font-size:28rpx;color:#3b82f6">木工</view>
         <view class="kc-lbl">下一阶段</view>
@@ -60,7 +60,7 @@
           <view class="task-check {{item.done ? 'done' : ''}}">{{item.done ? '✓' : ''}}</view>
           <text class="task-text {{item.done ? 'done' : ''}}">{{item.text}}</text>
         </view>
-        <view class="task-add" data-tip="添加任务" bindtap="showTip">＋ 添加任务</view>
+        <view class="task-add" bindtap="openTaskModal">＋ 添加任务</view>
       </view>
     </view>
 
@@ -86,23 +86,23 @@
 
     <view class="section-header" style="padding:24rpx 32rpx 16rpx"><text>📦 资料</text></view>
     <view class="diary-resources">
-      <view class="res-card" data-tip="阶段预算" bindtap="showTip">
+      <view class="res-card" data-url="/pages/budget/budget" bindtap="goUrl">
         <view class="rc-head"><text class="rc-title">💰 阶段预算</text><text class="rc-arr">›</text></view>
         <view class="rc-content">¥28,500 <text class="rc-sub">/ ¥30,000</text></view>
         <view class="budget-bar-track"><view class="budget-bar-fill" style="width:95%;background:linear-gradient(90deg,#f59e0b,#d97706)"></view></view>
         <view class="rc-mini" style="color:#dc2626">仅剩 ¥1,500</view>
       </view>
-      <view class="res-card" data-tip="现场照片" bindtap="showTip">
+      <view class="res-card" data-url="/pages/photo/photo" bindtap="goUrl">
         <view class="rc-head"><text class="rc-title">📷 现场照片</text><text class="rc-arr">›</text></view>
         <view class="rc-content">24 张</view>
         <view class="rc-mini">最近 7.30</view>
       </view>
-      <view class="res-card" data-tip="避坑提醒" bindtap="showTip">
+      <view class="res-card" data-url="/pages/article/article?id=bikeng-1" bindtap="goUrl">
         <view class="rc-head"><text class="rc-title">⚠️ 避坑提醒</text><text class="rc-arr">›</text></view>
         <view class="rc-content">4 条</view>
         <view class="rc-mini">必看必看</view>
       </view>
-      <view class="res-card" data-tip="工人详情" bindtap="showTip">
+      <view class="res-card" data-url="/pages/workers/workers" bindtap="goUrl">
         <view class="rc-head"><text class="rc-title">👷 今日工人</text><text class="rc-arr">›</text></view>
         <view class="wc-row"><text class="wc-av">👨‍🔧</text><text class="wc-name">张师傅</text><text class="wc-status">在场</text></view>
         <view class="wc-row"><text class="wc-av">🧑‍💼</text><text class="wc-name">王工长</text><text class="wc-status off">已离</text></view>
@@ -112,7 +112,7 @@
     <view class="next-stage-card">
       <view class="ns-title">➡️ 下一阶段：木工</view>
       <view class="ns-desc">木工进场前需准备：吊顶方案图、定制柜体设计、筒灯开孔位置</view>
-      <view class="ns-btn" data-tip="联系木工" bindtap="showTip">立即预约木工</view>
+      <view class="ns-btn" data-url="/pages/contractors/contractors" bindtap="goUrl">立即预约木工</view>
     </view>
   </view>
 
@@ -215,6 +215,27 @@
         <view class="ri-tags">
           <text wx:for="{{item.tags}}" wx:key="*this" class="tag tag-{{item === '验收' ? 'green' : (item === '水电' || item === '防水' ? 'blue' : 'orange')}}">#{{item}}</text>
         </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- ===== 添加任务弹窗 ===== -->
+  <view wx:if="{{taskModalOpen}}" class="modal-overlay" catchtap="closeTaskModal">
+    <view class="modal-sheet" catchtap="noop">
+      <view class="modal-handle"></view>
+      <view class="modal-title">✅ 添加今日任务</view>
+      <view class="modal-sub">会同步到「总览 · 今日任务」</view>
+      <input
+        class="form-input"
+        placeholder="如：预约美缝师傅 / 确认吊顶图纸"
+        value="{{taskInput}}"
+        bindinput="onTaskInput"
+        confirm-type="done"
+        bindconfirm="confirmAddTask"
+      />
+      <view class="modal-btns">
+        <view class="btn-secondary" bindtap="closeTaskModal">取消</view>
+        <view class="btn-primary" style="flex:2" bindtap="confirmAddTask">添加</view>
       </view>
     </view>
   </view>

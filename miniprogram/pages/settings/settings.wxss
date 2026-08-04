@@ -1,0 +1,26 @@
+.st-profile {
+  padding: 48rpx 0 40rpx;
+  text-align: center;
+}
+
+.st-avatar {
+  width: 112rpx;
+  height: 112rpx;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #fef3c7, #fde68a);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 48rpx;
+}
+
+.st-name { font-size: 32rpx; font-weight: 600; margin-top: 16rpx; }
+.st-sub { font-size: 24rpx; color: #999; margin-top: 6rpx; }
+
+.st-note {
+  margin: 24rpx 40rpx;
+  font-size: 22rpx;
+  color: #9ca3af;
+  line-height: 1.7;
+  text-align: center;
+}

@@ -141,7 +141,12 @@ Page({
     wx.navigateTo({ url: '/pages/budget/budget' });
   },
 
-  showTip(e) {
-    wx.showToast({ title: e.currentTarget.dataset.tip || '功能开发中', icon: 'none' });
-  }
+  goContractors() {
+    wx.navigateTo({ url: '/pages/contractors/contractors' });
+  },
+
+  goGuide() {
+    wx.navigateTo({ url: '/pages/article/article?id=gonglue-1' });
+  },
+
 });

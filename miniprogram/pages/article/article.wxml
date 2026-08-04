@@ -1,0 +1,23 @@
+<view wx:if="{{article}}" class="page-wrap">
+  <view class="art-hero">
+    <view class="art-icon">{{article.icon}}</view>
+    <view class="art-tags">
+      <text class="art-cat">{{article.cat}}</text>
+      <text class="tag tag-orange">装修干货</text>
+    </view>
+    <view class="art-title">{{article.title}}</view>
+    <view class="art-summary">{{article.summary}}</view>
+  </view>
+
+  <view wx:for="{{article.sections}}" wx:key="h" class="art-section">
+    <view class="as-title">{{index + 1}}. {{item.h}}</view>
+    <view wx:for="{{item.p}}" wx:key="*this" class="as-p">{{item}}</view>
+  </view>
+
+  <view wx:if="{{article.tips.length}}" class="art-tips">
+    <view class="tips-title">⚠️ 装修提醒</view>
+    <view wx:for="{{article.tips}}" wx:key="*this" class="tips-item">· {{item}}</view>
+  </view>
+
+  <view class="art-footer">— 内容仅供参考，请以当地市场与专业师傅为准 —</view>
+</view>

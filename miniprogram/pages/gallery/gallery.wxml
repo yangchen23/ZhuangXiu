@@ -1,0 +1,27 @@
+<view wx:if="{{style}}" class="page-wrap">
+  <view class="gl-hero">
+    <text class="gl-emoji">{{style.emoji}}</text>
+    <view class="gl-name">{{style.name}}风格</view>
+    <view class="gl-desc">{{style.desc}}</view>
+    <view class="gl-palette">
+      <view wx:for="{{style.palette}}" wx:key="*this" class="gl-swatch" style="background:{{item}}"></view>
+    </view>
+    <view class="gl-keywords">
+      <text wx:for="{{style.keywords}}" wx:key="*this" class="gl-kw">{{item}}</text>
+    </view>
+    <view class="gl-fav {{fav ? 'active' : ''}}" bindtap="toggleFav">{{fav ? '❤️ 已收藏' : '🤍 收藏此风格'}}</view>
+  </view>
+
+  <view class="section-header"><text>🖼️ 风格案例</text><text class="more">示意效果</text></view>
+  <view class="gl-grid">
+    <view wx:for="{{style.samples}}" wx:key="title" class="gl-card">
+      <view class="gl-img" style="background:{{item.bg}}">{{style.emoji}}</view>
+      <view class="gl-card-info">
+        <view class="gl-card-title">{{item.title}}</view>
+        <view class="gl-card-space">{{item.space}}</view>
+      </view>
+    </view>
+  </view>
+
+  <view class="gl-cta" bindtap="goArticles">📖 看配套装修攻略</view>
+</view>

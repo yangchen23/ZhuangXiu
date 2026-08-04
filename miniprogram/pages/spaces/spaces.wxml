@@ -1,0 +1,44 @@
+<view class="page-wrap">
+  <view class="sp-tip">点击空间可跳转日记按空间筛选 · 自定义空间可删除</view>
+  <view class="sp-grid">
+    <view wx:for="{{spaces}}" wx:key="name" class="sp-card">
+      <view class="sp-main" data-space="{{item.name}}" bindtap="goDiary">
+        <view class="sp-icon" style="background:{{item.bg}}">{{item.emoji}}</view>
+        <view class="sp-name">{{item.name}}</view>
+        <view class="sp-count">{{item.count}} 条记录</view>
+      </view>
+      <view wx:if="{{item.custom}}" class="sp-del" data-space="{{item.name}}" catchtap="deleteSpace">×</view>
+    </view>
+    <view class="sp-add" bindtap="openModal">
+      <view class="add-icon">+</view>
+      <text>添加空间</text>
+    </view>
+  </view>
+
+  <view wx:if="{{modalOpen}}" class="modal-overlay" catchtap="closeModal">
+    <view class="modal-sheet" catchtap="noop">
+      <view class="modal-handle"></view>
+      <view class="modal-title">➕ 添加自定义空间</view>
+      <view class="form-group">
+        <view class="form-label">空间名称</view>
+        <input class="form-input" placeholder="如：衣帽间 / 储物间" value="{{name}}" bindinput="onName" />
+      </view>
+      <view class="form-group">
+        <view class="form-label">选一个图标</view>
+        <view class="emoji-grid">
+          <view
+            wx:for="{{emojiList}}"
+            wx:key="*this"
+            class="emoji-opt {{emoji === item ? 'selected' : ''}}"
+            data-emoji="{{item}}"
+            bindtap="selectEmoji"
+          >{{item}}</view>
+        </view>
+      </view>
+      <view class="modal-btns">
+        <view class="btn-secondary" bindtap="closeModal">取消</view>
+        <view class="btn-primary" style="flex:2" bindtap="confirmAdd">添加</view>
+      </view>
+    </view>
+  </view>
+</view>

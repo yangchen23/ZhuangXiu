@@ -84,7 +84,7 @@
     </view>
     <view class="prep-cta">
       <text class="prep-cta-text">🎯 下一步：{{nextStep}}</text>
-      <text class="prep-cta-btn" data-tip="打开施工方推荐" bindtap="showTip">去看看</text>
+      <text class="prep-cta-btn" bindtap="goContractors">去看看</text>
     </view>
   </view>
 
@@ -92,7 +92,7 @@
   <view class="next-stage-card">
     <view class="ns-title">➡️ 下一阶段预告：泥瓦</view>
     <view class="ns-desc">开工后第一件大事：贴瓷砖。需要提前准备：瓷砖选型、瓦工预约、卫生间防水高度确认</view>
-    <view class="ns-btn" data-tip="查看泥瓦阶段攻略" bindtap="showTip">看攻略</view>
+    <view class="ns-btn" bindtap="goGuide">看攻略</view>
   </view>
 
   <!-- 今日贴士 -->

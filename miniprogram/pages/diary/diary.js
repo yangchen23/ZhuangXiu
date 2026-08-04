@@ -40,6 +40,8 @@ Page({
     activeSpace: '',
     spaceFilterBanner: false,
     spaceFilterName: '',
+    taskModalOpen: false,
+    taskInput: '',
     // 添加空间弹窗
     spaceModalOpen: false,
     spaceName: '',
@@ -50,6 +52,15 @@ Page({
   onShow() {
     if (typeof this.getTabBar === 'function' && this.getTabBar()) {
       this.getTabBar().setData({ selected: 2 });
+    }
+    const app = getApp();
+    const spaceFilter = app.globalData.spaceFilter || '';
+    const diaryTab = app.globalData.diaryTab || '';
+    app.globalData.spaceFilter = '';
+    app.globalData.diaryTab = '';
+    if (diaryTab) this.setData({ diaryTab });
+    if (spaceFilter) {
+      this.setData({ activeSpace: spaceFilter, spaceFilterBanner: true, spaceFilterName: spaceFilter });
     }
     this.refreshAll();
   },
@@ -99,8 +110,33 @@ Page({
     this.setData({ checks, checkDone: checks.filter(c => c.done).length });
   },
 
-  showTip(e) {
-    wx.showToast({ title: e.currentTarget.dataset.tip || '功能开发中', icon: 'none' });
+  goUrl(e) {
+    const url = e.currentTarget.dataset.url;
+    if (url) wx.navigateTo({ url });
+  },
+
+  // ===== 添加任务 =====
+  openTaskModal() {
+    this.setData({ taskModalOpen: true, taskInput: '' });
+  },
+
+  closeTaskModal() {
+    this.setData({ taskModalOpen: false });
+  },
+
+  onTaskInput(e) {
+    this.setData({ taskInput: e.detail.value });
+  },
+
+  confirmAddTask() {
+    const text = this.data.taskInput.trim();
+    if (!text) {
+      wx.showToast({ title: '请输入任务内容', icon: 'none' });
+      return;
+    }
+    const tasks = store.addTask(text);
+    this.setData({ taskModalOpen: false, tasks, taskDone: tasks.filter(t => t.done).length, taskTotal: tasks.length });
+    wx.showToast({ title: '已添加到今日任务', icon: 'success' });
   },
 
   // ===== 计划日历 =====

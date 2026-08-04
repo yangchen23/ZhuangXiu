@@ -1,0 +1,59 @@
+.wk-tip {
+  padding: 24rpx 32rpx 12rpx;
+  font-size: 22rpx;
+  color: #9ca3af;
+}
+
+.wk-card {
+  background: #fff;
+  border-radius: 28rpx;
+  margin: 0 32rpx 20rpx;
+  padding: 28rpx;
+  box-shadow: 0 2rpx 6rpx rgba(0, 0, 0, 0.04);
+}
+
+.wk-head { display: flex; align-items: center; gap: 18rpx; }
+.wk-avatar {
+  width: 88rpx;
+  height: 88rpx;
+  border-radius: 50%;
+  background: #fef3c7;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 40rpx;
+}
+.wk-info { flex: 1; min-width: 0; }
+.wk-name { font-size: 30rpx; font-weight: 700; }
+.wk-trade { font-size: 22rpx; color: #9ca3af; font-weight: 400; margin-left: 8rpx; }
+.wk-meta { font-size: 22rpx; color: #9ca3af; margin-top: 4rpx; }
+.wk-status {
+  padding: 6rpx 18rpx;
+  border-radius: 20rpx;
+  font-size: 22rpx;
+  background: #dcfce7;
+  color: #16a34a;
+  font-weight: 500;
+}
+.wk-status.off { background: #f3f4f6; color: #6b7280; }
+
+.wk-note {
+  font-size: 26rpx;
+  color: #4b5563;
+  line-height: 1.7;
+  margin-top: 18rpx;
+  padding-top: 18rpx;
+  border-top: 1rpx solid #f5f5f5;
+}
+
+.wk-btn {
+  margin-top: 18rpx;
+  padding: 14rpx;
+  background: #fffbeb;
+  border: 2rpx solid #fde68a;
+  color: #92400e;
+  border-radius: 24rpx;
+  text-align: center;
+  font-size: 26rpx;
+  font-weight: 500;
+}

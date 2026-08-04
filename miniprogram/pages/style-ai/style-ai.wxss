@@ -1,0 +1,64 @@
+.sa-hero {
+  margin: 28rpx 32rpx 24rpx;
+  padding: 36rpx 32rpx;
+  background: linear-gradient(135deg, #f3e8ff, #ede9fe);
+  border-radius: 28rpx;
+}
+
+.sa-title { font-size: 36rpx; font-weight: 700; color: #6d28d9; }
+.sa-sub { font-size: 24rpx; color: #8b5cf6; margin-top: 8rpx; line-height: 1.6; }
+
+.sa-photo {
+  margin: 0 32rpx;
+  border: 4rpx dashed #e5e5e5;
+  border-radius: 28rpx;
+  min-height: 360rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: #fafafa;
+  overflow: hidden;
+}
+
+.sa-img { width: 100%; height: 420rpx; }
+.sa-photo-icon { font-size: 80rpx; margin-bottom: 12rpx; }
+.sa-photo-text { font-size: 26rpx; color: #4b5563; }
+
+.sa-btn { margin: 28rpx 32rpx; width: auto; }
+.sa-btn.disabled { opacity: 0.5; }
+
+.sa-result { padding: 28rpx; }
+.sa-item { margin-bottom: 22rpx; }
+.sa-item-head {
+  display: flex;
+  justify-content: space-between;
+  font-size: 28rpx;
+  font-weight: 600;
+  margin-bottom: 10rpx;
+}
+.sa-pct { font-weight: 700; }
+.sa-bar-track { height: 18rpx; background: #f3f4f6; border-radius: 9rpx; overflow: hidden; }
+.sa-bar-fill { height: 100%; border-radius: 9rpx; transition: width 0.6s; }
+.sa-desc { font-size: 22rpx; color: #9ca3af; margin-top: 8rpx; }
+
+.sa-tips { padding: 28rpx; }
+.sa-tips-title { font-size: 28rpx; font-weight: 700; margin-bottom: 12rpx; }
+.sa-tip { font-size: 26rpx; color: #4b5563; line-height: 1.8; }
+
+.sa-gallery-row {
+  display: flex;
+  gap: 18rpx;
+  margin: 0 32rpx 32rpx;
+}
+
+.sa-gallery-btn {
+  flex: 1;
+  padding: 22rpx;
+  background: #fff;
+  border-radius: 24rpx;
+  text-align: center;
+  font-size: 26rpx;
+  font-weight: 600;
+  box-shadow: 0 2rpx 6rpx rgba(0, 0, 0, 0.04);
+}

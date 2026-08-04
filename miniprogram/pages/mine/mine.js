@@ -1,4 +1,5 @@
 const store = require('../../utils/store');
+const knowledge = require('../../data/knowledge');
 
 Page({
   data: {
@@ -21,15 +22,21 @@ Page({
       this.getTabBar().setData({ selected: 3 });
     }
     const records = store.getRecords();
-    this.setData({ knowledgeCount: 5, recordCount: records.length });
+    this.setData({ knowledgeCount: knowledge.articles.length, recordCount: records.length });
   },
 
   onMenu(e) {
     const action = e.currentTarget.dataset.action;
-    if (action === 'budget') {
-      wx.navigateTo({ url: '/pages/budget/budget' });
-      return;
-    }
-    wx.showToast({ title: '「' + e.currentTarget.dataset.text + '」开发中', icon: 'none' });
+    const map = {
+      knowledge: '/pages/article-list/article-list?category=all',
+      budget: '/pages/budget/budget',
+      spaces: '/pages/spaces/spaces',
+      family: '/pages/family/family',
+      acceptance: '/pages/acceptance/acceptance',
+      appliances: '/pages/appliances/appliances',
+      settings: '/pages/settings/settings'
+    };
+    const url = map[action];
+    if (url) wx.navigateTo({ url });
   }
 });

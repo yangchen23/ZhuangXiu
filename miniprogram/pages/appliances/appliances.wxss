@@ -1,0 +1,49 @@
+.ap-tip {
+  padding: 24rpx 32rpx 12rpx;
+  font-size: 22rpx;
+  color: #9ca3af;
+}
+
+.ap-cta {
+  margin: 0 32rpx 24rpx;
+  padding: 22rpx 26rpx;
+  background: #fffbeb;
+  border: 2rpx solid #fde68a;
+  border-radius: 24rpx;
+  font-size: 26rpx;
+  color: #92400e;
+  font-weight: 500;
+}
+
+.ap-group { margin-bottom: 28rpx; }
+.ap-group-title {
+  padding: 0 32rpx 14rpx;
+  font-size: 30rpx;
+  font-weight: 700;
+}
+
+.ap-item {
+  background: #fff;
+  margin: 0 32rpx 12rpx;
+  border-radius: 24rpx;
+  padding: 24rpx 28rpx;
+  box-shadow: 0 2rpx 6rpx rgba(0, 0, 0, 0.04);
+}
+
+.ap-item-head { display: flex; align-items: center; gap: 14rpx; }
+.ap-name { flex: 1; font-size: 28rpx; font-weight: 600; }
+.ap-price { font-size: 24rpx; color: #d97706; font-weight: 600; }
+.ap-arr { font-size: 20rpx; color: #9ca3af; }
+
+.ap-body {
+  margin-top: 16rpx;
+  padding-top: 16rpx;
+  border-top: 1rpx solid #f5f5f5;
+}
+
+.ap-row {
+  font-size: 25rpx;
+  color: #4b5563;
+  line-height: 1.7;
+  padding: 4rpx 0;
+}

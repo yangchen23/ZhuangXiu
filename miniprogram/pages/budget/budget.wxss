@@ -133,6 +133,30 @@
   flex-shrink: 0;
 }
 
+.flow-tags {
+  display: flex;
+  gap: 12rpx;
+  padding: 0 32rpx 18rpx;
+  white-space: nowrap;
+  overflow-x: auto;
+}
+
+.flow-tag {
+  padding: 8rpx 24rpx;
+  border-radius: 28rpx;
+  font-size: 24rpx;
+  background: #fff;
+  color: #6b7280;
+  border: 2rpx solid #e5e5e5;
+  flex-shrink: 0;
+}
+
+.flow-tag.active {
+  background: #f59e0b;
+  color: #fff;
+  border-color: #f59e0b;
+}
+
 .budget-footer {
   margin: 40rpx 32rpx 24rpx;
   padding: 24rpx;

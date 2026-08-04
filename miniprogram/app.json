@@ -9,7 +9,20 @@
     "pages/diary-edit/diary-edit",
     "pages/ai-chat/ai-chat",
     "pages/style-test/style-test",
-    "pages/photo/photo"
+    "pages/photo/photo",
+    "pages/article/article",
+    "pages/article-list/article-list",
+    "pages/gallery/gallery",
+    "pages/style-ai/style-ai",
+    "pages/estimator/estimator",
+    "pages/contractors/contractors",
+    "pages/bookmark/bookmark",
+    "pages/workers/workers",
+    "pages/spaces/spaces",
+    "pages/family/family",
+    "pages/acceptance/acceptance",
+    "pages/appliances/appliances",
+    "pages/settings/settings"
   ],
   "window": {
     "navigationBarBackgroundColor": "#ffffff",

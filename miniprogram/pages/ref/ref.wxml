@@ -30,7 +30,7 @@
         <text>📥 已收藏 <text class="sb-count">{{bookmarks.length}} 条</text></text>
         <text class="sb-all" data-tab="know" bindtap="switchTab">全部 ›</text>
       </view>
-      <view wx:for="{{bookmarks}}" wx:key="id" class="sb-item" bindtap="showBookmark">
+      <view wx:for="{{bookmarks}}" wx:key="id" class="sb-item" data-id="{{item.id}}" bindtap="showBookmark">
         <view class="sb-thumb" style="background:{{item.bg}}">{{item.thumb}}</view>
         <view class="sb-info">
           <view class="sb-title">{{item.title}}</view>
@@ -58,15 +58,15 @@
     </view>
 
     <view class="tools-row">
-      <view class="tool" data-tip="AI风格分析（开发中）" bindtap="showTool">
+      <view class="tool" data-url="/pages/style-ai/style-ai" bindtap="showTool">
         <text class="t-icon">🤖</text>
         <text class="t-label">AI风格分析</text>
       </view>
-      <view class="tool" data-tip="户型方案（开发中）" bindtap="showTool">
+      <view class="tool" data-url="/pages/article/article?id=huxing-1" bindtap="showTool">
         <text class="t-icon">📐</text>
         <text class="t-label">户型方案</text>
       </view>
-      <view class="tool" data-tip="预算估算（开发中）" bindtap="showTool">
+      <view class="tool" data-url="/pages/estimator/estimator" bindtap="showTool">
         <text class="t-icon">💰</text>
         <text class="t-label">预算估算</text>
       </view>

@@ -1,0 +1,25 @@
+<view wx:if="{{item}}" class="page-wrap">
+  <view class="bm-hero" style="background:{{item.bg}}">
+    <text class="bm-thumb">{{item.thumb}}</text>
+    <view class="bm-title">{{item.title}}</view>
+    <view class="bm-source">{{item.source}}</view>
+  </view>
+
+  <view class="bm-section">
+    <view class="bm-section-title">🤖 AI 提炼</view>
+    <view class="bm-ai">
+      <view class="bm-ai-row">✅ 已提炼要点并归档到知识库</view>
+      <view class="bm-ai-row">💡 收藏时生成 3-7 条要点，展开后可逐条对照</view>
+    </view>
+  </view>
+
+  <view class="bm-section">
+    <view class="bm-section-title">📎 原文</view>
+    <view class="bm-original">{{item.source}}</view>
+  </view>
+
+  <view class="bm-actions">
+    <view class="btn-secondary" bindtap="deleteBookmark">删除收藏</view>
+    <view class="btn-primary" style="flex:2" bindtap="askAI">继续问 AI</view>
+  </view>
+</view>

@@ -208,16 +208,16 @@ Page({
     });
   },
 
-  showBookmark() {
-    wx.showToast({ title: '展开收藏详情（开发中）', icon: 'none' });
+  showBookmark(e) {
+    wx.navigateTo({ url: '/pages/bookmark/bookmark?id=' + e.currentTarget.dataset.id });
   },
 
   showStyle(e) {
-    wx.showToast({ title: e.currentTarget.dataset.name + ' 风格图库（开发中）', icon: 'none' });
+    wx.navigateTo({ url: '/pages/gallery/gallery?style=' + encodeURIComponent(e.currentTarget.dataset.name) });
   },
 
   showTool(e) {
-    wx.showToast({ title: e.currentTarget.dataset.tip, icon: 'none' });
+    wx.navigateTo({ url: e.currentTarget.dataset.url });
   },
 
   // ===== 知识库 =====
@@ -236,6 +236,6 @@ Page({
   },
 
   showCat(e) {
-    wx.showToast({ title: e.currentTarget.dataset.name + ' 选购指南（开发中）', icon: 'none' });
+    wx.navigateTo({ url: '/pages/article-list/article-list?category=' + encodeURIComponent(e.currentTarget.dataset.name) });
   }
 });

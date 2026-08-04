@@ -1,0 +1,44 @@
+<view class="page-wrap">
+  <view class="fm-tip">👨‍👩‍👧 家人可以一起参与记录和验收</view>
+  <view wx:for="{{members}}" wx:key="id" class="fm-card">
+    <view class="fm-avatar">{{item.emoji}}</view>
+    <view class="fm-info">
+      <view class="fm-name">{{item.name}} <text wx:if="{{item.owner}}" class="fm-owner">房主</text></view>
+      <view class="fm-role">{{item.role}}</view>
+    </view>
+    <view wx:if="{{!item.owner}}" class="fm-del" data-id="{{item.id}}" bindtap="deleteMember">移除</view>
+  </view>
+
+  <view class="btn-primary" style="margin:32rpx;width:auto" bindtap="openModal">＋ 添加家庭成员</view>
+
+  <view wx:if="{{modalOpen}}" class="modal-overlay" catchtap="closeModal">
+    <view class="modal-sheet" catchtap="noop">
+      <view class="modal-handle"></view>
+      <view class="modal-title">👨‍👩‍👧 添加成员</view>
+      <view class="form-group">
+        <view class="form-label">称呼</view>
+        <input class="form-input" placeholder="如：老婆 / 爸爸 / 小熊" value="{{name}}" bindinput="onName" />
+      </view>
+      <view class="form-group">
+        <view class="form-label">角色（可选）</view>
+        <input class="form-input" placeholder="如：审美担当 / 财务" value="{{role}}" bindinput="onRole" />
+      </view>
+      <view class="form-group">
+        <view class="form-label">头像</view>
+        <view class="emoji-grid">
+          <view
+            wx:for="{{emojiList}}"
+            wx:key="*this"
+            class="emoji-opt {{emoji === item ? 'selected' : ''}}"
+            data-emoji="{{item}}"
+            bindtap="selectEmoji"
+          >{{item}}</view>
+        </view>
+      </view>
+      <view class="modal-btns">
+        <view class="btn-secondary" bindtap="closeModal">取消</view>
+        <view class="btn-primary" style="flex:2" bindtap="confirmAdd">添加</view>
+      </view>
+    </view>
+  </view>
+</view>

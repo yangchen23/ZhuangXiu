@@ -1,0 +1,45 @@
+.bm-hero {
+  margin: 28rpx 32rpx 24rpx;
+  padding: 48rpx 32rpx;
+  border-radius: 28rpx;
+  text-align: center;
+}
+
+.bm-thumb { font-size: 96rpx; }
+.bm-title { font-size: 34rpx; font-weight: 700; margin-top: 14rpx; }
+.bm-source { font-size: 24rpx; color: #6b7280; margin-top: 8rpx; }
+
+.bm-section {
+  background: #fff;
+  border-radius: 28rpx;
+  margin: 0 32rpx 20rpx;
+  padding: 28rpx;
+  box-shadow: 0 2rpx 6rpx rgba(0, 0, 0, 0.04);
+}
+
+.bm-section-title {
+  font-size: 28rpx;
+  font-weight: 700;
+  margin-bottom: 16rpx;
+}
+
+.bm-ai {
+  background: #f0fdf4;
+  border: 2rpx solid #bbf7d0;
+  border-radius: 20rpx;
+  padding: 20rpx;
+}
+
+.bm-ai-row { font-size: 26rpx; color: #166534; line-height: 1.8; }
+
+.bm-original {
+  font-size: 26rpx;
+  color: #4b5563;
+  line-height: 1.8;
+}
+
+.bm-actions {
+  display: flex;
+  gap: 18rpx;
+  margin: 28rpx 32rpx;
+}

@@ -10,6 +10,9 @@ const KEYS = {
   tasks: 'zjx_tasks',
   checks: 'zjx_checks',
   bookmarks: 'zjx_bookmarks',
+  favorites: 'zjx_favorites',
+  members: 'zjx_members',
+  acceptance: 'zjx_acceptance',
   weather: 'zjx_weather',
   photos: 'zjx_photos',
   realWeather: 'zjx_real_weather'
@@ -73,6 +76,12 @@ function addSpace(name, emoji) {
   return true;
 }
 
+function removeSpace(name) {
+  const spaces = getSpaces().filter(s => s.name !== name || !s.custom);
+  set(KEYS.spaces, spaces);
+  return spaces;
+}
+
 function spaceCount(records, space) {
   return records.filter(r => r.space === space).length;
 }
@@ -86,6 +95,13 @@ function removeRecord(id) {
   const records = getRecords().filter(r => r.id !== id);
   set(KEYS.records, records);
   return records;
+}
+
+function addTask(text) {
+  const tasks = getTasks();
+  tasks.push({ text, done: false });
+  setTasks(tasks);
+  return tasks;
 }
 
 function addRecord(record) {
@@ -190,6 +206,80 @@ function addBookmark(bm) {
   return bookmarks;
 }
 
+function removeBookmark(id) {
+  const bookmarks = getBookmarks().filter(b => b.id !== id);
+  set(KEYS.bookmarks, bookmarks);
+  return bookmarks;
+}
+
+// ===== 风格收藏 =====
+function getFavorites() { return get(KEYS.favorites, []); }
+
+function toggleFavorite(fav) {
+  const favorites = getFavorites();
+  const idx = favorites.findIndex(f => f.id === fav.id);
+  if (idx >= 0) favorites.splice(idx, 1);
+  else favorites.unshift(Object.assign({}, fav, { id: fav.id || util.uid() }));
+  set(KEYS.favorites, favorites);
+  return favorites;
+}
+
+// ===== 家庭成员 =====
+function getMembers() {
+  const members = get(KEYS.members, []);
+  return members.length ? members : [
+    { id: 'owner', name: '小熊', role: '决策人', emoji: '🐻', owner: true },
+    { id: 'wife', name: '老婆', role: '审美担当', emoji: '👩', owner: false }
+  ];
+}
+
+function addMember(name, role, emoji) {
+  const members = getMembers();
+  members.push({ id: util.uid(), name, role, emoji, owner: false });
+  set(KEYS.members, members);
+  return members;
+}
+
+function removeMember(id) {
+  const members = getMembers().filter(m => m.id !== id && !m.owner);
+  set(KEYS.members, members);
+  return members;
+}
+
+// ===== 验收清单 =====
+function getAcceptance() {
+  const saved = get(KEYS.acceptance, null);
+  if (saved) return saved;
+  return seed.acceptanceStages
+    ? seed.acceptanceStages
+    : require('../data/knowledge').acceptanceStages;
+}
+
+function toggleAcceptance(stageIdx, itemIdx) {
+  const stages = getAcceptance();
+  if (!stages[stageIdx] || !stages[stageIdx].items[itemIdx]) return stages;
+  const item = stages[stageIdx].items[itemIdx];
+  item.done = !item.done;
+  set(KEYS.acceptance, stages);
+  return stages;
+}
+
+function resetAcceptance() {
+  const stages = require('../data/knowledge').acceptanceStages.map(s => Object.assign({}, s, {
+    items: s.items.map(i => Object.assign({}, i, { done: false }))
+  }));
+  set(KEYS.acceptance, stages);
+  return stages;
+}
+
+// ===== 预算 =====
+function setBudgetTotal(total) {
+  const budget = getBudget();
+  budget.total = Math.round(Number(total) || budget.total);
+  set(KEYS.budget, budget);
+  return budget;
+}
+
 // ===== 天气 =====
 function getWeatherIndex() { return get(KEYS.weather, 1); }
 function cycleWeather() {
@@ -212,6 +302,7 @@ function setRealWeather(w) {
 
 // ===== 拍照留档 =====
 function getPhotos() { return get(KEYS.photos, []); }
+function clearPhotos() { set(KEYS.photos, []); }
 function addPhotos(paths) {
   const photos = getPhotos();
   paths.forEach(p => {
@@ -235,12 +326,15 @@ module.exports = {
   resetDemo,
   getSpaces,
   addSpace,
+  removeSpace,
   spaceCount,
   getRecords,
   removeRecord,
   addRecord,
+  addTask,
   getBudget,
   addExpense,
+  setBudgetTotal,
   getPrep,
   togglePrep,
   prepProgress,
@@ -250,11 +344,21 @@ module.exports = {
   setChecks,
   getBookmarks,
   addBookmark,
+  removeBookmark,
+  getFavorites,
+  toggleFavorite,
+  getMembers,
+  addMember,
+  removeMember,
+  getAcceptance,
+  toggleAcceptance,
+  resetAcceptance,
   getWeatherIndex,
   cycleWeather,
   getRealWeather,
   setRealWeather,
   getPhotos,
   addPhotos,
-  removePhoto
+  removePhoto,
+  clearPhotos
 };

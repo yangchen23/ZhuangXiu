@@ -1,0 +1,31 @@
+<view class="page-wrap">
+  <view class="ac-tip">按阶段核对，全部勾选即可安心进入下一阶段</view>
+  <view wx:for="{{stages}}" wx:for-index="stageIndex" wx:key="stage" class="ac-card">
+    <view class="ac-head" data-index="{{stageIndex}}" bindtap="toggleStage">
+      <view class="ac-icon">{{item.icon}}</view>
+      <view class="ac-info">
+        <view class="ac-name">{{item.stage}}</view>
+        <view class="ac-progress">{{item.done}}/{{item.total}}</view>
+      </view>
+      <view class="ac-bar">
+        <view class="ac-bar-fill" style="width:{{item.pct}}%"></view>
+      </view>
+      <text class="ac-arr">{{item.open ? '▲' : '▼'}}</text>
+    </view>
+    <view wx:if="{{item.open}}" class="ac-body">
+      <view
+        wx:for="{{item.items}}"
+        wx:for-index="itemIndex"
+        wx:key="id"
+        class="ac-item"
+        data-stage="{{stageIndex}}"
+        data-item="{{itemIndex}}"
+        bindtap="toggleItem"
+      >
+        <view class="ac-check {{item.done ? 'done' : ''}}">{{item.done ? '✓' : ''}}</view>
+        <text class="ac-text {{item.done ? 'done' : ''}}">{{item.text}}</text>
+      </view>
+    </view>
+  </view>
+  <view class="btn-secondary" style="margin:8rpx 32rpx 40rpx" bindtap="resetAll">重置全部勾选</view>
+</view>

@@ -9,6 +9,9 @@ Page({
     pct: 0,
     cats: [],
     flow: [],
+    filteredFlow: [],
+    flowTags: ['全部', '材料', '人工', '家具', '家电'],
+    activeFlowTag: '全部',
     flowEmpty: true
   },
 
@@ -50,6 +53,8 @@ Page({
       });
     });
     const flow = b.flow.map(f => Object.assign({}, f, { amountText: util.formatMoney(f.amount) }));
+    const tag = this.data.activeFlowTag;
+    const filteredFlow = tag === '全部' ? flow : flow.filter(f => f.typeLabel === tag);
     this.setData({
       spent: util.formatMoney(b.spent),
       total: util.formatMoney(b.total),
@@ -57,8 +62,14 @@ Page({
       pct,
       cats,
       flow,
-      flowEmpty: flow.length === 0
+      filteredFlow,
+      flowEmpty: filteredFlow.length === 0
     });
+  },
+
+  filterFlow(e) {
+    this.setData({ activeFlowTag: e.currentTarget.dataset.tag });
+    this.refresh();
   },
 
   goQuickNote() {
@@ -66,6 +77,7 @@ Page({
   },
 
   showAll() {
-    wx.showToast({ title: '查看全部流水（开发中）', icon: 'none' });
+    this.setData({ activeFlowTag: '全部' });
+    this.refresh();
   }
 });

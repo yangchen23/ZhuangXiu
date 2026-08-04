@@ -1,0 +1,19 @@
+<view class="page-wrap">
+  <view class="ap-tip">水电定位前先看这份清单，能省很多返工</view>
+  <view class="ap-cta" bindtap="goArticle">📖 先读《嵌入式家电尺寸与预留清单》</view>
+
+  <view wx:for="{{groups}}" wx:for-index="gi" wx:key="space" class="ap-group">
+    <view class="ap-group-title">{{item.icon}} {{item.space}}</view>
+    <view wx:for="{{item.items}}" wx:for-index="ii" wx:key="name" class="ap-item" data-gi="{{gi}}" data-ii="{{ii}}" bindtap="toggleItem">
+      <view class="ap-item-head">
+        <view class="ap-name">{{item.name}}</view>
+        <view class="ap-price">{{item.price}}</view>
+        <text class="ap-arr">{{item.open ? '▲' : '▼'}}</text>
+      </view>
+      <view wx:if="{{item.open}}" class="ap-body">
+        <view class="ap-row">📝 {{item.note}}</view>
+        <view class="ap-row">🔌 预留：{{item.condition}}</view>
+      </view>
+    </view>
+  </view>
+</view>
