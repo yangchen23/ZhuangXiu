@@ -24,11 +24,21 @@ function uid() {
   return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
 }
 
+// 距目标日期还有几天（目标日期当天返回 0，已过返回负数）
+function daysUntil(target) {
+  const now = new Date();
+  now.setHours(0, 0, 0, 0);
+  const t = new Date(target);
+  t.setHours(0, 0, 0, 0);
+  return Math.round((t - now) / 86400000);
+}
+
 module.exports = {
   WEEK,
   pad,
   formatToday,
   formatShort,
   formatMoney,
-  uid
+  uid,
+  daysUntil
 };

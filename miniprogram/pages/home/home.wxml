@@ -2,7 +2,7 @@
   <!-- 顶部元信息 -->
   <view class="home-meta">
     <text>📅 {{todayStr}} · 准备中</text>
-    <text>距开工 31 天</text>
+    <text>{{daysToStart > 0 ? '距开工 ' + daysToStart + ' 天' : (daysToStart === 0 ? '今天开工！' : '已开工')}}</text>
   </view>
 
   <!-- Hero 天气主题 -->
@@ -83,7 +83,7 @@
       >{{item.name}}</view>
     </view>
     <view class="prep-cta">
-      <text class="prep-cta-text">🎯 下一步：找施工方</text>
+      <text class="prep-cta-text">🎯 下一步：{{nextStep}}</text>
       <text class="prep-cta-btn" data-tip="打开施工方推荐" bindtap="showTip">去看看</text>
     </view>
   </view>

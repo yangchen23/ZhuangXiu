@@ -18,7 +18,7 @@ Page({
 
   refresh() {
     const b = store.getBudget();
-    const pct = Math.min(100, Math.round(b.spent / b.total * 100));
+    const pct = b.total > 0 ? Math.min(100, Math.round(b.spent / b.total * 100)) : 0;
     const cats = [
       {
         key: 'material', icon: '🔨', name: '材料', sub: '瓷砖/地板/涂料/卫浴/灯具',
@@ -39,7 +39,7 @@ Page({
     ].map(c => {
       const spent = b.byCategory[c.key] || 0;
       const limit = b.categoryBudget[c.key] || 0;
-      const cpct = Math.min(100, Math.round(spent / limit * 100));
+      const cpct = limit > 0 ? Math.min(100, Math.round(spent / limit * 100)) : 0;
       return Object.assign({}, c, {
         spent,
         limit,

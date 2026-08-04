@@ -92,15 +92,18 @@
 
 .hg-stage {
   font-size: 26rpx;
-  display: inline-flex;
-  align-items: center;
-  gap: 8rpx;
+  display: inline-block;
   padding: 8rpx 20rpx;
   background: rgba(255, 255, 255, 0.7);
   border-radius: 20rpx;
   margin-top: 16rpx;
   position: relative;
   z-index: 2;
+  max-width: 82%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  vertical-align: middle;
 }
 
 .hero.rainy .hg-stage { background: rgba(255, 255, 255, 0.2); color: #e0e7ff; }

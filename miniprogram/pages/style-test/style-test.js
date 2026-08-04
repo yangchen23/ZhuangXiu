@@ -29,9 +29,17 @@ Page({
       scores[style] = (scores[style] || 0) + 1;
     });
     const ranked = Object.keys(scores).sort((x, y) => scores[y] - scores[x]);
+    const ALL_STYLES = ['北欧', '日式', '侘寂', '极简', '新中式', '轻奢', '法式', '美式'];
     const primary = ranked[0];
-    const secondary = ranked[1];
-    const avoid = ranked[ranked.length - 1];
+    // 全答同一风格时 ranked 只有 1 项，需要兜底
+    let secondary = ranked[1];
+    if (!secondary || secondary === primary) {
+      secondary = ALL_STYLES.find(s => s !== primary && !scores[s]) || (primary === '日式' ? '北欧' : '日式');
+    }
+    let avoid = ranked[ranked.length - 1];
+    if (!avoid || avoid === primary) {
+      avoid = ALL_STYLES.find(s => s !== primary && s !== secondary && !scores[s]) || '轻奢';
+    }
     this.setData({
       finished: true,
       picks,

@@ -169,6 +169,23 @@ Page({
     this.applyFilter();
   },
 
+  deleteRecord(e) {
+    const id = e.currentTarget.dataset.id;
+    wx.showModal({
+      title: '删除记录',
+      content: '删除后无法恢复，确定要删除这条记录吗？',
+      success: res => {
+        if (res.confirm) {
+          const records = store.removeRecord(id);
+          this.setData({ records });
+          this.refreshSpaces();
+          this.applyFilter();
+          wx.showToast({ title: '已删除', icon: 'success' });
+        }
+      }
+    });
+  },
+
   applyFilter() {
     const keyword = this.data.keyword.trim();
     const tag = this.data.activeTag;

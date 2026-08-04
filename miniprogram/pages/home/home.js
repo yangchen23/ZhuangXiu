@@ -22,7 +22,9 @@ Page({
     prepTotal: 0,
     prepPct: 0,
     spent: 0,
-    knowledgeCount: 5
+    knowledgeCount: 5,
+    nextStep: '找施工方',
+    daysToStart: 31
   },
 
   onShow() {
@@ -36,6 +38,7 @@ Page({
     const prep = store.getPrep();
     const prog = store.prepProgress(prep);
     const budget = store.getBudget();
+    const next = prep.find(p => !p.done);
     this.setData({
       todayStr: util.formatToday(),
       prep,
@@ -43,7 +46,9 @@ Page({
       prepTotal: prog.total,
       prepPct: prog.pct,
       spent: budget.spent,
-      spentText: util.formatMoney(budget.spent)
+      spentText: util.formatMoney(budget.spent),
+      nextStep: next ? next.name : '全部完成 🎉',
+      daysToStart: util.daysUntil(new Date(2026, 8, 1))
     });
     this.refreshWeather();
   },
@@ -113,7 +118,14 @@ Page({
     const name = e.currentTarget.dataset.name;
     const prep = store.togglePrep(name);
     const prog = store.prepProgress(prep);
-    this.setData({ prep, prepDone: prog.done, prepTotal: prog.total, prepPct: prog.pct });
+    const next = prep.find(p => !p.done);
+    this.setData({
+      prep,
+      prepDone: prog.done,
+      prepTotal: prog.total,
+      prepPct: prog.pct,
+      nextStep: next ? next.name : '全部完成 🎉'
+    });
   },
 
   goRef() {

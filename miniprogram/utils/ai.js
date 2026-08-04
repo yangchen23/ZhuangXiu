@@ -116,6 +116,13 @@ const CATEGORY_MAP = {
   appliance: '家电'
 };
 
+const LABEL_TO_KEY = {
+  '材料': 'material',
+  '人工': 'labor',
+  '家具': 'furniture',
+  '家电': 'appliance'
+};
+
 // 对话
 function chat(history) {
   const messages = [{ role: 'system', content: SYSTEM_CHAT }].concat(
@@ -131,10 +138,14 @@ function parseExpense(text) {
     response_format: { type: 'json_object' }
   }).then(content => {
     const obj = jsonParse(content);
-    const category = obj.category || 'material';
+    // 兼容 AI 返回 key（material）或中文（材料）两种情况
+    let category = String(obj.category || '').trim();
+    if (!CATEGORY_MAP[category]) {
+      category = LABEL_TO_KEY[category] || 'material';
+    }
     const typeLabel = CATEGORY_MAP[category] || obj.typeLabel || '材料';
     return {
-      amount: Math.round(Number(obj.amount) || 0),
+      amount: Math.round(Number(String(obj.amount || '').replace(/,/g, '')) || 0),
       category,
       typeLabel,
       space: obj.space || '全屋',

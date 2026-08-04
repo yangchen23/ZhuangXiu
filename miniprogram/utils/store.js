@@ -82,6 +82,12 @@ function getRecords() {
   return get(KEYS.records, []);
 }
 
+function removeRecord(id) {
+  const records = getRecords().filter(r => r.id !== id);
+  set(KEYS.records, records);
+  return records;
+}
+
 function addRecord(record) {
   const records = getRecords();
   records.unshift({
@@ -195,13 +201,13 @@ function cycleWeather() {
 // 真实天气缓存（10 分钟内不重复请求）
 function getRealWeather() {
   const w = get(KEYS.realWeather, null);
-  // v2：内置城市表就近匹配（旧缓存里可能存了「当前定位」，直接作废）
-  if (w && w.v === 2 && w.fetchedAt && Date.now() - w.fetchedAt < 10 * 60 * 1000) return w;
+  // v3：配置腾讯 key 后立即刷新街道地址，作废旧缓存
+  if (w && w.v === 3 && w.fetchedAt && Date.now() - w.fetchedAt < 10 * 60 * 1000) return w;
   return null;
 }
 
 function setRealWeather(w) {
-  set(KEYS.realWeather, Object.assign({}, w, { v: 2, fetchedAt: Date.now() }));
+  set(KEYS.realWeather, Object.assign({}, w, { v: 3, fetchedAt: Date.now() }));
 }
 
 // ===== 拍照留档 =====
@@ -231,6 +237,7 @@ module.exports = {
   addSpace,
   spaceCount,
   getRecords,
+  removeRecord,
   addRecord,
   getBudget,
   addExpense,

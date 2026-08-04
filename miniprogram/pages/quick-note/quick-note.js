@@ -12,14 +12,24 @@ const CATEGORIES = [
 const SPACES = ['客厅', '主卧', '次卧', '厨房', '主卫', '次卫', '书房', '餐厅', '玄关', '阳台', '全屋'];
 
 function parseText(text) {
-  // 金额：68元/片 × 52片 -> 3536；否则取第一个数字金额
+  // 金额：68元/片 × 52片 -> 3536；
+  // 否则优先取带「元/块」单位的数字（多个时取最后一个，通常是总价），再退回第一个数字
+  // 如「买了3个筒灯，一共126块钱」应取 126，而不是 3
+  const clean = text.replace(/,/g, '');
   let amount = 0;
-  const unit = text.match(/(\d+(?:\.\d+)?)\s*元\s*\/\s*片\s*[×x*]\s*(\d+(?:\.\d+)?)\s*片/);
+  const unit = clean.match(/(\d+(?:\.\d+)?)\s*元\s*\/\s*片\s*[×x*]\s*(\d+(?:\.\d+)?)\s*片/);
   if (unit) {
     amount = Math.round(parseFloat(unit[1]) * parseFloat(unit[2]));
   } else {
-    const m = text.match(/[¥￥]?\s*(\d+(?:\.\d+)?)\s*(?:元|块|块钱)?/);
-    if (m) amount = parseFloat(m[1]);
+    const withUnit = clean.match(/(\d+(?:\.\d+)?)\s*(?:块钱|块|元)/g);
+    if (withUnit && withUnit.length) {
+      const last = withUnit[withUnit.length - 1];
+      const m = last.match(/(\d+(?:\.\d+)?)/);
+      amount = parseFloat(m[1]);
+    } else {
+      const m = clean.match(/[¥￥]?\s*(\d+(?:\.\d+)?)/);
+      if (m) amount = parseFloat(m[1]);
+    }
   }
 
   // 品类
@@ -91,6 +101,7 @@ Page({
 
   // ===== 智能识别 =====
   parseNote() {
+    if (this.data.parsing) return;
     const text = this.data.text.trim();
     if (!text) {
       wx.showToast({ title: '请输入内容', icon: 'none' });
